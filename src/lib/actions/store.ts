@@ -45,6 +45,8 @@ export async function createStore(
   _prevState: CreateStoreState,
   formData: FormData
 ): Promise<CreateStoreState> {
+  let result: CreateStoreState;
+
   try {
     const { userId } = await auth();
     if (!userId) {
@@ -91,7 +93,7 @@ export async function createStore(
     });
 
     revalidatePath('/dashboard');
-    redirect('/dashboard');
+    result = { success: true };
   } catch (err) {
     console.error('createStore error:', err);
     return {
@@ -99,4 +101,6 @@ export async function createStore(
         err instanceof Error ? err.message : 'Gagal membuat toko. Coba lagi.',
     };
   }
+
+  redirect('/dashboard');
 }

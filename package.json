@@ -9,7 +9,9 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@ai-sdk/google": "^3.0.29",
     "@clerk/nextjs": "^6.37.4",
+    "ai": "^6.0.86",
     "dotenv": "^17.3.1",
     "drizzle-orm": "^0.45.1",
     "next": "16.1.6",

@@ -19,8 +19,8 @@ export const products = pgTable('products', {
   price: integer('price').notNull(),
   stock: integer('stock').notNull(),
   description: text('description').notNull(),
-  // Vector Embedding (1536 dimensi adalah standar model OpenAI/Google)
-  embedding: vector('embedding', { dimensions: 1536 }), 
+  // Vector Embedding (768 dimensi adalah standar model OpenAI/Google)
+  embedding: vector('embedding', { dimensions: 768 }), 
   createdAt: timestamp('created_at').defaultNow().notNull(),
 }, (table) => ({
     // Index biar query cepet
