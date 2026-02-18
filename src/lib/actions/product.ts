@@ -7,9 +7,13 @@ import { eq } from 'drizzle-orm';
 import { z } from 'zod';
 import { embed } from 'ai';
 import { google } from '@ai-sdk/google';
+import { createSupabaseClient } from '../supabase/server';
 import { db } from '../../db';
 import { stores } from '../../db/schema';
 import { products } from '../../db/schema';
+
+const MAX_IMAGE_SIZE_BYTES = 2 * 1024 * 1024; // 2MB
+const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 
 const EMBEDDING_DIMENSIONS = 768;
 
@@ -40,6 +44,7 @@ export type CreateProductState = {
     price?: string[];
     stock?: string[];
     description?: string[];
+    image?: string[];
   };
 };
 
@@ -81,7 +86,37 @@ export async function createProduct(
 
     const { name, price, stock, description } = parsed.data;
 
-    const model = google.embedding('text-embedding-004');
+    let imageUrl: string | null = null;
+    const imageFile = formData.get('image');
+    if (imageFile instanceof File && imageFile.size > 0) {
+      if (!ALLOWED_IMAGE_TYPES.includes(imageFile.type)) {
+        return {
+          fieldErrors: { image: ['Format file harus gambar (JPEG, PNG, WebP, atau GIF).'] },
+        };
+      }
+      if (imageFile.size > MAX_IMAGE_SIZE_BYTES) {
+        return {
+          fieldErrors: { image: ['Ukuran gambar maksimal 2MB.'] },
+        };
+      }
+      const ext = imageFile.name.split('.').pop()?.toLowerCase() || 'jpg';
+      const safeExt = ['jpeg', 'jpg', 'png', 'webp', 'gif'].includes(ext) ? ext : 'jpg';
+      const filePath = `${crypto.randomUUID()}.${safeExt}`;
+      const supabase = createSupabaseClient();
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('product-images')
+        .upload(filePath, imageFile, { upsert: false });
+      if (uploadError) {
+        console.error('Supabase upload error:', uploadError);
+        return { error: 'Gagal mengunggah gambar. Coba lagi.' };
+      }
+      const { data: urlData } = supabase.storage
+        .from('product-images')
+        .getPublicUrl(uploadData.path);
+      imageUrl = urlData.publicUrl;
+    }
+
+    const model = google.textEmbeddingModel("gemini-embedding-001");
     const { embedding: rawEmbedding } = await embed({
       model,
       value: description,
@@ -103,6 +138,7 @@ export async function createProduct(
       price,
       stock,
       description,
+      imageUrl,
       embedding,
     });
 

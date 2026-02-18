@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState } from 'react';
+import { useActionState, useState } from 'react';
 import Link from 'next/link';
 import {
   createProduct,
@@ -14,6 +14,16 @@ export default function NewProductPage() {
     createProduct,
     initialState
   );
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImagePreview(URL.createObjectURL(file));
+    } else {
+      setImagePreview(null);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -93,6 +103,60 @@ export default function NewProductPage() {
                   {state.fieldErrors.name[0]}
                 </p>
               )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                Gambar Produk <span className="text-gray-400">(opsional)</span>
+              </label>
+              <div className="mt-1 flex flex-col items-start gap-2">
+                <label
+                  htmlFor="image"
+                  className="relative flex flex-col items-center justify-center w-full min-h-[140px] rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 hover:border-gray-400 hover:bg-gray-100/50 transition-colors cursor-pointer"
+                >
+                  <input
+                    id="image"
+                    name="image"
+                    type="file"
+                    accept="image/*"
+                    className="sr-only"
+                    onChange={handleImageChange}
+                    aria-invalid={!!state?.fieldErrors?.image}
+                    aria-describedby={
+                      state?.fieldErrors?.image ? 'image-error' : undefined
+                    }
+                  />
+                  {imagePreview ? (
+                    <img
+                      src={imagePreview}
+                      alt="Preview"
+                      className="w-full h-40 object-cover rounded-lg"
+                    />
+                  ) : (
+                    <div className="flex flex-col items-center gap-1 text-gray-500 py-6">
+                      <svg
+                        className="w-10 h-10"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={1.5}
+                          d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14"
+                        />
+                      </svg>
+                      <span className="text-sm">Klik untuk pilih gambar (max 2MB)</span>
+                    </div>
+                  )}
+                </label>
+                {state?.fieldErrors?.image && (
+                  <p id="image-error" className="text-sm text-red-600">
+                    {state.fieldErrors.image[0]}
+                  </p>
+                )}
+              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
