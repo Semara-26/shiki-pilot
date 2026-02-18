@@ -6,6 +6,7 @@ import {
   LayoutGrid,
   Package,
   BarChart3,
+  MessageSquare,
   PlusCircle,
   User,
   ChevronRight,
@@ -14,8 +15,9 @@ import { cn } from "@/src/lib/utils";
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutGrid, exact: true },
-  { href: "/dashboard", label: "Inventory", icon: Package, exact: true },
+  { href: "/dashboard/inventory", label: "Inventory", icon: Package },
   { href: "/dashboard/analytics", label: "Analytics", icon: BarChart3 },
+  { href: "/dashboard/chat", label: "AI Chat", icon: MessageSquare },
   { href: "/dashboard/products/new", label: "Add Product", icon: PlusCircle },
 ];
 

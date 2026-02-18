@@ -130,7 +130,20 @@ export default async function DashboardPage() {
       <div className="flex-1 overflow-y-auto p-6">
         <div className="flex flex-col gap-6">
           <MetricsRow metrics={metrics} />
-          <ProductsTable products={productsList} />
+          <div>
+            <div className="mb-3 flex items-center justify-between">
+              <p className="font-mono text-xs uppercase tracking-widest text-muted-foreground">
+                Recent assets
+              </p>
+              <Link
+                href="/dashboard/inventory"
+                className="font-mono text-xs text-primary hover:underline"
+              >
+                View full list →
+              </Link>
+            </div>
+            <ProductsTable products={productsList.slice(0, 5)} />
+          </div>
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 h-[300px]">
             <GrowthChart data={chartData} title="GROWTH" />
             <EventLog events={eventLogItems} />
