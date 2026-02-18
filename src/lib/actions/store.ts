@@ -2,7 +2,6 @@
 
 import { auth } from '@clerk/nextjs/server';
 import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
 import { eq } from 'drizzle-orm';
 import { z } from 'zod';
 import { db } from '../../db';
@@ -45,8 +44,6 @@ export async function createStore(
   _prevState: CreateStoreState,
   formData: FormData
 ): Promise<CreateStoreState> {
-  let result: CreateStoreState;
-
   try {
     const { userId } = await auth();
     if (!userId) {
@@ -93,7 +90,7 @@ export async function createStore(
     });
 
     revalidatePath('/dashboard');
-    result = { success: true };
+    return { success: true };
   } catch (err) {
     console.error('createStore error:', err);
     return {
@@ -101,6 +98,4 @@ export async function createStore(
         err instanceof Error ? err.message : 'Gagal membuat toko. Coba lagi.',
     };
   }
-
-  redirect('/dashboard');
 }

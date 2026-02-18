@@ -1,7 +1,9 @@
 'use client';
 
-import { useActionState, useState } from 'react';
+import { useActionState, useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 import {
   createProduct,
   type CreateProductState,
@@ -16,11 +18,27 @@ const inputClass =
 const labelClass = 'block font-mono text-sm text-muted-foreground mb-1.5';
 
 export default function NewProductPage() {
+  const router = useRouter();
   const [state, formAction, isPending] = useActionState(
     createProduct,
     initialState
   );
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (state?.error) {
+      toast.error('Operation failed', { description: state.error });
+    }
+  }, [state?.error]);
+
+  useEffect(() => {
+    if (state?.success) {
+      toast.success('Asset registered successfully', {
+        description: 'Data has been synced to database.',
+      });
+      router.push('/dashboard');
+    }
+  }, [state?.success, router]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -230,9 +248,7 @@ export default function NewProductPage() {
                   disabled={isPending}
                   className="flex-1 rounded-md bg-primary px-4 py-2.5 font-mono text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background disabled:pointer-events-none disabled:opacity-60"
                 >
-                  {isPending
-                    ? 'Sedang menyimpan & memproses AI...'
-                    : 'Simpan Produk'}
+                  {isPending ? 'PROCESSING...' : 'Simpan Produk'}
                 </button>
               </div>
             </form>

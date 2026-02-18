@@ -2,7 +2,6 @@
 
 import { auth } from '@clerk/nextjs/server';
 import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
 import { eq } from 'drizzle-orm';
 import { z } from 'zod';
 import { embed } from 'ai';
@@ -143,6 +142,7 @@ export async function createProduct(
     });
 
     revalidatePath('/dashboard');
+    return { success: true };
   } catch (err) {
     console.error('createProduct error:', err);
     return {
@@ -150,6 +150,4 @@ export async function createProduct(
         err instanceof Error ? err.message : 'Gagal menyimpan produk. Coba lagi.',
     };
   }
-
-  redirect('/dashboard');
 }
