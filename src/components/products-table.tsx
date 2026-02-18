@@ -1,7 +1,20 @@
 "use client";
 
 import Image from "next/image";
+import { motion } from "framer-motion";
 import { cn } from "@/src/lib/utils";
+
+const tableContainerVariants = {
+  initial: {},
+  animate: {
+    transition: { staggerChildren: 0.05 },
+  },
+};
+
+const tableRowVariants = {
+  initial: { opacity: 0, y: 8 },
+  animate: { opacity: 1, y: 0 },
+};
 
 export interface ProductRow {
   id: string;
@@ -66,7 +79,11 @@ export function ProductsTable({ products, className }: ProductsTableProps) {
               </th>
             </tr>
           </thead>
-          <tbody>
+          <motion.tbody
+            variants={tableContainerVariants}
+            initial="initial"
+            animate="animate"
+          >
             {products.length === 0 ? (
               <tr>
                 <td
@@ -78,8 +95,9 @@ export function ProductsTable({ products, className }: ProductsTableProps) {
               </tr>
             ) : (
               products.map((product) => (
-                <tr
+                <motion.tr
                   key={product.id}
+                  variants={tableRowVariants}
                   className="crisp-table transition-colors hover:bg-muted/20"
                 >
                   <td className="px-4 py-4 font-medium text-foreground">
@@ -121,10 +139,10 @@ export function ProductsTable({ products, className }: ProductsTableProps) {
                   <td className="px-4 py-4 text-right tabular-nums text-foreground">
                     {product.stock}
                   </td>
-                </tr>
+                </motion.tr>
               ))
             )}
-          </tbody>
+          </motion.tbody>
         </table>
       </div>
     </div>

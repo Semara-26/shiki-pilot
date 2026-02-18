@@ -8,6 +8,7 @@ import { MetricsRow } from "@/src/components/metrics-row";
 import { ProductsTable } from "@/src/components/products-table";
 import { GrowthChart } from "@/src/components/growth-chart";
 import { EventLog } from "@/src/components/event-log";
+import { PageContainer } from "@/src/components/page-animation";
 
 export default async function DashboardPage() {
   const { userId } = await auth();
@@ -85,65 +86,69 @@ export default async function DashboardPage() {
 
   if (!userStore) {
     return (
-      <div className="flex h-full flex-col overflow-hidden">
-        <div className="flex-none">
-          <DashboardHeader breadcrumbs="TERMINAL" title="WELCOME" />
-        </div>
-        <div className="flex-1 overflow-y-auto p-6">
-          <div className="flex min-h-full items-center justify-center">
-            <div className="rounded-md border border-border bg-card p-8 text-center max-w-md">
-              <h1 className="text-xl font-semibold text-foreground mb-2">
-                Selamat Datang di Cockpit
-              </h1>
-              <p className="text-muted-foreground mb-6 text-sm">
-                Buat toko pertama Anda untuk mulai mengelola produk dan chat.
-              </p>
-              <Link
-                href="/dashboard/create-store"
-                className="inline-flex items-center gap-2 rounded-md bg-primary px-6 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
-              >
-                + Buat Toko Pertama
-              </Link>
+      <PageContainer className="h-full w-full">
+        <div className="flex h-full flex-col overflow-hidden">
+          <div className="flex-none">
+            <DashboardHeader breadcrumbs="TERMINAL" title="WELCOME" />
+          </div>
+          <div className="flex-1 overflow-y-auto p-6">
+            <div className="flex min-h-full items-center justify-center">
+              <div className="rounded-md border border-border bg-card p-8 text-center max-w-md">
+                <h1 className="text-xl font-semibold text-foreground mb-2">
+                  Selamat Datang di Cockpit
+                </h1>
+                <p className="text-muted-foreground mb-6 text-sm">
+                  Buat toko pertama Anda untuk mulai mengelola produk dan chat.
+                </p>
+                <Link
+                  href="/dashboard/create-store"
+                  className="inline-flex items-center gap-2 rounded-md bg-primary px-6 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+                >
+                  + Buat Toko Pertama
+                </Link>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </PageContainer>
     );
   }
 
   return (
-    <div className="flex h-full flex-col overflow-hidden">
-      <div className="flex-none">
-        <DashboardHeader />
-      </div>
-      <div className="flex-1 overflow-y-auto p-6">
-        <div className="flex flex-col gap-6">
-          <MetricsRow
-            totalValue={metrics.totalValue}
-            totalProducts={metrics.totalProducts}
-            totalStock={metrics.totalStock}
-            lowStock={metrics.lowStock}
-          />
-          <div>
-            <div className="mb-3 flex items-center justify-between">
-              <p className="font-mono text-xs uppercase tracking-widest text-muted-foreground">
-                Recent assets
-              </p>
-              <Link
-                href="/dashboard/inventory"
-                className="font-mono text-xs text-primary hover:underline"
-              >
-                View full list →
-              </Link>
+    <PageContainer className="h-full w-full">
+      <div className="flex h-full flex-col overflow-hidden">
+        <div className="flex-none">
+          <DashboardHeader />
+        </div>
+        <div className="flex-1 overflow-y-auto p-6">
+          <div className="flex flex-col gap-6">
+            <MetricsRow
+              totalValue={metrics.totalValue}
+              totalProducts={metrics.totalProducts}
+              totalStock={metrics.totalStock}
+              lowStock={metrics.lowStock}
+            />
+            <div>
+              <div className="mb-3 flex items-center justify-between">
+                <p className="font-mono text-xs uppercase tracking-widest text-muted-foreground">
+                  Recent assets
+                </p>
+                <Link
+                  href="/dashboard/inventory"
+                  className="font-mono text-xs text-primary hover:underline"
+                >
+                  View full list →
+                </Link>
+              </div>
+              <ProductsTable products={productsList.slice(0, 5)} />
             </div>
-            <ProductsTable products={productsList.slice(0, 5)} />
-          </div>
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 h-[300px]">
-            <GrowthChart data={stockChartData} title="CURRENT STOCK LEVELS" />
-            <EventLog events={eventLogItems} />
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 h-[300px]">
+              <GrowthChart data={stockChartData} title="CURRENT STOCK LEVELS" />
+              <EventLog events={eventLogItems} />
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </PageContainer>
   );
 }

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { motion } from "framer-motion";
 import {
   LayoutGrid,
   Package,
@@ -12,6 +13,11 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { cn } from "@/src/lib/utils";
+
+const motionLinkProps = {
+  whileHover: { scale: 1.02 },
+  whileTap: { scale: 0.98 },
+};
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutGrid, exact: true },
@@ -32,17 +38,19 @@ export function Sidebar() {
       )}
     >
       {/* Logo: red square + 会社, SHIKIPILOT on hover */}
-      <Link
-        href="/dashboard"
-        className="flex h-16 shrink-0 items-center gap-3 border-b border-sidebar-border px-4 transition-colors hover:bg-sidebar-accent"
-      >
+      <motion.div {...motionLinkProps} className="shrink-0">
+        <Link
+          href="/dashboard"
+          className="flex h-16 shrink-0 items-center gap-3 border-b border-sidebar-border px-4 transition-colors hover:bg-sidebar-accent"
+        >
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground">
           <span className="font-mono text-lg font-bold">会社</span>
         </div>
         <span className="hidden whitespace-nowrap text-sm font-semibold tracking-[0.2em] text-sidebar-foreground opacity-0 transition-opacity duration-200 group-hover:block group-hover:opacity-100">
           SHIKIPILOT
         </span>
-      </Link>
+        </Link>
+      </motion.div>
 
       {/* Nav */}
       <nav className="flex-1 space-y-0.5 overflow-y-auto py-4">
@@ -52,23 +60,24 @@ export function Sidebar() {
             ? pathname === item.href
             : pathname === item.href || pathname?.startsWith(item.href + "/");
           return (
-            <Link
-              key={`${item.href}-${item.label}`}
-              href={item.href}
-              className={cn(
-                "relative flex items-center gap-3 border-r-2 border-transparent px-4 py-3 text-sm transition-colors",
-                "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                isActive && "border-primary bg-sidebar-accent font-medium text-primary"
-              )}
-            >
-              <Icon className="h-5 w-5 shrink-0" />
-              <span className="hidden whitespace-nowrap opacity-0 transition-opacity duration-200 group-hover:block group-hover:opacity-100">
-                {item.label}
-              </span>
-              {isActive && (
-                <ChevronRight className="ml-auto hidden group-hover:block" />
-              )}
-            </Link>
+            <motion.div key={`${item.href}-${item.label}`} {...motionLinkProps}>
+              <Link
+                href={item.href}
+                className={cn(
+                  "relative flex items-center gap-3 border-r-2 border-transparent px-4 py-3 text-sm transition-colors",
+                  "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                  isActive && "border-primary bg-sidebar-accent font-medium text-primary"
+                )}
+              >
+                <Icon className="h-5 w-5 shrink-0" />
+                <span className="hidden whitespace-nowrap opacity-0 transition-opacity duration-200 group-hover:block group-hover:opacity-100">
+                  {item.label}
+                </span>
+                {isActive && (
+                  <ChevronRight className="ml-auto hidden group-hover:block" />
+                )}
+              </Link>
+            </motion.div>
           );
         })}
       </nav>
