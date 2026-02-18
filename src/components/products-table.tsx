@@ -98,7 +98,7 @@ export function ProductsTable({ products, className }: ProductsTableProps) {
                 <motion.tr
                   key={product.id}
                   variants={tableRowVariants}
-                  className="crisp-table transition-colors hover:bg-muted/20"
+                  className="crisp-table border-l-2 border-l-transparent transition-all duration-300 hover:border-l-primary hover:bg-gradient-to-r hover:from-primary/10 hover:via-transparent hover:to-transparent"
                 >
                   <td className="px-4 py-4 font-medium text-foreground">
                     #{product.id.substring(0, 4)}

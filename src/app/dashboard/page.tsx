@@ -59,13 +59,10 @@ export default async function DashboardPage() {
     lowStock: lowStock,
   };
 
-  const stockChartData = productsList
-    .slice(0, 5)
-    .map((p) => ({
-      name: p.name.length > 12 ? p.name.slice(0, 12) + "…" : p.name,
-      value: p.stock,
-      fullLabel: p.name,
-    }));
+  const stockChartData = productsList.slice(0, 5).map((p) => ({
+    name: p.name,
+    value: p.stock,
+  }));
 
   const recentProductsForLog = [...productsList]
     .sort(
