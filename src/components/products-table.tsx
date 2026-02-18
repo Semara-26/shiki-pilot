@@ -52,10 +52,10 @@ export function ProductsTable({ products, className }: ProductsTableProps) {
               <th className="px-4 py-4 text-left font-medium uppercase tracking-widest text-muted-foreground">
                 Product Name
               </th>
-              <th className="px-4 py-4 text-left font-medium uppercase tracking-widest text-muted-foreground">
+              <th className="w-[120px] px-4 py-4 text-left font-medium uppercase tracking-widest text-muted-foreground">
                 Status
               </th>
-              <th className="px-4 py-4 text-left font-medium uppercase tracking-widest text-muted-foreground">
+              <th className="w-[72px] px-4 py-4 text-left font-medium uppercase tracking-widest text-muted-foreground">
                 Resource
               </th>
               <th className="px-4 py-4 text-right font-medium uppercase tracking-widest text-muted-foreground">
@@ -86,10 +86,10 @@ export function ProductsTable({ products, className }: ProductsTableProps) {
                     #{product.id.substring(0, 4)}
                   </td>
                   <td className="px-4 py-4 text-foreground">{product.name}</td>
-                  <td className="px-4 py-4">
+                  <td className="w-[120px] px-4 py-4 align-middle">
                     <span
                       className={cn(
-                        "inline-block rounded-md px-2 py-0.5 text-xs font-medium uppercase tracking-wider",
+                        "inline-block rounded-md px-2 py-1 text-xs font-medium uppercase tracking-wider",
                         product.stock > 0
                           ? "bg-chart-2/20 text-chart-2"
                           : "bg-destructive/20 text-destructive"
@@ -98,19 +98,19 @@ export function ProductsTable({ products, className }: ProductsTableProps) {
                       {product.stock > 0 ? "ACTIVE" : "OUT_OF_STOCK"}
                     </span>
                   </td>
-                  <td className="px-4 py-4">
+                  <td className="w-[72px] px-4 py-4 align-middle">
                     {product.imageUrl ? (
-                      <div className="relative h-9 w-9 shrink-0 overflow-hidden rounded-full border border-border bg-muted">
+                      <div className="relative inline-block h-10 w-10 shrink-0 overflow-hidden rounded-full border border-border bg-muted">
                         <Image
                           src={product.imageUrl}
                           alt={product.name}
-                          width={36}
-                          height={36}
+                          width={40}
+                          height={40}
                           className="h-full w-full object-cover"
                         />
                       </div>
                     ) : (
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-border bg-muted font-medium text-muted-foreground avatar-mono">
+                      <div className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border bg-muted text-xs font-medium text-muted-foreground avatar-mono">
                         {getInitials(product.name)}
                       </div>
                     )}

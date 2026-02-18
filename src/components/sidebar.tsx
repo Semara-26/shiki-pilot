@@ -3,18 +3,20 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  LayoutDashboard,
-  BarChart3,
+  LayoutGrid,
   Package,
+  BarChart3,
+  PlusCircle,
   User,
   ChevronRight,
 } from "lucide-react";
 import { cn } from "@/src/lib/utils";
 
-const menuItems = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/dashboard/analysis", label: "Analysis", icon: BarChart3 },
-  { href: "/dashboard/inventory", label: "Inventory", icon: Package },
+const navItems = [
+  { href: "/dashboard", label: "Dashboard", icon: LayoutGrid, exact: true },
+  { href: "/dashboard", label: "Inventory", icon: Package, exact: true },
+  { href: "/dashboard/analytics", label: "Analytics", icon: BarChart3 },
+  { href: "/dashboard/products/new", label: "Add Product", icon: PlusCircle },
 ];
 
 export function Sidebar() {
@@ -42,18 +44,19 @@ export function Sidebar() {
 
       {/* Nav */}
       <nav className="flex-1 space-y-0.5 overflow-y-auto py-4">
-        {menuItems.map((item) => {
+        {navItems.map((item) => {
           const Icon = item.icon;
-          const isActive =
-            pathname === item.href || pathname?.startsWith(item.href + "/");
+          const isActive = item.exact
+            ? pathname === item.href
+            : pathname === item.href || pathname?.startsWith(item.href + "/");
           return (
             <Link
-              key={item.href}
+              key={`${item.href}-${item.label}`}
               href={item.href}
               className={cn(
-                "flex items-center gap-3 px-4 py-3 text-sm transition-colors",
+                "relative flex items-center gap-3 border-r-2 border-transparent px-4 py-3 text-sm transition-colors",
                 "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                isActive && "bg-sidebar-accent font-medium text-sidebar-primary"
+                isActive && "border-primary bg-sidebar-accent font-medium text-primary"
               )}
             >
               <Icon className="h-5 w-5 shrink-0" />

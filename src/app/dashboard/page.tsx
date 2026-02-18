@@ -96,10 +96,12 @@ export default async function DashboardPage() {
 
   if (!userStore) {
     return (
-      <div className="flex h-full w-full flex-col">
-        <DashboardHeader breadcrumbs="TERMINAL" title="WELCOME" />
-        <div className="flex flex-1 flex-col gap-6 overflow-y-auto p-6">
-          <div className="flex flex-1 items-center justify-center">
+      <div className="flex h-full flex-col overflow-hidden">
+        <div className="flex-none">
+          <DashboardHeader breadcrumbs="TERMINAL" title="WELCOME" />
+        </div>
+        <div className="flex-1 overflow-y-auto p-6">
+          <div className="flex min-h-full items-center justify-center">
             <div className="rounded-md border border-border bg-card p-8 text-center max-w-md">
               <h1 className="text-xl font-semibold text-foreground mb-2">
                 Selamat Datang di Cockpit
@@ -121,14 +123,18 @@ export default async function DashboardPage() {
   }
 
   return (
-    <div className="flex h-full w-full flex-col">
-      <DashboardHeader />
-      <div className="flex flex-1 flex-col gap-6 overflow-y-auto p-6">
-        <MetricsRow metrics={metrics} />
-        <ProductsTable products={productsList} />
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 h-[300px]">
-          <GrowthChart data={chartData} title="GROWTH" />
-          <EventLog events={eventLogItems} />
+    <div className="flex h-full flex-col overflow-hidden">
+      <div className="flex-none">
+        <DashboardHeader />
+      </div>
+      <div className="flex-1 overflow-y-auto p-6">
+        <div className="flex flex-col gap-6">
+          <MetricsRow metrics={metrics} />
+          <ProductsTable products={productsList} />
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 h-[300px]">
+            <GrowthChart data={chartData} title="GROWTH" />
+            <EventLog events={eventLogItems} />
+          </div>
         </div>
       </div>
     </div>
