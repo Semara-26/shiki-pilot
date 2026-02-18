@@ -27,72 +27,61 @@ export default async function DashboardPage() {
             price: true,
             stock: true,
             imageUrl: true,
+            createdAt: true,
           },
         })
       : [];
 
-  const totalRevenue =
-    productsList.reduce((sum, p) => sum + p.price * Math.max(0, p.stock), 0) || 0;
+  // 1. Hitung statistik dari data products
+  const totalProducts = productsList.length;
+  const totalStock = productsList.reduce((acc, product) => acc + product.stock, 0);
+  const totalValue = productsList.reduce(
+    (acc, product) => acc + product.price * product.stock,
+    0
+  );
+  const lowStock = productsList.filter((product) => product.stock < 10).length;
 
-  const metrics = [
-    {
-      label: "TR_REV",
-      value: new Intl.NumberFormat("id-ID", {
-        style: "currency",
-        currency: "IDR",
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0,
-      }).format(totalRevenue),
-      change: 2.4,
-      changeLabel: "vs last month",
-    },
-    {
-      label: "AU_COUNT",
-      value: productsList.length,
-      change: productsList.length > 0 ? 1 : 0,
-      changeLabel: "products",
-    },
-    {
-      label: "STOCK_ACTIVE",
-      value: productsList.filter((p) => p.stock > 0).length,
-      change: 0,
-      changeLabel: "in stock",
-    },
-    {
-      label: "OUT_OF_STOCK",
-      value: productsList.filter((p) => p.stock === 0).length,
-      change: -1,
-      changeLabel: "items",
-    },
-  ];
+  // 2. Format Rupiah
+  const formatRupiah = (value: number) => {
+    return new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+      maximumFractionDigits: 0,
+    }).format(value);
+  };
 
-  const chartData = [
-    { name: "W1", value: 12, fullLabel: "Week 1" },
-    { name: "W2", value: 19, fullLabel: "Week 2" },
-    { name: "W3", value: 15, fullLabel: "Week 3" },
-    { name: "W4", value: 24, fullLabel: "Week 4" },
-  ];
+  // 3. Bungkus dalam objek 'metrics' agar sesuai dengan props komponen
+  const metrics = {
+    totalValue: formatRupiah(totalValue),
+    totalProducts: totalProducts,
+    totalStock: totalStock,
+    lowStock: lowStock,
+  };
 
-  const eventLogItems = [
-    {
-      id: "1",
-      title: "New Order",
-      detail: "Order #1024 — 2 items",
-      timestamp: "14:32",
-    },
-    {
-      id: "2",
-      title: "Stock Update",
-      detail: "Product stock synced",
-      timestamp: "14:28",
-    },
-    {
-      id: "3",
-      title: "Product Added",
-      detail: productsList[0]?.name ?? "New product",
-      timestamp: "13:15",
-    },
-  ];
+  const stockChartData = productsList
+    .slice(0, 5)
+    .map((p) => ({
+      name: p.name.length > 12 ? p.name.slice(0, 12) + "…" : p.name,
+      value: p.stock,
+      fullLabel: p.name,
+    }));
+
+  const recentProductsForLog = [...productsList]
+    .sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    )
+    .slice(0, 3);
+
+  const eventLogItems = recentProductsForLog.map((p) => ({
+    id: p.id,
+    title: "New Asset Registered",
+    detail: p.name,
+    timestamp: new Date(p.createdAt).toLocaleTimeString("id-ID", {
+      hour: "2-digit",
+      minute: "2-digit",
+    }),
+  }));
 
   if (!userStore) {
     return (
@@ -129,7 +118,12 @@ export default async function DashboardPage() {
       </div>
       <div className="flex-1 overflow-y-auto p-6">
         <div className="flex flex-col gap-6">
-          <MetricsRow metrics={metrics} />
+          <MetricsRow
+            totalValue={metrics.totalValue}
+            totalProducts={metrics.totalProducts}
+            totalStock={metrics.totalStock}
+            lowStock={metrics.lowStock}
+          />
           <div>
             <div className="mb-3 flex items-center justify-between">
               <p className="font-mono text-xs uppercase tracking-widest text-muted-foreground">
@@ -145,7 +139,7 @@ export default async function DashboardPage() {
             <ProductsTable products={productsList.slice(0, 5)} />
           </div>
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 h-[300px]">
-            <GrowthChart data={chartData} title="GROWTH" />
+            <GrowthChart data={stockChartData} title="CURRENT STOCK LEVELS" />
             <EventLog events={eventLogItems} />
           </div>
         </div>

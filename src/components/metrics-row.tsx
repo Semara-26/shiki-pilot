@@ -1,21 +1,31 @@
 "use client";
 
 import { cn } from "@/src/lib/utils";
-import { TrendingUp, TrendingDown } from "lucide-react";
-
-export interface MetricCard {
-  label: string;
-  value: string | number;
-  change?: number;
-  changeLabel?: string;
-}
 
 interface MetricsRowProps {
-  metrics: MetricCard[];
+  totalValue: string;
+  totalProducts: number;
+  totalStock: number;
+  lowStock: number;
   className?: string;
 }
 
-export function MetricsRow({ metrics, className }: MetricsRowProps) {
+const cards: { key: keyof Omit<MetricsRowProps, "className">; label: string }[] = [
+  { key: "totalValue", label: "ESTIMATED ASSET VALUE" },
+  { key: "totalProducts", label: "PRODUCT TYPES" },
+  { key: "totalStock", label: "TOTAL ITEMS" },
+  { key: "lowStock", label: "LOW STOCK ALERT" },
+];
+
+export function MetricsRow({
+  totalValue,
+  totalProducts,
+  totalStock,
+  lowStock,
+  className,
+}: MetricsRowProps) {
+  const values = { totalValue, totalProducts, totalStock, lowStock };
+
   return (
     <div
       className={cn(
@@ -23,39 +33,17 @@ export function MetricsRow({ metrics, className }: MetricsRowProps) {
         className
       )}
     >
-      {metrics.map((metric) => (
+      {cards.map(({ key, label }) => (
         <div
-          key={metric.label}
+          key={key}
           className="rounded-md border border-border bg-card p-4 text-card-foreground transition-colors hover:border-border/80"
         >
           <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
-            {metric.label}
+            {label}
           </p>
           <p className="mt-2 font-mono text-2xl font-semibold tracking-tight text-foreground md:text-3xl">
-            {metric.value}
+            {values[key]}
           </p>
-          {metric.change !== undefined && (
-            <div className="mt-2 flex items-center gap-1.5 font-mono text-sm">
-              {metric.change >= 0 ? (
-                <TrendingUp className="h-4 w-4 text-chart-2" />
-              ) : (
-                <TrendingDown className="h-4 w-4 text-destructive" />
-              )}
-              <span
-                className={cn(
-                  metric.change >= 0 ? "text-chart-2" : "text-destructive"
-                )}
-              >
-                {metric.change >= 0 ? "+" : ""}
-                {metric.change}%
-              </span>
-              {metric.changeLabel && (
-                <span className="text-muted-foreground">
-                  {metric.changeLabel}
-                </span>
-              )}
-            </div>
-          )}
         </div>
       ))}
     </div>

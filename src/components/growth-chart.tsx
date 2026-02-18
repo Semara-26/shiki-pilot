@@ -2,8 +2,8 @@
 
 import {
   ResponsiveContainer,
-  LineChart,
-  Line,
+  BarChart,
+  Bar,
   XAxis,
   YAxis,
   Tooltip,
@@ -40,7 +40,7 @@ export function GrowthChart({ data, title, className }: GrowthChartProps) {
       )}
       <div className="h-[280px] w-full">
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart
+          <BarChart
             data={data}
             margin={{ top: 8, right: 8, left: 0, bottom: 0 }}
           >
@@ -70,20 +70,18 @@ export function GrowthChart({ data, title, className }: GrowthChartProps) {
               }}
               labelStyle={{ color: "hsl(var(--card-foreground))" }}
               itemStyle={{ color: CHART_COLOR }}
-              formatter={(value: number) => [value, "Value"]}
+              formatter={(value: number) => [value, "Stock"]}
               labelFormatter={(_, payload) =>
                 payload[0]?.payload?.fullLabel ?? payload[0]?.payload?.name
               }
             />
-            <Line
-              type="monotone"
+            <Bar
               dataKey="value"
-              stroke={CHART_COLOR}
-              strokeWidth={2}
-              dot={{ fill: CHART_COLOR, strokeWidth: 0 }}
-              activeDot={{ r: 4, fill: CHART_COLOR, stroke: "hsl(var(--card))", strokeWidth: 2 }}
+              fill={CHART_COLOR}
+              radius={[0, 0, 0, 0]}
+              name="Stock"
             />
-          </LineChart>
+          </BarChart>
         </ResponsiveContainer>
       </div>
     </div>
