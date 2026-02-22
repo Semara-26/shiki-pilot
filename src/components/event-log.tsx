@@ -7,8 +7,23 @@ export interface EventLogItem {
   id: string;
   title: string;
   detail?: string;
-  timestamp: string;
+  /** Tampilan lama: string waktu saja. Lebih baik gunakan date (ISO) agar diformat "DD MMM • HH:mm". */
+  timestamp?: string;
+  /** ISO date string (atau Date yang diserialisasi) untuk format "22 Feb • 13:45". */
+  date?: string;
   type?: "order" | "stock" | "system" | "default";
+}
+
+/** Format: "22 Feb • 13:45" (DD MMM • HH:mm). */
+function formatEventDate(dateInput: string | Date | undefined): string {
+  if (dateInput == null) return "";
+  const d = typeof dateInput === "string" ? new Date(dateInput) : dateInput;
+  if (Number.isNaN(d.getTime())) return "";
+  const day = d.getDate();
+  const month = d.toLocaleString("en-GB", { month: "short" });
+  const hour = d.getHours().toString().padStart(2, "0");
+  const min = d.getMinutes().toString().padStart(2, "0");
+  return `${day} ${month} • ${hour}:${min}`;
 }
 
 interface EventLogProps {
@@ -44,9 +59,13 @@ export function EventLog({
             key={event.id}
             className="flex gap-3 px-4 py-3 transition-colors hover:bg-muted/50"
           >
-            <div className="flex shrink-0 items-center gap-1.5 text-muted-foreground">
-              <Clock className="h-3.5 w-3.5" />
-              <span className="font-mono text-xs">{event.timestamp}</span>
+            <div className="flex shrink-0 items-center gap-1.5 text-muted-foreground min-w-[7rem]">
+              <Clock className="h-3.5 w-3.5 shrink-0" />
+              <span className="font-mono text-[11px] leading-tight">
+                {event.date != null
+                  ? formatEventDate(event.date)
+                  : event.timestamp ?? "—"}
+              </span>
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-sm font-medium text-foreground">

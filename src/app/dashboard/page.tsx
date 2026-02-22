@@ -7,6 +7,7 @@ import { DashboardHeader } from "@/src/components/dashboard-header";
 import { MetricsRow, type MetricProduct } from "@/src/components/metrics-row";
 import { ProductsTable } from "@/src/components/products-table";
 import { GrowthChart } from "@/src/components/growth-chart";
+import { AssetDonutChart } from "@/src/components/asset-donut-chart";
 import { EventLog } from "@/src/components/event-log";
 import { PageContainer } from "@/src/components/page-animation";
 
@@ -76,10 +77,7 @@ export default async function DashboardPage() {
     id: p.id,
     title: "New Asset Registered",
     detail: p.name,
-    timestamp: new Date(p.createdAt).toLocaleTimeString("id-ID", {
-      hour: "2-digit",
-      minute: "2-digit",
-    }),
+    date: new Date(p.createdAt).toISOString(),
   }));
 
   if (!userStore) {
@@ -141,9 +139,10 @@ export default async function DashboardPage() {
               </div>
               <ProductsTable products={productsList.slice(0, 5)} />
             </div>
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 h-[300px]">
-              <GrowthChart data={stockChartData} title="CURRENT STOCK LEVELS" />
-              <EventLog events={eventLogItems} />
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 h-[350px]">
+              <GrowthChart data={stockChartData} title="CURRENT STOCK LEVELS" className="h-full" />
+              <AssetDonutChart data={productsList} title="ASSET DISTRIBUTION" className="h-full" />
+              <EventLog events={eventLogItems} className="h-full" />
             </div>
           </div>
         </div>
