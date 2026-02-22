@@ -10,63 +10,53 @@ import {
   CartesianGrid,
   TooltipProps,
 } from "recharts";
-
-type CursorShape = { x?: number; y?: number; width?: number; height?: number };
 import { motion } from "framer-motion";
 import { cn } from "@/src/lib/utils";
 
 const CHART_COLOR = "#f20d0d";
-const CURSOR_GRADIENT_ID = "holo-scanner-cursor-gradient";
 
+type CursorShape = { x?: number; y?: number; width?: number; height?: number };
+
+/** Targeting Laser cursor: subtle highlight + vertical dashed line at bar center */
 function CustomCursor({ x, y, width, height }: CursorShape) {
   if (width == null || height == null || x == null || y == null) return null;
+  const centerX = x + width / 2;
   return (
-    <g>
-      <defs>
-        <linearGradient
-          id={CURSOR_GRADIENT_ID}
-          x1="0"
-          y1="0"
-          x2="1"
-          y2="0"
-          gradientUnits="objectBoundingBox"
-        >
-          <stop offset="0%" stopColor={CHART_COLOR} stopOpacity={0.35} />
-          <stop offset="50%" stopColor={CHART_COLOR} stopOpacity={0.12} />
-          <stop offset="100%" stopColor={CHART_COLOR} stopOpacity={0} />
-        </linearGradient>
-      </defs>
+    <g className="pointer-events-none">
       <rect
         x={x}
         y={y}
         width={width}
         height={height}
-        fill={`url(#${CURSOR_GRADIENT_ID})`}
-        className="pointer-events-none"
+        fill="rgba(242, 13, 13, 0.05)"
+      />
+      <line
+        x1={centerX}
+        y1={y}
+        x2={centerX}
+        y2={y + height}
+        stroke={CHART_COLOR}
+        strokeWidth={1}
+        strokeDasharray="3 3"
       />
     </g>
   );
 }
 
-function ChartTooltip({ active, payload }: TooltipProps<number, string>) {
+function HoloTooltip({ active, payload }: TooltipProps<number, string>) {
   if (!active || !payload?.length) return null;
   const item = payload[0].payload;
   const fullName = item.name ?? payload[0].payload?.name;
   const stock = item.value ?? payload[0].value;
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.8, filter: "blur(4px)" }}
-      animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
-      transition={{
-        type: "spring",
-        stiffness: 200,
-        damping: 20,
-        mass: 1,
-      }}
-      className="rounded-md border border-primary/50 bg-card/80 px-3 py-2 shadow-lg backdrop-blur-md"
+      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
+      className="rounded-md border border-primary/50 bg-background/90 p-3 shadow-[0_0_20px_rgba(242,13,13,0.3)] backdrop-blur-md"
     >
       <p className="mb-1 font-mono text-xs text-muted-foreground">{fullName}</p>
-      <p className="font-mono text-xl font-semibold text-foreground tabular-nums">
+      <p className="font-mono text-xl font-semibold tabular-nums text-foreground drop-shadow-[0_0_8px_rgba(242,13,13,0.8)]">
         {stock}{" "}
         <span className="text-sm font-normal text-muted-foreground">stok</span>
       </p>
@@ -89,20 +79,20 @@ export function GrowthChart({ data, title, className }: GrowthChartProps) {
   return (
     <div
       className={cn(
-        "rounded-md border border-border bg-card p-4 text-card-foreground",
+        "flex h-full flex-col overflow-hidden rounded-md border border-border bg-card p-4 text-card-foreground",
         className
       )}
     >
       {title && (
-        <p className="mb-4 text-sm font-medium uppercase tracking-widest text-muted-foreground">
+        <p className="shrink-0 text-sm font-medium uppercase tracking-widest text-muted-foreground">
           {title}
         </p>
       )}
-      <div className="h-[280px] w-full">
+      <div className="flex-1 w-full h-full min-h-0 relative mt-4">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
             data={data}
-            margin={{ top: 8, right: 8, left: 0, bottom: 0 }}
+            margin={{ top: 10, right: 10, left: -20, bottom: 15 }}
           >
             <CartesianGrid
               strokeDasharray="3 3"
@@ -128,7 +118,7 @@ export function GrowthChart({ data, title, className }: GrowthChartProps) {
               tickFormatter={(v) => String(v)}
             />
             <Tooltip
-              content={<ChartTooltip />}
+              content={<HoloTooltip />}
               cursor={<CustomCursor />}
             />
             <Bar
@@ -138,10 +128,11 @@ export function GrowthChart({ data, title, className }: GrowthChartProps) {
               name="Stock"
               animationDuration={1500}
               activeBar={{
-                stroke: CHART_COLOR,
-                strokeWidth: 2,
-                fill: CHART_COLOR,
+                stroke: "#f20d0d",
+                strokeWidth: 1,
+                fill: "#f20d0d",
                 fillOpacity: 0.8,
+                filter: "drop-shadow(0 0 5px rgba(242,13,13,0.5))",
               }}
             />
           </BarChart>

@@ -25,6 +25,7 @@ export default async function InventoryPage() {
             price: true,
             stock: true,
             imageUrl: true,
+            description: true,
           },
         })
       : [];

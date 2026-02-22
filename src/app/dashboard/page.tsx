@@ -4,7 +4,7 @@ import { eq } from "drizzle-orm";
 import { db } from "@/src/db";
 import { stores, products } from "@/src/db/schema";
 import { DashboardHeader } from "@/src/components/dashboard-header";
-import { MetricsRow } from "@/src/components/metrics-row";
+import { MetricsRow, type MetricProduct } from "@/src/components/metrics-row";
 import { ProductsTable } from "@/src/components/products-table";
 import { GrowthChart } from "@/src/components/growth-chart";
 import { EventLog } from "@/src/components/event-log";
@@ -28,6 +28,7 @@ export default async function DashboardPage() {
             price: true,
             stock: true,
             imageUrl: true,
+            description: true,
             createdAt: true,
           },
         })
@@ -124,6 +125,7 @@ export default async function DashboardPage() {
               totalProducts={metrics.totalProducts}
               totalStock={metrics.totalStock}
               lowStock={metrics.lowStock}
+              products={productsList as MetricProduct[]}
             />
             <div>
               <div className="mb-3 flex items-center justify-between">
