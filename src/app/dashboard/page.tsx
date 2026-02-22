@@ -114,7 +114,7 @@ export default async function DashboardPage() {
     <PageContainer className="h-full w-full">
       <div className="flex h-full flex-col overflow-hidden">
         <div className="flex-none">
-          <DashboardHeader />
+          <DashboardHeader products={productsList} />
         </div>
         <div className="flex-1 overflow-y-auto p-6">
           <div className="flex flex-col gap-6">

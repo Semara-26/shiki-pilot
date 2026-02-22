@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
@@ -13,6 +14,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { cn } from "@/src/lib/utils";
+import { OperatorIdPanel } from "@/src/components/operator-id-panel";
 
 const motionLinkProps = {
   whileHover: { scale: 1.02 },
@@ -29,6 +31,20 @@ const navItems = [
 
 export function Sidebar() {
   const pathname = usePathname();
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const profileRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
+        setIsProfileOpen(false);
+      }
+    }
+    if (isProfileOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isProfileOpen]);
 
   return (
     <aside
@@ -82,19 +98,29 @@ export function Sidebar() {
         })}
       </nav>
 
-      {/* User profile */}
-      <div className="border-t border-sidebar-border p-4">
-        <div className="flex items-center gap-3">
+      {/* User profile — Operator ID Panel trigger */}
+      <div ref={profileRef} className="relative border-t border-sidebar-border p-4">
+        <button
+          type="button"
+          onClick={() => setIsProfileOpen((v) => !v)}
+          className="flex w-full items-center gap-3 rounded-md transition-colors hover:bg-sidebar-accent"
+          aria-expanded={isProfileOpen}
+          aria-label="Operator profile"
+        >
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-sidebar-accent">
             <User className="h-4 w-4 text-sidebar-foreground" />
           </div>
-          <div className="hidden min-w-0 overflow-hidden transition-opacity duration-200 group-hover:block group-hover:opacity-100">
+          <div className="hidden min-w-0 overflow-hidden text-left transition-opacity duration-200 group-hover:block group-hover:opacity-100">
             <p className="truncate text-xs font-medium text-sidebar-foreground">
               Profile
             </p>
-            <p className="truncate text-xs text-muted-foreground">User</p>
+            <p className="truncate text-xs text-muted-foreground">Operator</p>
           </div>
-        </div>
+        </button>
+        <OperatorIdPanel
+          isOpen={isProfileOpen}
+          onClose={() => setIsProfileOpen(false)}
+        />
       </div>
     </aside>
   );

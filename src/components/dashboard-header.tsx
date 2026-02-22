@@ -5,22 +5,29 @@ import { Search, Bell } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { cn } from "@/src/lib/utils";
 
+export interface DashboardHeaderProduct {
+  id: string;
+  name: string;
+  stock: number;
+}
+
 interface DashboardHeaderProps {
   breadcrumbs?: string;
   title?: string;
+  products?: DashboardHeaderProduct[];
   className?: string;
 }
 
-const STATIC_NOTIFICATIONS = [
-  { id: "1", type: "critical" as const, text: "CRITICAL: Low Stock on Kerupuk Pedas" },
-  { id: "2", type: "success" as const, text: "SUCCESS: Asset registry synced" },
-];
+const LOW_STOCK_THRESHOLD = 10;
 
 export function DashboardHeader({
   breadcrumbs = "TERMINAL / ACTIVE PROJECTS",
   title = "DATA REPOSITORY",
+  products = [],
   className,
 }: DashboardHeaderProps) {
+  const lowStockProducts = products.filter((p) => p.stock < LOW_STOCK_THRESHOLD);
+  const hasAlerts = lowStockProducts.length > 0;
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const notifRef = useRef<HTMLDivElement>(null);
 
@@ -74,10 +81,12 @@ export function DashboardHeader({
               aria-expanded={isNotifOpen}
             >
               <Bell className="h-4 w-4" />
-              <span
-                className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-primary animate-pulse"
-                aria-hidden
-              />
+              {hasAlerts && (
+                <span
+                  className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-primary animate-pulse"
+                  aria-hidden
+                />
+              )}
             </button>
 
             <AnimatePresence>
@@ -100,23 +109,31 @@ export function DashboardHeader({
                     </p>
                   </div>
                   <ul className="max-h-64 overflow-y-auto">
-                    {STATIC_NOTIFICATIONS.map((item) => (
-                      <li key={item.id}>
-                        <button
-                          type="button"
-                          className="w-full px-4 py-3 text-left font-mono text-xs transition-colors hover:bg-primary/10"
-                        >
-                          <span
-                            className={cn(
-                              item.type === "critical" && "text-destructive",
-                              item.type === "success" && "text-emerald-500"
-                            )}
+                    {hasAlerts ? (
+                      lowStockProducts.map((p) => (
+                        <li key={p.id}>
+                          <div
+                            className="w-full px-4 py-3 font-mono text-xs transition-colors hover:bg-primary/10"
+                            role="presentation"
                           >
-                            {item.text}
+                            <span className="text-destructive">
+                              CRITICAL: Low Stock on {p.name} (Sisa: {p.stock})
+                            </span>
+                          </div>
+                        </li>
+                      ))
+                    ) : (
+                      <li>
+                        <div
+                          className="w-full px-4 py-3 font-mono text-xs transition-colors hover:bg-primary/10"
+                          role="presentation"
+                        >
+                          <span className="text-emerald-500">
+                            SYSTEM NOMINAL: All asset stocks are optimal.
                           </span>
-                        </button>
+                        </div>
                       </li>
-                    ))}
+                    )}
                   </ul>
                 </motion.div>
               )}
