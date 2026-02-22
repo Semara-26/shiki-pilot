@@ -98,13 +98,13 @@ export function ProductsTable({ products, className }: ProductsTableProps) {
                 <motion.tr
                   key={product.id}
                   variants={tableRowVariants}
-                  className="crisp-table border-l-2 border-l-transparent transition-all duration-300 hover:border-l-primary hover:bg-gradient-to-r hover:from-primary/10 hover:via-transparent hover:to-transparent"
+                  className="group crisp-table border-l-2 border-l-transparent transition-all duration-500 ease-in-out hover:border-l-primary hover:bg-gradient-to-r hover:from-primary/20 hover:via-primary/5 hover:to-transparent"
                 >
-                  <td className="px-4 py-4 font-medium text-foreground">
+                  <td className="px-4 py-4 font-medium text-foreground transition-colors duration-300 group-hover:text-white">
                     #{product.id.substring(0, 4)}
                   </td>
-                  <td className="px-4 py-4 text-foreground">{product.name}</td>
-                  <td className="w-[120px] px-4 py-4 align-middle">
+                  <td className="px-4 py-4 text-foreground transition-colors duration-300 group-hover:text-white">{product.name}</td>
+                  <td className="w-[120px] px-4 py-4 align-middle transition-colors duration-300 group-hover:text-white">
                     <span
                       className={cn(
                         "inline-block rounded-md px-2 py-1 text-xs font-medium uppercase tracking-wider",
@@ -116,7 +116,7 @@ export function ProductsTable({ products, className }: ProductsTableProps) {
                       {product.stock > 0 ? "ACTIVE" : "OUT_OF_STOCK"}
                     </span>
                   </td>
-                  <td className="w-[72px] px-4 py-4 align-middle">
+                  <td className="w-[72px] px-4 py-4 align-middle transition-colors duration-300 group-hover:text-white">
                     {product.imageUrl ? (
                       <div className="relative inline-block h-10 w-10 shrink-0 overflow-hidden rounded-full border border-border bg-muted">
                         <Image
@@ -133,10 +133,10 @@ export function ProductsTable({ products, className }: ProductsTableProps) {
                       </div>
                     )}
                   </td>
-                  <td className="px-4 py-4 text-right tabular-nums text-foreground">
+                  <td className="px-4 py-4 text-right tabular-nums text-foreground transition-colors duration-300 group-hover:text-white">
                     {formatRupiah(product.price)}
                   </td>
-                  <td className="px-4 py-4 text-right tabular-nums text-foreground">
+                  <td className="px-4 py-4 text-right tabular-nums text-foreground transition-colors duration-300 group-hover:text-white">
                     {product.stock}
                   </td>
                 </motion.tr>

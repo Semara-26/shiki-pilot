@@ -55,11 +55,15 @@ function ChartTooltip({ active, payload }: TooltipProps<number, string>) {
   const stock = item.value ?? payload[0].value;
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.9 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.2, ease: "easeOut" }}
-      className="rounded-md border border-primary/60 bg-card/80 px-3 py-2 shadow-lg backdrop-blur-md"
-      style={{ borderColor: "rgba(242, 13, 13, 0.5)" }}
+      initial={{ opacity: 0, scale: 0.8, filter: "blur(4px)" }}
+      animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+      transition={{
+        type: "spring",
+        stiffness: 200,
+        damping: 20,
+        mass: 1,
+      }}
+      className="rounded-md border border-primary/50 bg-card/80 px-3 py-2 shadow-lg backdrop-blur-md"
     >
       <p className="mb-1 font-mono text-xs text-muted-foreground">{fullName}</p>
       <p className="font-mono text-xl font-semibold text-foreground tabular-nums">
@@ -136,7 +140,8 @@ export function GrowthChart({ data, title, className }: GrowthChartProps) {
               activeBar={{
                 stroke: CHART_COLOR,
                 strokeWidth: 2,
-                fillOpacity: 1,
+                fill: CHART_COLOR,
+                fillOpacity: 0.8,
               }}
             />
           </BarChart>

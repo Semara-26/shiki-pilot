@@ -36,7 +36,7 @@ export function MetricsRow({
       {cards.map(({ key, label }) => (
         <div
           key={key}
-          className="rounded-md border border-border bg-card p-4 text-card-foreground transition-all duration-300 hover:scale-[1.01] hover:border-primary/50 hover:shadow-[0_0_20px_rgba(242,13,13,0.15)]"
+          className="rounded-md border border-border bg-card p-4 text-card-foreground transition-all duration-700 ease-out hover:border-primary/80 hover:bg-primary/[0.03] hover:shadow-[inset_0_0_20px_rgba(242,13,13,0.1),0_0_20px_rgba(242,13,13,0.3)]"
         >
           <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
             {label}
