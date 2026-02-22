@@ -6,10 +6,10 @@ import {
   User,
   Store,
   Shield,
-  Key,
   Upload,
   Lock,
   RefreshCw,
+  AlertTriangle,
 } from "lucide-react";
 import { cn } from "@/src/lib/utils";
 
@@ -22,18 +22,46 @@ const NAV_TABS = [
   { id: "account", label: "ACCOUNT", icon: User },
   { id: "store", label: "STORE INFO", icon: Store },
   { id: "security", label: "SECURITY", icon: Shield },
-  { id: "api", label: "API KEYS", icon: Key },
 ] as const;
 
 type TabLabel = (typeof NAV_TABS)[number]["label"];
+
+const INITIAL_FORM_DATA = {
+  username: "Kael_V",
+  email: "kael@nexus-systems.com",
+  storeName: "Raja Tuna",
+  businessType: "F&B / Retail",
+  contactEmail: "hello@rajatuna.com",
+  phone: "+62 812-3456-7890",
+  address: "",
+  currentPassword: "",
+  newPassword: "",
+  confirmPassword: "",
+};
 
 export function SystemPreferencesModal({
   isOpen,
   onClose,
 }: SystemPreferencesModalProps) {
   const [activeTab, setActiveTab] = useState<TabLabel>("ACCOUNT");
-  const [username, setUsername] = useState("Kael_V");
-  const [email, setEmail] = useState("kael@nexus-systems.com");
+  const [formData, setFormData] = useState(INITIAL_FORM_DATA);
+  const [isSyncing, setIsSyncing] = useState(false);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { id, value } = e.target;
+    setFormData((prev) => ({ ...prev, [id]: value }));
+  };
+
+  const handleSyncData = () => {
+    setIsSyncing(true);
+    setTimeout(() => {
+      setIsSyncing(false);
+      onClose();
+    }, 1500);
+  };
+
+  const inputClass =
+    "mt-1 w-full border-0 border-b-2 border-white/10 bg-transparent px-4 py-3 font-mono text-sm text-foreground outline-none transition-colors focus:border-primary focus:ring-0 rounded-t-lg placeholder:text-muted-foreground";
 
   function renderAccountTab() {
     return (
@@ -87,9 +115,10 @@ export function SystemPreferencesModal({
                 USERNAME
               </label>
               <input
+                id="username"
                 type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                value={formData.username}
+                onChange={handleInputChange}
                 className="mt-1 w-full border-b border-white/20 bg-transparent py-2 font-mono text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary"
                 placeholder="Your display name"
               />
@@ -102,9 +131,10 @@ export function SystemPreferencesModal({
                 EMAIL ADDRESS
               </label>
               <input
+                id="email"
                 type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={formData.email}
+                onChange={handleInputChange}
                 className="mt-1 w-full border-b border-white/20 bg-transparent py-2 font-mono text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary"
                 placeholder="you@example.com"
               />
@@ -117,30 +147,165 @@ export function SystemPreferencesModal({
 
   function renderStoreInfoTab() {
     return (
-      <div className="flex flex-1 items-center justify-center p-8">
-        <p className="font-mono text-sm text-muted-foreground">
-          STORE_INFO_MODULE // INITIALIZING...
-        </p>
+      <div className="space-y-6">
+        <div>
+          <h3 className="text-base font-bold uppercase tracking-wide text-foreground">
+            STORE CONFIGURATION
+          </h3>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Manage public-facing enterprise details.
+          </p>
+        </div>
+        <section className="rounded-md border border-white/10 bg-background/80 p-4">
+          <h4 className="text-sm font-semibold text-foreground">
+            Enterprise Details
+          </h4>
+          <div className="mt-4 grid gap-4 sm:grid-cols-2">
+            <div className="sm:col-span-2">
+              <label className="block font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+                STORE NAME
+              </label>
+              <input
+                id="storeName"
+                type="text"
+                value={formData.storeName}
+                onChange={handleInputChange}
+                className={inputClass}
+                placeholder="Store name"
+              />
+            </div>
+            <div>
+              <label className="block font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+                BUSINESS TYPE
+              </label>
+              <select
+                id="businessType"
+                value={formData.businessType}
+                onChange={handleInputChange}
+                className={inputClass}
+              >
+                <option value="F&B / Retail" className="text-black dark:text-white">F&B / Retail</option>
+                <option value="Services" className="text-black dark:text-white">Services</option>
+                <option value="Manufacturing" className="text-black dark:text-white">Manufacturing</option>
+                <option value="Other" className="text-black dark:text-white">Other</option>
+              </select>
+            </div>
+            <div>
+              <label className="block font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+                CONTACT EMAIL
+              </label>
+              <input
+                id="contactEmail"
+                type="email"
+                value={formData.contactEmail}
+                onChange={handleInputChange}
+                className={inputClass}
+                placeholder="hello@example.com"
+              />
+            </div>
+            <div className="sm:col-span-2">
+              <label className="block font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+                PHONE NUMBER
+              </label>
+              <input
+                id="phone"
+                type="text"
+                value={formData.phone}
+                onChange={handleInputChange}
+                className={inputClass}
+                placeholder="+62 812-3456-7890"
+              />
+            </div>
+            <div className="sm:col-span-2">
+              <label className="block font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+                STORE ADDRESS
+              </label>
+              <textarea
+                id="address"
+                value={formData.address}
+                onChange={handleInputChange}
+                rows={3}
+                className={`${inputClass} min-h-[80px] resize-y`}
+                placeholder="Full address"
+              />
+            </div>
+          </div>
+        </section>
       </div>
     );
   }
 
   function renderSecurityTab() {
     return (
-      <div className="flex flex-1 items-center justify-center p-8">
-        <p className="font-mono text-sm text-muted-foreground">
-          SECURITY_PROTOCOL // STANDBY...
-        </p>
-      </div>
-    );
-  }
-
-  function renderApiKeysTab() {
-    return (
-      <div className="flex flex-1 items-center justify-center p-8">
-        <p className="font-mono text-sm text-muted-foreground">
-          API_GATEWAY // OFFLINE...
-        </p>
+      <div className="space-y-6">
+        <div>
+          <h3 className="text-base font-bold uppercase tracking-wide text-foreground">
+            SECURITY PROTOCOLS
+          </h3>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Manage authentication and access credentials.
+          </p>
+        </div>
+        <section className="rounded-md border border-white/10 bg-background/80 p-4">
+          <h4 className="text-sm font-semibold text-foreground">
+            Password Change
+          </h4>
+          <div className="mt-4 flex flex-col gap-6">
+            <div>
+              <label className="block font-mono text-[10px] uppercase tracking-wider text-muted-foreground transition-colors peer-focus:text-primary">
+                CURRENT PASSWORD
+              </label>
+              <input
+                id="currentPassword"
+                type="password"
+                value={formData.currentPassword}
+                onChange={handleInputChange}
+                className={`peer ${inputClass}`}
+                placeholder="••••••••"
+              />
+            </div>
+            <div>
+              <label className="block font-mono text-[10px] uppercase tracking-wider text-muted-foreground transition-colors peer-focus:text-primary">
+                NEW PASSWORD
+              </label>
+              <input
+                id="newPassword"
+                type="password"
+                value={formData.newPassword}
+                onChange={handleInputChange}
+                className={`peer ${inputClass}`}
+                placeholder="••••••••"
+              />
+            </div>
+            <div>
+              <label className="block font-mono text-[10px] uppercase tracking-wider text-muted-foreground transition-colors peer-focus:text-primary">
+                CONFIRM PASSWORD
+              </label>
+              <input
+                id="confirmPassword"
+                type="password"
+                value={formData.confirmPassword}
+                onChange={handleInputChange}
+                className={`peer ${inputClass}`}
+                placeholder="••••••••"
+              />
+            </div>
+          </div>
+        </section>
+        <div className="rounded-lg border border-yellow-500/20 bg-yellow-500/5 p-4">
+          <div className="flex gap-3">
+            <AlertTriangle className="h-5 w-5 shrink-0 text-yellow-500" />
+            <div>
+              <p className="font-semibold text-yellow-600 dark:text-yellow-500">
+                Two-Factor Authentication Required
+              </p>
+              <p className="mt-1.5 text-xs text-muted-foreground">
+                Changes to sensitive account data require a secondary
+                authentication token. Ensure your bio-link or keyfob is active.
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
@@ -153,8 +318,6 @@ export function SystemPreferencesModal({
         return renderStoreInfoTab();
       case "SECURITY":
         return renderSecurityTab();
-      case "API KEYS":
-        return renderApiKeysTab();
       default:
         return renderAccountTab();
     }
@@ -258,10 +421,12 @@ export function SystemPreferencesModal({
                   </button>
                   <button
                     type="button"
-                    className="flex items-center gap-2 rounded-sm bg-primary px-5 py-2 font-mono text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+                    onClick={handleSyncData}
+                    disabled={isSyncing}
+                    className="flex items-center gap-2 rounded-sm bg-primary px-5 py-2 font-mono text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-70 disabled:pointer-events-none"
                   >
-                    <RefreshCw className="h-3.5 w-3.5" />
-                    SYNC DATA
+                    <RefreshCw className={cn("h-3.5 w-3.5", isSyncing && "animate-spin")} />
+                    {isSyncing ? "UPLOADING..." : "SYNC DATA"}
                   </button>
                 </div>
               </div>

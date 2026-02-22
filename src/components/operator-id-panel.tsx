@@ -101,8 +101,9 @@ export function OperatorIdPanel({ isOpen, onClose }: OperatorIdPanelProps) {
                 </button>
               </li>
               <li>
-                <button
-                  type="button"
+                <div
+                  role="menuitem"
+                  tabIndex={0}
                   className="flex w-full items-center gap-3 border-l-2 border-transparent px-4 py-3 text-left transition-colors hover:bg-white/5 hover:border-l-primary"
                 >
                   <Monitor className="h-4 w-4 shrink-0 text-muted-foreground" />
@@ -134,7 +135,7 @@ export function OperatorIdPanel({ isOpen, onClose }: OperatorIdPanelProps) {
                       )}
                     />
                   </button>
-                </button>
+                </div>
               </li>
               <li>
                 <button
