@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   User,
@@ -9,7 +9,8 @@ import {
   Upload,
   Lock,
   RefreshCw,
-  AlertTriangle,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import { cn } from "@/src/lib/utils";
 
@@ -46,6 +47,27 @@ export function SystemPreferencesModal({
   const [activeTab, setActiveTab] = useState<TabLabel>("ACCOUNT");
   const [formData, setFormData] = useState(INITIAL_FORM_DATA);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState<string>("");
+  const [showPassword, setShowPassword] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (avatarUrl && avatarUrl.startsWith("blob:")) {
+        URL.revokeObjectURL(avatarUrl);
+      }
+      setAvatarUrl(URL.createObjectURL(file));
+    }
+    e.target.value = "";
+  };
+
+  const handleRemoveAvatar = () => {
+    if (avatarUrl && avatarUrl.startsWith("blob:")) {
+      URL.revokeObjectURL(avatarUrl);
+    }
+    setAvatarUrl("");
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { id, value } = e.target;
@@ -67,13 +89,25 @@ export function SystemPreferencesModal({
     return (
       <div className="space-y-6">
         <section className="rounded-md border border-white/10 bg-background/80 p-4">
+          <input
+            type="file"
+            accept="image/*"
+            className="hidden"
+            ref={fileInputRef}
+            onChange={handleAvatarChange}
+          />
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
             <div className="relative shrink-0">
               <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border-2 border-primary bg-muted font-mono text-2xl font-semibold text-foreground">
-                KV
+                {avatarUrl ? (
+                  <img src={avatarUrl} alt="Avatar" className="h-full w-full object-cover" />
+                ) : (
+                  "KV"
+                )}
               </div>
               <button
                 type="button"
+                onClick={() => fileInputRef.current?.click()}
                 className="absolute -bottom-0.5 -right-0.5 flex h-7 w-7 items-center justify-center rounded-full border border-primary bg-primary"
                 aria-label="Upload avatar"
               >
@@ -91,12 +125,14 @@ export function SystemPreferencesModal({
               <div className="mt-3 flex gap-2">
                 <button
                   type="button"
+                  onClick={() => fileInputRef.current?.click()}
                   className="rounded-sm bg-primary px-3 py-1.5 font-mono text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90"
                 >
                   UPLOAD NEW
                 </button>
                 <button
                   type="button"
+                  onClick={handleRemoveAvatar}
                   className="rounded-sm border border-primary/60 bg-transparent px-3 py-1.5 font-mono text-xs text-foreground transition-colors hover:bg-primary/10"
                 >
                   REMOVE
@@ -255,53 +291,94 @@ export function SystemPreferencesModal({
               <label className="block font-mono text-[10px] uppercase tracking-wider text-muted-foreground transition-colors peer-focus:text-primary">
                 CURRENT PASSWORD
               </label>
-              <input
-                id="currentPassword"
-                type="password"
-                value={formData.currentPassword}
-                onChange={handleInputChange}
-                className={`peer ${inputClass}`}
-                placeholder="••••••••"
-              />
+              <div className="relative">
+                <input
+                  id="currentPassword"
+                  type={showPassword ? "text" : "password"}
+                  value={formData.currentPassword}
+                  onChange={handleInputChange}
+                  className={`peer ${inputClass} pr-10`}
+                  placeholder="••••••••"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-3 cursor-pointer text-muted-foreground transition-colors hover:text-white"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </button>
+              </div>
             </div>
             <div>
               <label className="block font-mono text-[10px] uppercase tracking-wider text-muted-foreground transition-colors peer-focus:text-primary">
                 NEW PASSWORD
               </label>
-              <input
-                id="newPassword"
-                type="password"
-                value={formData.newPassword}
-                onChange={handleInputChange}
-                className={`peer ${inputClass}`}
-                placeholder="••••••••"
-              />
+              <div className="relative">
+                <input
+                  id="newPassword"
+                  type={showPassword ? "text" : "password"}
+                  value={formData.newPassword}
+                  onChange={handleInputChange}
+                  className={`peer ${inputClass} pr-10`}
+                  placeholder="••••••••"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-3 cursor-pointer text-muted-foreground transition-colors hover:text-white"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </button>
+              </div>
             </div>
             <div>
               <label className="block font-mono text-[10px] uppercase tracking-wider text-muted-foreground transition-colors peer-focus:text-primary">
                 CONFIRM PASSWORD
               </label>
-              <input
-                id="confirmPassword"
-                type="password"
-                value={formData.confirmPassword}
-                onChange={handleInputChange}
-                className={`peer ${inputClass}`}
-                placeholder="••••••••"
-              />
+              <div className="relative">
+                <input
+                  id="confirmPassword"
+                  type={showPassword ? "text" : "password"}
+                  value={formData.confirmPassword}
+                  onChange={handleInputChange}
+                  className={`peer ${inputClass} pr-10`}
+                  placeholder="••••••••"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-3 cursor-pointer text-muted-foreground transition-colors hover:text-white"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </button>
+              </div>
             </div>
           </div>
         </section>
-        <div className="rounded-lg border border-yellow-500/20 bg-yellow-500/5 p-4">
+        <div className="rounded-lg border border-dashed border-white/20 bg-surface-darker/50 p-4 opacity-70">
           <div className="flex gap-3">
-            <AlertTriangle className="h-5 w-5 shrink-0 text-yellow-500" />
+            <Lock className="h-5 w-5 shrink-0 text-slate-400" />
             <div>
-              <p className="font-semibold text-yellow-600 dark:text-yellow-500">
-                Two-Factor Authentication Required
+              <p className="font-mono text-xs text-slate-300">
+                FEATURE_LOCKED // 2FA AUTENTIKASI
               </p>
-              <p className="mt-1.5 text-xs text-muted-foreground">
-                Changes to sensitive account data require a secondary
-                authentication token. Ensure your bio-link or keyfob is active.
+              <p className="mt-1.5 text-[10px] text-slate-400/90">
+                Sistem keamanan OTP dan biometrik sedang dalam tahap sinkronisasi jaringan. Fitur ini akan tersedia pada pembaruan sistem berikutnya.
               </p>
             </div>
           </div>
