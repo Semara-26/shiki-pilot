@@ -44,35 +44,35 @@ export function EventLog({
   return (
     <div
       className={cn(
-        "rounded-md border border-border bg-card text-card-foreground",
+        "rounded-lg border-2 border-ink bg-white dark:border-white/10 dark:bg-surface-dark",
         className
       )}
     >
-      <div className="border-b border-border px-4 py-3">
-        <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
+      <div className="border-b border-gray-200 px-4 py-3 dark:border-white/10">
+        <p className="text-sm font-bold uppercase tracking-widest text-ink dark:text-white">
           {title}
         </p>
       </div>
-      <ul className="divide-y divide-border">
+      <ul className="divide-y divide-gray-200 dark:divide-white/5">
         {displayEvents.map((event) => (
           <li
             key={event.id}
-            className="flex gap-3 px-4 py-3 transition-colors hover:bg-muted/50"
+            className="flex gap-3 px-4 py-3 transition-colors hover:bg-gray-50 dark:hover:bg-white/5"
           >
-            <div className="flex shrink-0 items-center gap-1.5 text-muted-foreground min-w-[7rem]">
+            <div className="flex min-w-[7rem] shrink-0 items-center gap-1.5 text-sm font-medium text-gray-500 dark:text-gray-400">
               <Clock className="h-3.5 w-3.5 shrink-0" />
-              <span className="font-mono text-[11px] leading-tight">
+              <span className="font-mono leading-tight">
                 {event.date != null
                   ? formatEventDate(event.date)
                   : event.timestamp ?? "—"}
               </span>
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium text-foreground">
+              <p className="text-sm font-bold text-ink dark:text-white">
                 {event.title}
               </p>
               {event.detail && (
-                <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                <p className="mt-0.5 truncate text-sm font-medium text-gray-600 dark:text-gray-400">
                   {event.detail}
                 </p>
               )}

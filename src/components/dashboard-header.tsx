@@ -46,16 +46,16 @@ export function DashboardHeader({
   return (
     <header
       className={cn(
-        "sticky top-0 z-30 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80",
+        "sticky top-0 z-30 border-b-2 border-ink bg-white backdrop-blur supports-[backdrop-filter]:bg-white/80 dark:border-white/10 dark:bg-surface-dark",
         className
       )}
     >
       <div className="flex h-16 items-center justify-between gap-4 px-6">
         <div className="flex min-w-0 flex-col gap-0.5">
-          <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
+          <p className="text-xs font-medium uppercase tracking-widest text-gray-500 dark:text-gray-400">
             {breadcrumbs}
           </p>
-          <h1 className="text-xl font-semibold tracking-tight text-foreground md:text-2xl">
+          <h1 className="text-xl font-semibold tracking-tight text-ink md:text-2xl dark:text-white">
             {title}
           </h1>
         </div>
@@ -63,11 +63,11 @@ export function DashboardHeader({
         <div className="flex items-center gap-2">
           {/* Search */}
           <div className="relative hidden md:block">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500 dark:text-gray-400" />
             <input
               type="search"
               placeholder="Search..."
-              className="h-9 w-48 rounded-md border border-input bg-background pl-9 pr-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+              className="h-9 w-48 rounded-md border border-ink/20 bg-white pl-9 pr-3 text-sm text-ink placeholder:text-gray-500 focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring dark:border-white/10 dark:bg-surface-dark dark:text-white dark:placeholder:text-gray-400"
             />
           </div>
 
@@ -76,7 +76,7 @@ export function DashboardHeader({
             <button
               type="button"
               onClick={() => setIsNotifOpen((v) => !v)}
-              className="relative flex h-9 w-9 items-center justify-center rounded-md border border-border bg-background text-foreground transition-colors hover:bg-muted hover:text-foreground"
+              className="relative flex h-9 w-9 items-center justify-center rounded-md border border-ink/20 bg-white text-ink transition-colors hover:bg-paper hover:text-ink dark:border-white/10 dark:bg-surface-dark dark:text-white dark:hover:bg-white/10"
               aria-label="Notifications"
               aria-expanded={isNotifOpen}
             >

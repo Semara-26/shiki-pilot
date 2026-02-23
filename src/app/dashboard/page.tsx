@@ -127,12 +127,12 @@ export default async function DashboardPage() {
             />
             <div>
               <div className="mb-3 flex items-center justify-between">
-                <p className="font-mono text-xs uppercase tracking-widest text-muted-foreground">
-                  Recent assets
+                <p className="font-mono text-xs uppercase tracking-widest text-gray-500 dark:text-gray-400">
+                  RECENT ASSETS
                 </p>
                 <Link
                   href="/dashboard/inventory"
-                  className="font-mono text-xs text-primary hover:underline"
+                  className="font-mono text-xs text-primary hover:text-red-700 dark:hover:text-red-400 hover:underline"
                 >
                   View full list →
                 </Link>

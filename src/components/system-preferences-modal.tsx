@@ -113,7 +113,7 @@ export function SystemPreferencesModal({
   };
 
   const inputClass =
-    "mt-1 w-full border-0 border-b-2 border-white/10 bg-transparent px-4 py-3 font-mono text-sm text-foreground outline-none transition-colors focus:border-primary focus:ring-0 rounded-t-lg placeholder:text-muted-foreground";
+    "mt-1 w-full border-b-2 border-ink bg-white px-4 py-3 font-mono text-sm font-medium text-ink outline-none transition-colors focus:border-primary focus:ring-0 rounded-t-lg placeholder:text-gray-500 dark:border-white/10 dark:bg-surface-darker dark:text-white dark:placeholder:text-muted-foreground";
 
   function renderAccountTab() {
     return (
@@ -185,7 +185,7 @@ export function SystemPreferencesModal({
                 type="text"
                 value={formData.username}
                 onChange={handleInputChange}
-                className="mt-1 w-full border-b border-white/20 bg-transparent py-2 font-mono text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary"
+                className="mt-1 w-full border-b-2 border-ink bg-white py-2 font-mono text-sm font-medium text-ink outline-none transition-colors placeholder:text-gray-500 focus:border-primary dark:border-white/10 dark:bg-surface-darker dark:text-white dark:placeholder:text-muted-foreground"
                 placeholder="Your display name"
               />
               <p className="mt-1 font-mono text-[10px] text-muted-foreground">
@@ -201,7 +201,7 @@ export function SystemPreferencesModal({
                 type="email"
                 value={formData.email}
                 onChange={handleInputChange}
-                className="mt-1 w-full border-b border-white/20 bg-transparent py-2 font-mono text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary"
+                className="mt-1 w-full border-b-2 border-ink bg-white py-2 font-mono text-sm font-medium text-ink outline-none transition-colors placeholder:text-gray-500 focus:border-primary dark:border-white/10 dark:bg-surface-darker dark:text-white dark:placeholder:text-muted-foreground"
                 placeholder="you@example.com"
               />
             </div>
@@ -445,21 +445,21 @@ export function SystemPreferencesModal({
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ type: "spring", stiffness: 300, damping: 28 }}
-            className="flex h-[600px] max-h-[90vh] w-full max-w-5xl overflow-hidden rounded-md border border-primary bg-background shadow-[0_0_25px_rgba(242,13,13,0.25)]"
+            className="flex h-[600px] max-h-[90vh] w-full max-w-5xl overflow-hidden rounded-md border-2 border-ink bg-white shadow-neo dark:border-red-500/20 dark:bg-[#0a0a0a] dark:shadow-[0_0_30px_rgba(255,0,0,0.1)]"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Kolom Kiri — Navigasi */}
-            <aside className="flex w-72 shrink-0 flex-col border-r border-white/10 bg-background/98">
-              <div className="border-b border-white/10 p-4">
+            <aside className="flex w-72 shrink-0 flex-col border-r-2 border-ink bg-gray-50 dark:border-white/10 dark:bg-surface-dark">
+              <div className="border-b border-ink/20 p-4 dark:border-white/10">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-primary/60 bg-muted font-mono text-sm font-semibold text-foreground">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-primary/60 bg-white font-mono text-sm font-semibold text-ink dark:bg-muted dark:text-foreground">
                     SP
                   </div>
                   <div>
-                    <p className="text-sm font-semibold uppercase tracking-wide text-foreground">
+                    <p className="text-sm font-semibold uppercase tracking-wide text-ink dark:text-foreground">
                       SYSTEM PREFS
                     </p>
-                    <p className="font-mono text-[10px] text-muted-foreground">
+                    <p className="font-mono text-[10px] text-gray-500 dark:text-muted-foreground">
                       V2.0.4 // ONLINE
                     </p>
                   </div>
@@ -474,10 +474,10 @@ export function SystemPreferencesModal({
                       type="button"
                       onClick={() => setActiveTab(label)}
                       className={cn(
-                        "flex w-full items-center gap-3 rounded-sm border-l-2 px-3 py-2.5 text-left text-sm font-medium transition-colors",
+                        "flex w-full items-center gap-3 rounded-sm border-l-2 px-3 py-2.5 text-left text-sm font-bold transition-colors",
                         isActive
-                          ? "border-primary bg-primary/90 text-primary-foreground"
-                          : "border-transparent text-muted-foreground hover:bg-white/5 hover:text-foreground"
+                          ? "border-primary bg-ink text-white dark:bg-primary dark:text-primary-foreground"
+                          : "border-transparent text-ink hover:bg-gray-200 dark:text-muted-foreground dark:hover:bg-white/5 dark:hover:text-foreground"
                       )}
                     >
                       <Icon className="h-4 w-4 shrink-0" />
@@ -486,7 +486,7 @@ export function SystemPreferencesModal({
                   );
                 })}
               </nav>
-              <div className="border-t border-white/10 p-3 font-mono text-[10px] text-muted-foreground">
+              <div className="border-t border-ink/20 p-3 font-mono text-[10px] text-gray-500 dark:border-white/10 dark:text-muted-foreground">
                 <p>SERVER: US-EAST-1</p>
                 <p className="mt-1 flex items-center gap-1.5">
                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
@@ -496,16 +496,16 @@ export function SystemPreferencesModal({
             </aside>
 
             {/* Kolom Kanan — Konten (Modular Grid) */}
-            <main className="flex flex-1 flex-col overflow-y-auto bg-muted/30">
-              <div className="shrink-0 border-b border-white/10 px-6 py-4">
+            <main className="flex flex-1 flex-col overflow-y-auto bg-paper/50 dark:bg-muted/30">
+              <div className="shrink-0 border-b border-ink/20 px-6 py-4 dark:border-white/10">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="h-8 w-0.5 bg-primary" />
-                    <h2 className="text-lg font-semibold uppercase tracking-wide text-foreground">
+                    <h2 className="text-lg font-black uppercase tracking-wide text-ink dark:text-white">
                       USER PROFILE CONFIGURATION
                     </h2>
                   </div>
-                  <div className="flex items-center gap-2 rounded border border-primary/40 bg-background/80 px-2 py-1 font-mono text-[10px] text-muted-foreground">
+                  <div className="flex items-center gap-2 rounded border border-primary/40 bg-white px-2 py-1 font-mono text-[10px] text-gray-500 dark:bg-background/80 dark:text-muted-foreground">
                     <Lock className="h-3 w-3" />
                     ENCRYPTED CONNECTION
                   </div>
@@ -517,12 +517,12 @@ export function SystemPreferencesModal({
               </div>
 
               {/* Footer Actions */}
-              <div className="shrink-0 border-t border-white/10 px-6 py-4">
+              <div className="shrink-0 border-t border-ink/20 px-6 py-4 dark:border-white/10">
                 <div className="flex items-center justify-between">
                   <button
                     type="button"
                     onClick={onClose}
-                    className="rounded-sm border border-white/20 bg-background/80 px-4 py-2 font-mono text-xs font-medium text-foreground transition-colors hover:bg-white/10"
+                    className="rounded-sm border-2 border-ink bg-white px-4 py-2 font-mono text-xs font-medium text-ink transition-colors hover:bg-gray-100 dark:border-white/20 dark:bg-background/80 dark:text-foreground dark:hover:bg-white/10"
                   >
                     CANCEL CHANGES
                   </button>

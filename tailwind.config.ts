@@ -44,6 +44,9 @@ const config: Config = {
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
         "surface-darker": "hsl(var(--surface-darker))",
+        ink: "#111111",
+        paper: "#f5f5f5",
+        "surface-dark": "#0a0a0a",
         chart: {
           "1": "hsl(var(--chart-1))",
           "2": "hsl(var(--chart-2))",
@@ -66,6 +69,9 @@ const config: Config = {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+      },
+      boxShadow: {
+        neo: "4px 4px 0px 0px rgba(0,0,0,1)",
       },
     },
   },

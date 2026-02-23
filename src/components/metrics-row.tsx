@@ -84,12 +84,12 @@ export function MetricsRow({
                 setActiveDrawer(drawerKey);
               }
             }}
-            className="cursor-pointer rounded-md border border-border bg-card p-4 text-card-foreground transition-all duration-700 ease-out hover:border-primary/80 hover:bg-primary/[0.03] hover:shadow-[inset_0_0_20px_rgba(242,13,13,0.1),0_0_20px_rgba(242,13,13,0.3)]"
+            className="cursor-pointer rounded-md border-2 border-ink bg-white p-4 text-ink transition-all duration-300 hover:shadow-neo dark:border-white/10 dark:bg-surface-dark dark:text-white dark:hover:shadow-none"
           >
-            <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
+            <p className="text-xs font-medium uppercase tracking-widest text-gray-500 dark:text-gray-400">
               {label}
             </p>
-            <p className="mt-2 font-mono text-2xl font-semibold tracking-tight text-foreground md:text-3xl">
+            <p className="mt-2 font-mono text-2xl font-semibold tracking-tight text-ink md:text-3xl dark:text-white">
               {values[key]}
             </p>
           </div>

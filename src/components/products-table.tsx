@@ -57,30 +57,30 @@ export function ProductsTable({ products, className }: ProductsTableProps) {
     <>
       <div
         className={cn(
-          "rounded-md border border-border bg-card text-card-foreground overflow-hidden",
+          "rounded-lg overflow-hidden border-2 border-ink bg-white dark:border-white/10 dark:bg-surface-dark",
           className
         )}
       >
         <div className="overflow-x-auto">
           <table className="w-full border-collapse font-mono text-sm">
             <thead>
-              <tr className="crisp-table border-b border-border/60 bg-muted/30">
-                <th className="px-4 py-4 text-left font-medium uppercase tracking-widest text-muted-foreground">
+              <tr className="border-b-2 border-ink bg-paper uppercase dark:border-white/10 dark:bg-black/40">
+                <th className="px-4 py-4 text-left text-sm font-bold tracking-wider text-gray-500 dark:text-gray-400">
                   ID
                 </th>
-                <th className="px-4 py-4 text-left font-medium uppercase tracking-widest text-muted-foreground">
+                <th className="px-4 py-4 text-left text-sm font-bold tracking-wider text-gray-500 dark:text-gray-400">
                   Product Name
                 </th>
-                <th className="w-[120px] px-4 py-4 text-left font-medium uppercase tracking-widest text-muted-foreground">
+                <th className="w-[120px] px-4 py-4 text-left text-sm font-bold tracking-wider text-gray-500 dark:text-gray-400">
                   Status
                 </th>
-                <th className="w-[72px] px-4 py-4 text-left font-medium uppercase tracking-widest text-muted-foreground">
+                <th className="w-[72px] px-4 py-4 text-left text-sm font-bold tracking-wider text-gray-500 dark:text-gray-400">
                   Resource
                 </th>
-                <th className="px-4 py-4 text-right font-medium uppercase tracking-widest text-muted-foreground">
+                <th className="px-4 py-4 text-right text-sm font-bold tracking-wider text-gray-500 dark:text-gray-400">
                   Price
                 </th>
-                <th className="px-4 py-4 text-right font-medium uppercase tracking-widest text-muted-foreground">
+                <th className="px-4 py-4 text-right text-sm font-bold tracking-wider text-gray-500 dark:text-gray-400">
                   Stock
                 </th>
               </tr>
@@ -94,7 +94,7 @@ export function ProductsTable({ products, className }: ProductsTableProps) {
                 <tr>
                   <td
                     colSpan={6}
-                    className="px-4 py-10 text-center text-muted-foreground"
+                    className="px-4 py-10 text-center text-gray-500 dark:text-gray-400"
                   >
                     No products yet.
                   </td>
@@ -117,15 +117,15 @@ export function ProductsTable({ products, className }: ProductsTableProps) {
                         setIsOpen(true);
                       }
                     }}
-                    className="group crisp-table cursor-pointer border-l-2 border-l-transparent transition-all duration-500 ease-in-out hover:border-l-primary hover:bg-gradient-to-r hover:from-primary/20 hover:via-primary/5 hover:to-transparent"
+                    className="cursor-pointer border-b border-gray-200 transition-colors hover:bg-gray-50 dark:border-white/5 dark:hover:bg-white/5"
                   >
-                    <td className="px-4 py-4 font-medium text-foreground transition-colors duration-300 group-hover:text-white">
+                    <td className="px-4 py-4 font-semibold text-ink dark:text-white">
                       #{product.id.substring(0, 4)}
                     </td>
-                    <td className="px-4 py-4 text-foreground transition-colors duration-300 group-hover:text-white">
+                    <td className="px-4 py-4 font-semibold text-ink dark:text-white">
                       {product.name}
                     </td>
-                    <td className="w-[120px] px-4 py-4 align-middle transition-colors duration-300 group-hover:text-white">
+                    <td className="w-[120px] px-4 py-4 align-middle">
                       <span
                         className={cn(
                           "inline-block rounded-md px-2 py-1 text-xs font-medium uppercase tracking-wider",
@@ -137,9 +137,9 @@ export function ProductsTable({ products, className }: ProductsTableProps) {
                         {product.stock > 0 ? "ACTIVE" : "OUT_OF_STOCK"}
                       </span>
                     </td>
-                    <td className="w-[72px] px-4 py-4 align-middle transition-colors duration-300 group-hover:text-white">
+                    <td className="w-[72px] px-4 py-4 align-middle">
                       {product.imageUrl ? (
-                        <div className="relative inline-block h-10 w-10 shrink-0 overflow-hidden rounded-full border border-border bg-muted">
+                        <div className="relative inline-block h-10 w-10 shrink-0 overflow-hidden rounded-full border border-gray-200 bg-paper dark:border-white/10 dark:bg-black/40">
                           <Image
                             src={product.imageUrl}
                             alt={product.name}
@@ -149,15 +149,15 @@ export function ProductsTable({ products, className }: ProductsTableProps) {
                           />
                         </div>
                       ) : (
-                        <div className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border bg-muted text-xs font-medium text-muted-foreground avatar-mono">
+                        <div className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-gray-200 bg-paper text-xs font-medium text-gray-500 avatar-mono dark:border-white/10 dark:bg-black/40 dark:text-gray-400">
                           {getInitials(product.name)}
                         </div>
                       )}
                     </td>
-                    <td className="px-4 py-4 text-right tabular-nums text-foreground transition-colors duration-300 group-hover:text-white">
+                    <td className="px-4 py-4 text-right tabular-nums font-semibold text-ink dark:text-white">
                       {formatRupiah(product.price)}
                     </td>
-                    <td className="px-4 py-4 text-right tabular-nums text-foreground transition-colors duration-300 group-hover:text-white">
+                    <td className="px-4 py-4 text-right tabular-nums font-semibold text-ink dark:text-white">
                       {product.stock}
                     </td>
                   </motion.tr>

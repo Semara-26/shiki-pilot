@@ -94,19 +94,19 @@ export function AssetDonutChart({
   return (
     <div
       className={cn(
-        "flex h-full flex-col overflow-hidden rounded-md border border-border bg-card p-4 text-card-foreground",
+        "flex h-full flex-col overflow-hidden rounded-lg border-2 border-ink bg-white p-4 dark:border-white/10 dark:bg-surface-dark",
         className
       )}
     >
       {title && (
-        <p className="mb-3 shrink-0 text-sm font-medium uppercase tracking-widest text-muted-foreground">
+        <p className="mb-3 shrink-0 text-sm font-bold uppercase tracking-widest text-ink dark:text-white">
           {title}
         </p>
       )}
 
       {isEmpty ? (
         <div className="flex flex-1 items-center justify-center">
-          <p className="font-mono text-sm text-muted-foreground">No asset data</p>
+          <p className="font-mono text-sm text-gray-500 dark:text-gray-400">No asset data</p>
         </div>
       ) : (
         <>
@@ -137,31 +137,31 @@ export function AssetDonutChart({
               className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none"
               aria-hidden
             >
-              <p className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
+              <p className="font-mono text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">
                 TOTAL ASSET
               </p>
-              <p className="mt-1 font-mono text-base font-bold tabular-nums text-primary drop-shadow-[0_0_6px_rgba(242,13,13,0.5)] sm:text-lg">
+              <p className="mt-1 font-mono text-base font-bold tabular-nums text-ink sm:text-lg dark:text-white drop-shadow-[0_0_6px_rgba(242,13,13,0.5)]">
                 {formatRupiahShort(totalValue)}
               </p>
             </div>
           </div>
 
           {/* Custom legend */}
-          <div className="mt-3 flex-1 min-h-0 border-t border-border/50 pt-3">
+          <div className="mt-3 flex-1 min-h-0 border-t border-gray-200 pt-3 dark:border-white/10">
             <div className="flex flex-col gap-2">
               {legendItems.map((item, index) => (
                 <div
                   key={`legend-${index}`}
-                  className="flex items-center gap-2 font-mono text-xs"
+                  className="flex items-center gap-2 font-mono text-sm font-medium"
                 >
                   <span
-                    className="h-3 w-3 shrink-0 rounded-full border border-border/50"
+                    className="h-3 w-3 shrink-0 rounded-full border border-gray-200 dark:border-white/10"
                     style={{ backgroundColor: NERV_COLORS[index % NERV_COLORS.length] }}
                   />
-                  <span className="min-w-0 flex-1 truncate text-foreground">
+                  <span className="min-w-0 flex-1 truncate text-gray-700 dark:text-gray-300">
                     {item.name}
                   </span>
-                  <span className="shrink-0 tabular-nums text-muted-foreground">
+                  <span className="shrink-0 tabular-nums text-gray-500 dark:text-gray-400">
                     {item.percentage.toFixed(1)}%
                   </span>
                 </div>

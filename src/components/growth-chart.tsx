@@ -10,6 +10,7 @@ import {
   CartesianGrid,
   TooltipProps,
 } from "recharts";
+import { useTheme } from "next-themes";
 import { motion } from "framer-motion";
 import { cn } from "@/src/lib/utils";
 
@@ -75,16 +76,26 @@ interface GrowthChartProps {
   className?: string;
 }
 
+const GRID_STROKE_LIGHT = "#e5e7eb";
+const GRID_STROKE_DARK = "rgba(255,255,255,0.1)";
+const TICK_FILL_LIGHT = "#6b7280";
+const TICK_FILL_DARK = "#9ca3af";
+
 export function GrowthChart({ data, title, className }: GrowthChartProps) {
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === "dark";
+  const gridStroke = isDark ? GRID_STROKE_DARK : GRID_STROKE_LIGHT;
+  const tickFill = isDark ? TICK_FILL_DARK : TICK_FILL_LIGHT;
+
   return (
     <div
       className={cn(
-        "flex h-full flex-col overflow-hidden rounded-md border border-border bg-card p-4 text-card-foreground",
+        "flex h-full flex-col overflow-hidden rounded-lg border-2 border-ink bg-white p-4 dark:border-white/10 dark:bg-surface-dark",
         className
       )}
     >
       {title && (
-        <p className="shrink-0 text-sm font-medium uppercase tracking-widest text-muted-foreground">
+        <p className="shrink-0 text-sm font-bold uppercase tracking-widest text-ink dark:text-white">
           {title}
         </p>
       )}
@@ -96,15 +107,15 @@ export function GrowthChart({ data, title, className }: GrowthChartProps) {
           >
             <CartesianGrid
               strokeDasharray="3 3"
-              stroke="hsl(var(--border))"
+              stroke={gridStroke}
               strokeOpacity={0.5}
               vertical={false}
             />
             <XAxis
               dataKey="name"
-              tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
+              tick={{ fill: tickFill, fontSize: 11 }}
               tickLine={false}
-              axisLine={{ stroke: "hsl(var(--border))" }}
+              axisLine={{ stroke: gridStroke }}
               tickFormatter={(value) =>
                 typeof value === "string" && value.length > 10
                   ? value.substring(0, 10) + "…"
@@ -112,7 +123,7 @@ export function GrowthChart({ data, title, className }: GrowthChartProps) {
               }
             />
             <YAxis
-              tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
+              tick={{ fill: tickFill, fontSize: 11 }}
               tickLine={false}
               axisLine={false}
               tickFormatter={(v) => String(v)}

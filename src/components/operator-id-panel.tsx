@@ -54,7 +54,7 @@ export function OperatorIdPanel({ isOpen, onClose }: OperatorIdPanelProps) {
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 20, scale: 0.95 }}
           transition={{ duration: 0.2, ease: "easeOut" }}
-          className="fixed bottom-6 left-[80px] z-[100] w-[320px] overflow-hidden rounded-md border border-primary bg-background/95 shadow-[0_0_15px_rgba(242,13,13,0.3)] backdrop-blur-md"
+          className="fixed bottom-6 left-[80px] z-[100] w-[320px] overflow-hidden rounded-md border-2 border-ink bg-white shadow-neo backdrop-blur-md dark:border-red-500/30 dark:bg-surface-dark dark:shadow-none"
         >
           {/* Scanline overlay */}
           <div
@@ -73,7 +73,7 @@ export function OperatorIdPanel({ isOpen, onClose }: OperatorIdPanelProps) {
 
           <div className="relative z-10">
             {/* Header — ID Card */}
-            <div className="relative border-b border-primary/50 px-4 pb-4 pt-5">
+            <div className="relative border-b border-ink/30 px-4 pb-4 pt-5 dark:border-primary/50">
               <span className="absolute left-0 top-0 rounded-r bg-primary px-2 py-0.5 font-mono text-[10px] font-medium text-primary-foreground">
                 OP-01
               </span>
@@ -81,7 +81,7 @@ export function OperatorIdPanel({ isOpen, onClose }: OperatorIdPanelProps) {
                 #
               </span>
               <div className="flex items-start gap-3">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-primary bg-muted font-mono text-sm font-semibold text-foreground">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-primary bg-paper font-mono text-sm font-semibold text-ink dark:bg-muted dark:text-foreground">
                   {userProfile.avatar ? (
                     <img
                       src={userProfile.avatar}
@@ -93,18 +93,18 @@ export function OperatorIdPanel({ isOpen, onClose }: OperatorIdPanelProps) {
                   )}
                 </div>
                 <div className="min-w-0 flex-1 pt-0.5">
-                  <p className="font-semibold leading-tight text-foreground">
+                  <p className="font-black leading-tight text-ink dark:text-white">
                     {userProfile.name}
                   </p>
                   <p className="mt-1 font-mono text-[10px] uppercase tracking-wider text-primary">
                     {userProfile.role}
                   </p>
-                  <div className="mt-1.5 flex items-center gap-1.5 font-mono text-[10px] text-muted-foreground">
+                  <div className="mt-1.5 flex items-center gap-1.5 font-mono text-[10px] text-gray-500 dark:text-muted-foreground">
                     <span className="relative flex h-1.5 w-1.5">
                       <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-75" />
                       <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
                     </span>
-                    <span className="text-foreground/90">ONLINE</span>
+                    <span className="text-ink/90 dark:text-foreground/90">ONLINE</span>
                     <span>// SECURE</span>
                   </div>
                 </div>
@@ -112,23 +112,23 @@ export function OperatorIdPanel({ isOpen, onClose }: OperatorIdPanelProps) {
             </div>
 
             {/* Menu List */}
-            <ul className="border-b border-primary/30">
+            <ul className="border-b border-ink/20 dark:border-primary/30">
               <li>
                 <button
                   type="button"
                   onClick={() => setIsPrefsOpen(true)}
-                  className="flex w-full items-center gap-3 border-l-2 border-transparent px-4 py-3 text-left transition-colors hover:bg-white/5 hover:border-l-primary"
+                  className="flex w-full items-center gap-3 border-l-2 border-transparent px-4 py-3 text-left transition-colors hover:bg-gray-100 hover:border-l-primary dark:hover:bg-white/5 dark:hover:border-l-primary"
                 >
-                  <Settings className="h-4 w-4 shrink-0 text-muted-foreground" />
+                  <Settings className="h-4 w-4 shrink-0 text-gray-500 dark:text-muted-foreground" />
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-foreground">
+                    <p className="text-sm font-bold text-ink dark:text-white">
                       SYSTEM PREFERENCES
                     </p>
                     <p className="font-mono text-[10px] text-primary">
                       CONFIG_SYS_01
                     </p>
                   </div>
-                  <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
+                  <ChevronRight className="h-4 w-4 shrink-0 text-gray-500 dark:text-muted-foreground" />
                 </button>
               </li>
               <li>
@@ -136,11 +136,11 @@ export function OperatorIdPanel({ isOpen, onClose }: OperatorIdPanelProps) {
                   role="menuitem"
                   tabIndex={0}
                   onClick={toggleTheme}
-                  className="flex w-full cursor-pointer items-center gap-3 border-l-2 border-transparent px-4 py-3 text-left transition-colors hover:bg-white/5 hover:border-l-primary"
+                  className="flex w-full cursor-pointer items-center gap-3 border-l-2 border-transparent px-4 py-3 text-left transition-colors hover:bg-gray-100 dark:hover:bg-white/5 hover:border-l-primary dark:hover:border-l-primary"
                 >
-                  <Monitor className="h-4 w-4 shrink-0 text-muted-foreground" />
+                  <Monitor className="h-4 w-4 shrink-0 text-gray-500 dark:text-muted-foreground" />
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-foreground">
+                    <p className="text-sm font-bold text-ink dark:text-white">
                       INTERFACE MODE
                     </p>
                     <p className="font-mono text-[10px] text-primary">
@@ -183,18 +183,18 @@ export function OperatorIdPanel({ isOpen, onClose }: OperatorIdPanelProps) {
                 <button
                   type="button"
                   onClick={() => setIsDocOpen(true)}
-                  className="flex w-full items-center gap-3 border-l-2 border-transparent px-4 py-3 text-left transition-colors hover:bg-white/5 hover:border-l-primary"
+                  className="flex w-full items-center gap-3 border-l-2 border-transparent px-4 py-3 text-left transition-colors hover:bg-gray-100 dark:hover:bg-white/5 hover:border-l-primary dark:hover:border-l-primary"
                 >
-                  <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
+                  <FileText className="h-4 w-4 shrink-0 text-gray-500 dark:text-muted-foreground" />
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-foreground">
+                    <p className="text-sm font-bold text-ink dark:text-white">
                       DOCUMENTATION
                     </p>
                     <p className="font-mono text-[10px] text-primary">
                       READ_MANUAL_0X
                     </p>
                   </div>
-                  <Link2 className="h-4 w-4 shrink-0 text-muted-foreground" />
+                  <Link2 className="h-4 w-4 shrink-0 text-gray-500 dark:text-muted-foreground" />
                 </button>
               </li>
             </ul>
@@ -204,7 +204,7 @@ export function OperatorIdPanel({ isOpen, onClose }: OperatorIdPanelProps) {
               <button
                 type="button"
                 onClick={onClose}
-                className="flex w-full items-center justify-center gap-2 rounded-md border border-primary/50 bg-background/80 py-3 font-mono text-sm font-semibold text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
+                className="flex w-full items-center justify-center gap-2 rounded-md border-2 border-ink bg-white py-3 font-mono text-sm font-semibold text-primary transition-colors hover:bg-red-50 dark:border-primary/50 dark:bg-transparent dark:hover:bg-primary dark:hover:text-primary-foreground"
               >
                 <Power className="h-4 w-4" />
                 TERMINATE SESSION
@@ -212,7 +212,7 @@ export function OperatorIdPanel({ isOpen, onClose }: OperatorIdPanelProps) {
             </div>
 
             {/* Bottom info bar */}
-            <div className="flex items-center justify-between border-t border-border/50 px-4 py-2 font-mono text-[10px] text-muted-foreground">
+            <div className="flex items-center justify-between border-t border-ink/20 px-4 py-2 font-mono text-[10px] text-gray-500 dark:border-border/50 dark:text-muted-foreground">
               <span>ID: 803-212-AF</span>
               <span>NERV.08_VER.3.33</span>
             </div>
