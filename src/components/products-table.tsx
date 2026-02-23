@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
+import { Pencil, Trash2 } from "lucide-react";
 import { cn } from "@/src/lib/utils";
 import { useState } from "react";
 
@@ -47,9 +48,12 @@ function getInitials(name: string): string {
 interface ProductsTableProps {
   products: ProductRow[];
   className?: string;
+  /** When true, shows ACTIONS column with Edit/Delete buttons (e.g. for inventory page). */
+  showActions?: boolean;
 }
 
-export function ProductsTable({ products, className }: ProductsTableProps) {
+export function ProductsTable({ products, className, showActions }: ProductsTableProps) {
+  const colCount = showActions ? 7 : 6;
   const [selectedProduct, setSelectedProduct] = useState<ProductRow | null>(null);
   const [isOpen, setIsOpen] = useState(false);
 
@@ -83,6 +87,11 @@ export function ProductsTable({ products, className }: ProductsTableProps) {
                 <th className="px-4 py-4 text-right text-sm font-bold tracking-wider text-gray-500 dark:text-gray-400">
                   Stock
                 </th>
+                {showActions && (
+                  <th className="px-4 py-4 text-right text-sm font-bold tracking-wider text-gray-500 dark:text-gray-400">
+                    ACTIONS
+                  </th>
+                )}
               </tr>
             </thead>
             <motion.tbody
@@ -93,7 +102,7 @@ export function ProductsTable({ products, className }: ProductsTableProps) {
               {products.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={6}
+                    colSpan={colCount}
                     className="px-4 py-10 text-center text-gray-500 dark:text-gray-400"
                   >
                     No products yet.
@@ -117,7 +126,7 @@ export function ProductsTable({ products, className }: ProductsTableProps) {
                         setIsOpen(true);
                       }
                     }}
-                    className="cursor-pointer border-b border-gray-200 transition-colors hover:bg-gray-50 dark:border-white/5 dark:hover:bg-white/5"
+                    className="cursor-pointer border-b border-gray-200 transition-all duration-200 hover:bg-gray-50 dark:border-white/5 dark:hover:bg-primary/10"
                   >
                     <td className="px-4 py-4 font-semibold text-ink dark:text-white">
                       #{product.id.substring(0, 4)}
@@ -160,6 +169,29 @@ export function ProductsTable({ products, className }: ProductsTableProps) {
                     <td className="px-4 py-4 text-right tabular-nums font-semibold text-ink dark:text-white">
                       {product.stock}
                     </td>
+                    {showActions && (
+                      <td
+                        className="px-4 py-4 text-right"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <div className="flex items-center justify-end gap-2">
+                          <button
+                            type="button"
+                            className="rounded-md p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-primary dark:hover:bg-white/10 dark:hover:text-primary"
+                            aria-label="Edit"
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </button>
+                          <button
+                            type="button"
+                            className="rounded-md p-2 text-gray-500 transition-colors hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/30 dark:hover:text-red-400"
+                            aria-label="Delete"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </td>
+                    )}
                   </motion.tr>
                 ))
               )}

@@ -68,7 +68,7 @@ export default async function InventoryPage() {
           />
         </div>
         <div className="flex-1 overflow-y-auto p-6">
-          <ProductsTable products={productsList} />
+          <ProductsTable products={productsList} showActions />
         </div>
       </div>
     </PageContainer>

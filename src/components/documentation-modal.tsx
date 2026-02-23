@@ -42,14 +42,14 @@ export function DocumentationModal({
             {/* Header */}
             <div className="flex shrink-0 items-center gap-3 border-b border-primary/50 px-6 py-4">
               <BookOpen className="h-5 w-5 shrink-0 text-primary" />
-              <h2 className="text-lg font-bold uppercase tracking-wide text-foreground">
+              <h2 className="text-lg font-black uppercase tracking-wide text-ink dark:text-white">
                 CLASSIFIED // SHIKIPILOT OPERATIONAL MANUAL
               </h2>
             </div>
 
             {/* Scrollable terminal content */}
             <div className="flex-1 overflow-x-hidden overflow-y-auto px-6 py-4">
-              <pre className="max-w-full font-mono text-sm text-emerald-700 whitespace-pre-wrap break-words dark:text-emerald-500">
+              <pre className="max-w-full font-mono text-sm text-emerald-700 whitespace-pre-wrap break-words dark:text-emerald-400">
                 {TERMINAL_LINES.map((line, i) => (
                   <span key={i}>
                     {line}

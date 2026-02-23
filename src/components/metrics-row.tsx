@@ -84,7 +84,7 @@ export function MetricsRow({
                 setActiveDrawer(drawerKey);
               }
             }}
-            className="cursor-pointer rounded-md border-2 border-ink bg-white p-4 text-ink transition-all duration-300 hover:shadow-neo dark:border-white/10 dark:bg-surface-dark dark:text-white dark:hover:shadow-none"
+            className="cursor-pointer rounded-md border-2 border-ink bg-white p-4 text-ink transition-all duration-200 hover:shadow-neo dark:border-white/10 dark:bg-surface-dark dark:text-white dark:hover:border-primary dark:hover:shadow-[0_0_15px_rgba(242,13,13,0.15)]"
           >
             <p className="text-xs font-medium uppercase tracking-widest text-gray-500 dark:text-gray-400">
               {label}

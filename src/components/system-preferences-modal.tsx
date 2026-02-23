@@ -118,7 +118,7 @@ export function SystemPreferencesModal({
   function renderAccountTab() {
     return (
       <div className="space-y-6">
-        <section className="rounded-md border border-white/10 bg-background/80 p-4">
+        <section className="rounded-md border border-gray-200 bg-gray-50/50 p-4 dark:border-white/10 dark:bg-background/80">
           <input
             type="file"
             accept="image/*"
@@ -145,10 +145,10 @@ export function SystemPreferencesModal({
               </button>
             </div>
             <div className="min-w-0 flex-1">
-              <h3 className="text-sm font-semibold text-foreground">
+              <h3 className="text-sm font-bold text-ink dark:text-white">
                 Avatar Settings
               </h3>
-              <p className="mt-1 text-xs text-muted-foreground">
+              <p className="mt-1 text-xs text-gray-600 dark:text-gray-400">
                 Upload a new avatar or synchronize with your Gravatar profile.
                 Recommended size: 400×400px.
               </p>
@@ -163,7 +163,7 @@ export function SystemPreferencesModal({
                 <button
                   type="button"
                   onClick={handleRemoveAvatar}
-                  className="rounded-sm border border-primary/60 bg-transparent px-3 py-1.5 font-mono text-xs text-foreground transition-colors hover:bg-primary/10"
+                  className="rounded-md border border-red-200 px-4 py-2 font-mono text-xs font-bold text-red-600 transition-all hover:bg-red-50 dark:border-white/20 dark:text-gray-300 dark:hover:bg-white/10"
                 >
                   REMOVE
                 </button>
@@ -171,13 +171,13 @@ export function SystemPreferencesModal({
             </div>
           </div>
         </section>
-        <section className="rounded-md border border-white/10 bg-background/80 p-4">
-          <h3 className="text-sm font-semibold text-foreground">
+        <section className="rounded-md border border-gray-200 bg-gray-50/50 p-4 dark:border-white/10 dark:bg-background/80">
+          <h3 className="text-sm font-bold text-ink dark:text-white">
             Nexus ID Parameters
           </h3>
           <div className="mt-4 space-y-4">
             <div>
-              <label className="block font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+              <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
                 USERNAME
               </label>
               <input
@@ -188,12 +188,12 @@ export function SystemPreferencesModal({
                 className="mt-1 w-full border-b-2 border-ink bg-white py-2 font-mono text-sm font-medium text-ink outline-none transition-colors placeholder:text-gray-500 focus:border-primary dark:border-white/10 dark:bg-surface-darker dark:text-white dark:placeholder:text-muted-foreground"
                 placeholder="Your display name"
               />
-              <p className="mt-1 font-mono text-[10px] text-muted-foreground">
+              <p className="mt-1 font-mono text-[10px] text-gray-600 dark:text-gray-400">
                 Your public display name within the nexus network.
               </p>
             </div>
             <div>
-              <label className="block font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+              <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
                 EMAIL ADDRESS
               </label>
               <input
@@ -215,20 +215,20 @@ export function SystemPreferencesModal({
     return (
       <div className="space-y-6">
         <div>
-          <h3 className="text-base font-bold uppercase tracking-wide text-foreground">
+          <h3 className="text-base font-bold uppercase tracking-wide text-ink dark:text-white">
             STORE CONFIGURATION
           </h3>
-          <p className="mt-1 text-xs text-muted-foreground">
+          <p className="mt-1 text-xs text-gray-600 dark:text-gray-400">
             Manage public-facing enterprise details.
           </p>
         </div>
-        <section className="rounded-md border border-white/10 bg-background/80 p-4">
-          <h4 className="text-sm font-semibold text-foreground">
+        <section className="rounded-md border border-gray-200 bg-gray-50/50 p-4 dark:border-white/10 dark:bg-background/80">
+          <h4 className="text-sm font-bold text-ink dark:text-white">
             Enterprise Details
           </h4>
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
             <div className="sm:col-span-2">
-              <label className="block font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+              <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
                 STORE NAME
               </label>
               <input
@@ -241,7 +241,7 @@ export function SystemPreferencesModal({
               />
             </div>
             <div>
-              <label className="block font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+              <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
                 BUSINESS TYPE
               </label>
               <select
@@ -257,7 +257,7 @@ export function SystemPreferencesModal({
               </select>
             </div>
             <div>
-              <label className="block font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+              <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
                 CONTACT EMAIL
               </label>
               <input
@@ -270,7 +270,7 @@ export function SystemPreferencesModal({
               />
             </div>
             <div className="sm:col-span-2">
-              <label className="block font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+              <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
                 PHONE NUMBER
               </label>
               <input
@@ -283,7 +283,7 @@ export function SystemPreferencesModal({
               />
             </div>
             <div className="sm:col-span-2">
-              <label className="block font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+              <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
                 STORE ADDRESS
               </label>
               <textarea
@@ -305,20 +305,20 @@ export function SystemPreferencesModal({
     return (
       <div className="space-y-6">
         <div>
-          <h3 className="text-base font-bold uppercase tracking-wide text-foreground">
+          <h3 className="text-base font-bold uppercase tracking-wide text-ink dark:text-white">
             SECURITY PROTOCOLS
           </h3>
-          <p className="mt-1 text-xs text-muted-foreground">
+          <p className="mt-1 text-xs text-gray-600 dark:text-gray-400">
             Manage authentication and access credentials.
           </p>
         </div>
-        <section className="rounded-md border border-white/10 bg-background/80 p-4">
-          <h4 className="text-sm font-semibold text-foreground">
+        <section className="rounded-md border border-gray-200 bg-gray-50/50 p-4 dark:border-white/10 dark:bg-background/80">
+          <h4 className="text-sm font-bold text-ink dark:text-white">
             Password Change
           </h4>
           <div className="mt-4 flex flex-col gap-6">
             <div>
-              <label className="block font-mono text-[10px] uppercase tracking-wider text-muted-foreground transition-colors peer-focus:text-primary">
+              <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-gray-500 transition-colors peer-focus:text-primary dark:text-gray-400">
                 CURRENT PASSWORD
               </label>
               <div className="relative">
@@ -345,7 +345,7 @@ export function SystemPreferencesModal({
               </div>
             </div>
             <div>
-              <label className="block font-mono text-[10px] uppercase tracking-wider text-muted-foreground transition-colors peer-focus:text-primary">
+              <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-gray-500 transition-colors peer-focus:text-primary dark:text-gray-400">
                 NEW PASSWORD
               </label>
               <div className="relative">
@@ -372,7 +372,7 @@ export function SystemPreferencesModal({
               </div>
             </div>
             <div>
-              <label className="block font-mono text-[10px] uppercase tracking-wider text-muted-foreground transition-colors peer-focus:text-primary">
+              <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-gray-500 transition-colors peer-focus:text-primary dark:text-gray-400">
                 CONFIRM PASSWORD
               </label>
               <div className="relative">
@@ -400,14 +400,14 @@ export function SystemPreferencesModal({
             </div>
           </div>
         </section>
-        <div className="rounded-lg border border-dashed border-white/20 bg-surface-darker/50 p-4 opacity-70">
+        <div className="rounded-lg border border-gray-300 bg-gray-100 p-4 dark:border-white/20 dark:bg-surface-darker/50">
           <div className="flex gap-3">
-            <Lock className="h-5 w-5 shrink-0 text-slate-400" />
+            <Lock className="h-5 w-5 shrink-0 text-gray-500 dark:text-slate-400" />
             <div>
-              <p className="font-mono text-xs text-slate-300">
+              <p className="font-mono text-xs font-bold text-gray-500 dark:text-slate-300">
                 FEATURE_LOCKED // 2FA AUTENTIKASI
               </p>
-              <p className="mt-1.5 text-[10px] text-slate-400/90">
+              <p className="mt-1.5 text-[10px] text-gray-500 dark:text-slate-300">
                 Sistem keamanan OTP dan biometrik sedang dalam tahap sinkronisasi jaringan. Fitur ini akan tersedia pada pembaruan sistem berikutnya.
               </p>
             </div>
@@ -477,7 +477,7 @@ export function SystemPreferencesModal({
                         "flex w-full items-center gap-3 rounded-sm border-l-2 px-3 py-2.5 text-left text-sm font-bold transition-colors",
                         isActive
                           ? "border-primary bg-ink text-white dark:bg-primary dark:text-primary-foreground"
-                          : "border-transparent text-ink hover:bg-gray-200 dark:text-muted-foreground dark:hover:bg-white/5 dark:hover:text-foreground"
+                          : "border-transparent text-gray-600 hover:bg-gray-200 hover:text-ink dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-white"
                       )}
                     >
                       <Icon className="h-4 w-4 shrink-0" />
