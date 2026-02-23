@@ -12,6 +12,16 @@ import {
 } from "lucide-react";
 import { cn } from "@/src/lib/utils";
 import { SystemPreferencesModal } from "@/src/components/system-preferences-modal";
+import { DocumentationModal } from "@/src/components/documentation-modal";
+
+const DEFAULT_USER_PROFILE = {
+  name: "SHIKIZIMA OPERATOR",
+  email: "admin@shikizima.net",
+  role: "ROLE // SYSTEM_OPERATOR",
+  avatar:
+    "https://lh3.googleusercontent.com/aida-public/AB6AXuDk1qukePOU9rNGnVDPRzYJf0ooNQEkK5swjYentFD6gEPngQ6IwDpPuoaKBHAVigQD3d4Z_HjNUk9MJvFSYhO0z46Foq8zTzhFItWsBXn_Sa8ST0fkGR5zO1_Dl_C9AX1US9M95EWA2WRYQ7xA3v1-h-uQvrjyPKjuIpO0lQ40VxXR4c-_7TOyXawYhkQb4mmgzbkmOOUA0tXMYx-1cntjzTEt-BYoridTq3pLQLgQveBIgLDz5639gJ61CAt7WpRJWIjYlZDtEvdF",
+  storeName: "Tuna Bites",
+};
 
 interface OperatorIdPanelProps {
   isOpen: boolean;
@@ -19,8 +29,17 @@ interface OperatorIdPanelProps {
 }
 
 export function OperatorIdPanel({ isOpen, onClose }: OperatorIdPanelProps) {
-  const [interfaceModeOn, setInterfaceModeOn] = useState(true);
+  const [isHudOn, setIsHudOn] = useState(true);
   const [isPrefsOpen, setIsPrefsOpen] = useState(false);
+  const [isDocOpen, setIsDocOpen] = useState(false);
+  const [userProfile, setUserProfile] = useState(DEFAULT_USER_PROFILE);
+
+  const initials = userProfile.name
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((w) => w[0] ?? "")
+    .join("")
+    .toUpperCase() || "OP";
 
   return (
     <>
@@ -59,14 +78,22 @@ export function OperatorIdPanel({ isOpen, onClose }: OperatorIdPanelProps) {
               </span>
               <div className="flex items-start gap-3">
                 <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-primary bg-muted font-mono text-sm font-semibold text-foreground">
-                  AR
+                  {userProfile.avatar ? (
+                    <img
+                      src={userProfile.avatar}
+                      alt=""
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    initials
+                  )}
                 </div>
                 <div className="min-w-0 flex-1 pt-0.5">
                   <p className="font-semibold leading-tight text-foreground">
-                    ADMIN RAJA TUNA
+                    {userProfile.name}
                   </p>
                   <p className="mt-1 font-mono text-[10px] uppercase tracking-wider text-primary">
-                    ROLE // SYSTEM_OPERATOR
+                    {userProfile.role}
                   </p>
                   <div className="mt-1.5 flex items-center gap-1.5 font-mono text-[10px] text-muted-foreground">
                     <span className="relative flex h-1.5 w-1.5">
@@ -104,7 +131,8 @@ export function OperatorIdPanel({ isOpen, onClose }: OperatorIdPanelProps) {
                 <div
                   role="menuitem"
                   tabIndex={0}
-                  className="flex w-full items-center gap-3 border-l-2 border-transparent px-4 py-3 text-left transition-colors hover:bg-white/5 hover:border-l-primary"
+                  onClick={() => setIsHudOn((v) => !v)}
+                  className="flex w-full cursor-pointer items-center gap-3 border-l-2 border-transparent px-4 py-3 text-left transition-colors hover:bg-white/5 hover:border-l-primary"
                 >
                   <Monitor className="h-4 w-4 shrink-0 text-muted-foreground" />
                   <div className="min-w-0 flex-1">
@@ -118,20 +146,28 @@ export function OperatorIdPanel({ isOpen, onClose }: OperatorIdPanelProps) {
                   <button
                     type="button"
                     role="switch"
-                    aria-checked={interfaceModeOn}
+                    aria-checked={isHudOn}
                     onClick={(e) => {
                       e.stopPropagation();
-                      setInterfaceModeOn((v) => !v);
+                      setIsHudOn((v) => !v);
                     }}
-                    className="relative h-6 w-11 shrink-0 rounded-sm bg-primary transition-colors"
+                    className={cn(
+                      "relative h-6 w-11 shrink-0 rounded-sm transition-colors",
+                      isHudOn ? "bg-primary" : "bg-surface-darker"
+                    )}
                   >
-                    <span className="absolute inset-y-0 left-1.5 flex items-center font-mono text-[10px] font-medium text-primary-foreground">
-                      {interfaceModeOn ? "ON" : "OFF"}
+                    <span
+                      className={cn(
+                        "absolute inset-y-0 left-1.5 flex items-center font-mono text-[10px] font-medium",
+                        isHudOn ? "text-primary" : "text-muted-foreground"
+                      )}
+                    >
+                      {isHudOn ? "ON" : "OFF"}
                     </span>
                     <span
                       className={cn(
-                        "absolute top-0.5 h-4 w-4 rounded-sm bg-white transition-all",
-                        interfaceModeOn ? "right-0.5" : "left-0.5"
+                        "absolute top-0.5 left-0.5 h-4 w-4 rounded-sm bg-white transition-transform",
+                        isHudOn && "translate-x-5"
                       )}
                     />
                   </button>
@@ -140,6 +176,7 @@ export function OperatorIdPanel({ isOpen, onClose }: OperatorIdPanelProps) {
               <li>
                 <button
                   type="button"
+                  onClick={() => setIsDocOpen(true)}
                   className="flex w-full items-center gap-3 border-l-2 border-transparent px-4 py-3 text-left transition-colors hover:bg-white/5 hover:border-l-primary"
                 >
                   <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
@@ -181,6 +218,14 @@ export function OperatorIdPanel({ isOpen, onClose }: OperatorIdPanelProps) {
       <SystemPreferencesModal
         isOpen={isPrefsOpen}
         onClose={() => setIsPrefsOpen(false)}
+        currentProfile={userProfile}
+        onSave={(newData) =>
+          setUserProfile((prev) => ({ ...prev, ...newData }))
+        }
+      />
+      <DocumentationModal
+        isOpen={isDocOpen}
+        onClose={() => setIsDocOpen(false)}
       />
     </>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   User,
@@ -14,9 +14,19 @@ import {
 } from "lucide-react";
 import { cn } from "@/src/lib/utils";
 
+export interface UserProfileForPrefs {
+  name: string;
+  email: string;
+  role?: string;
+  avatar?: string;
+  storeName?: string;
+}
+
 interface SystemPreferencesModalProps {
   isOpen: boolean;
   onClose: () => void;
+  currentProfile?: UserProfileForPrefs;
+  onSave?: (data: Partial<UserProfileForPrefs>) => void;
 }
 
 const NAV_TABS = [
@@ -43,6 +53,8 @@ const INITIAL_FORM_DATA = {
 export function SystemPreferencesModal({
   isOpen,
   onClose,
+  currentProfile,
+  onSave,
 }: SystemPreferencesModalProps) {
   const [activeTab, setActiveTab] = useState<TabLabel>("ACCOUNT");
   const [formData, setFormData] = useState(INITIAL_FORM_DATA);
@@ -50,6 +62,18 @@ export function SystemPreferencesModal({
   const [avatarUrl, setAvatarUrl] = useState<string>("");
   const [showPassword, setShowPassword] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (isOpen && currentProfile) {
+      setFormData((prev) => ({
+        ...prev,
+        username: currentProfile.name,
+        email: currentProfile.email,
+        storeName: currentProfile.storeName ?? prev.storeName,
+      }));
+      setAvatarUrl(currentProfile.avatar ?? "");
+    }
+  }, [isOpen, currentProfile]);
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -77,6 +101,12 @@ export function SystemPreferencesModal({
   const handleSyncData = () => {
     setIsSyncing(true);
     setTimeout(() => {
+      onSave?.({
+        name: formData.username,
+        email: formData.email,
+        avatar: avatarUrl || undefined,
+        storeName: formData.storeName,
+      });
       setIsSyncing(false);
       onClose();
     }, 1500);
