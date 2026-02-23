@@ -49,7 +49,7 @@ export function Sidebar() {
   return (
     <aside
       className={cn(
-        "group z-50 flex h-full shrink-0 flex-col overflow-hidden border-r border-sidebar-border bg-sidebar text-sidebar-foreground",
+        "group z-50 flex h-full shrink-0 flex-col overflow-hidden border-r border-gray-200 bg-gray-50 text-sidebar-foreground dark:border-white/10 dark:bg-[#0a0a0a] dark:text-sidebar-foreground",
         "w-20 transition-[width] duration-300 ease-out hover:w-64"
       )}
     >
@@ -57,12 +57,12 @@ export function Sidebar() {
       <motion.div {...motionLinkProps} className="shrink-0">
         <Link
           href="/dashboard"
-          className="flex h-16 shrink-0 items-center gap-3 border-b border-sidebar-border px-4 transition-colors hover:bg-sidebar-accent"
+          className="flex h-16 shrink-0 items-center gap-3 border-b border-gray-200 px-4 transition-colors hover:bg-white dark:border-white/10 dark:hover:bg-white/5"
         >
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground">
           <span className="font-mono text-lg font-bold">会社</span>
         </div>
-        <span className="hidden whitespace-nowrap text-sm font-semibold tracking-[0.2em] text-sidebar-foreground opacity-0 transition-opacity duration-200 group-hover:block group-hover:opacity-100">
+        <span className="hidden whitespace-nowrap text-sm font-semibold tracking-[0.2em] text-gray-700 opacity-0 transition-opacity duration-200 group-hover:block group-hover:opacity-100 dark:text-sidebar-foreground">
           SHIKIPILOT
         </span>
         </Link>
@@ -81,8 +81,8 @@ export function Sidebar() {
                 href={item.href}
                 className={cn(
                   "relative flex items-center gap-3 border-r-2 border-transparent px-4 py-3 text-sm transition-colors",
-                  "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                  isActive && "border-primary bg-sidebar-accent font-medium text-primary"
+                  "text-gray-600 hover:bg-white hover:text-primary dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-white",
+                  isActive && "border-primary font-medium text-primary dark:bg-white/5"
                 )}
               >
                 <Icon className="h-5 w-5 shrink-0" />
@@ -99,22 +99,22 @@ export function Sidebar() {
       </nav>
 
       {/* User profile — Operator ID Panel trigger */}
-      <div ref={profileRef} className="relative border-t border-sidebar-border p-4">
+      <div ref={profileRef} className="relative border-t border-gray-200 p-4 dark:border-white/10">
         <button
           type="button"
           onClick={() => setIsProfileOpen((v) => !v)}
-          className="flex w-full items-center gap-3 rounded-md transition-colors hover:bg-sidebar-accent"
+          className="flex w-full items-center gap-3 rounded-md transition-colors hover:bg-white dark:hover:bg-white/5"
           aria-expanded={isProfileOpen}
           aria-label="Operator profile"
         >
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-sidebar-accent">
-            <User className="h-4 w-4 text-sidebar-foreground" />
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-white dark:bg-white/10">
+            <User className="h-4 w-4 text-gray-600 dark:text-sidebar-foreground" />
           </div>
           <div className="hidden min-w-0 overflow-hidden text-left transition-opacity duration-200 group-hover:block group-hover:opacity-100">
-            <p className="truncate text-xs font-medium text-sidebar-foreground">
+            <p className="truncate text-xs font-medium text-gray-700 dark:text-sidebar-foreground">
               Profile
             </p>
-            <p className="truncate text-xs text-muted-foreground">Operator</p>
+            <p className="truncate text-xs text-gray-500 dark:text-muted-foreground">Operator</p>
           </div>
         </button>
         <OperatorIdPanel

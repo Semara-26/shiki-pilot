@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
+import { ThemeProvider } from "next-themes";
 import { Toaster } from "sonner";
 import { IBM_Plex_Sans_Condensed } from "next/font/google";
 import "./globals.css";
@@ -23,19 +24,21 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <html lang="en">
+      <html lang="en" suppressHydrationWarning>
         <body className={ibmPlexSansCondensed.variable}>
-          <Toaster
-            theme="dark"
-            toastOptions={{
-              style: {
-                background: "#121212",
-                border: "1px solid #262626",
-                color: "#ffffff",
-              },
-            }}
-          />
-          {children}
+          <ThemeProvider attribute="class" defaultTheme="dark">
+            <Toaster
+              theme="dark"
+              toastOptions={{
+                style: {
+                  background: "#121212",
+                  border: "1px solid #262626",
+                  color: "#ffffff",
+                },
+              }}
+            />
+            {children}
+          </ThemeProvider>
         </body>
       </html>
     </ClerkProvider>

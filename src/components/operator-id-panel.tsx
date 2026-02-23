@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTheme } from "next-themes";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   Settings,
@@ -29,10 +30,13 @@ interface OperatorIdPanelProps {
 }
 
 export function OperatorIdPanel({ isOpen, onClose }: OperatorIdPanelProps) {
-  const [isHudOn, setIsHudOn] = useState(true);
+  const { theme, setTheme } = useTheme();
   const [isPrefsOpen, setIsPrefsOpen] = useState(false);
   const [isDocOpen, setIsDocOpen] = useState(false);
   const [userProfile, setUserProfile] = useState(DEFAULT_USER_PROFILE);
+
+  const isDark = theme !== "light";
+  const toggleTheme = () => setTheme(isDark ? "light" : "dark");
 
   const initials = userProfile.name
     .split(/\s+/)
@@ -131,7 +135,7 @@ export function OperatorIdPanel({ isOpen, onClose }: OperatorIdPanelProps) {
                 <div
                   role="menuitem"
                   tabIndex={0}
-                  onClick={() => setIsHudOn((v) => !v)}
+                  onClick={toggleTheme}
                   className="flex w-full cursor-pointer items-center gap-3 border-l-2 border-transparent px-4 py-3 text-left transition-colors hover:bg-white/5 hover:border-l-primary"
                 >
                   <Monitor className="h-4 w-4 shrink-0 text-muted-foreground" />
@@ -143,34 +147,36 @@ export function OperatorIdPanel({ isOpen, onClose }: OperatorIdPanelProps) {
                       HUD_OVERLAY_V2
                     </p>
                   </div>
-                  <button
-                    type="button"
-                    role="switch"
-                    aria-checked={isHudOn}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setIsHudOn((v) => !v);
-                    }}
-                    className={cn(
-                      "relative h-6 w-11 shrink-0 rounded-sm transition-colors",
-                      isHudOn ? "bg-primary" : "bg-surface-darker"
-                    )}
-                  >
+                  <div className="flex shrink-0 items-center gap-2">
                     <span
                       className={cn(
-                        "absolute inset-y-0 left-1.5 flex items-center font-mono text-[10px] font-medium",
-                        isHudOn ? "text-primary" : "text-muted-foreground"
+                        "font-mono text-[10px] font-bold",
+                        isDark ? "text-primary" : "text-slate-500"
                       )}
                     >
-                      {isHudOn ? "ON" : "OFF"}
+                      {isDark ? "DARK" : "LIGHT"}
                     </span>
-                    <span
+                    <button
+                      type="button"
+                      role="switch"
+                      aria-checked={isDark}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleTheme();
+                      }}
                       className={cn(
-                        "absolute top-0.5 left-0.5 h-4 w-4 rounded-sm bg-white transition-transform",
-                        isHudOn && "translate-x-5"
+                        "relative h-6 w-11 shrink-0 rounded-sm transition-colors",
+                        isDark ? "bg-primary" : "bg-slate-300"
                       )}
-                    />
-                  </button>
+                    >
+                      <span
+                        className={cn(
+                          "absolute top-0.5 left-0.5 h-4 w-4 rounded-sm bg-white transition-transform",
+                          isDark && "translate-x-5"
+                        )}
+                      />
+                    </button>
+                  </div>
                 </div>
               </li>
               <li>
