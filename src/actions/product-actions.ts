@@ -4,12 +4,13 @@ import { auth } from '@clerk/nextjs/server';
 import { revalidatePath } from 'next/cache';
 import { eq, and } from 'drizzle-orm';
 import { db } from '@/src/db';
-import { stores, products } from '@/src/db/schema';
+import { stores, products, eventLogs } from '@/src/db/schema';
 
 export type DeleteProductResult = { success?: boolean; error?: string };
 
 /**
  * Menghapus produk berdasarkan ID. Hanya produk milik toko user yang login yang bisa dihapus.
+ * Nama produk di-fetch dulu untuk dicatat di Event Log, lalu delete + insert log dijalankan dalam transaksi.
  */
 export async function deleteProduct(id: string): Promise<DeleteProductResult> {
   try {
@@ -26,9 +27,26 @@ export async function deleteProduct(id: string): Promise<DeleteProductResult> {
       return { error: 'Toko tidak ditemukan.' };
     }
 
-    await db
-      .delete(products)
-      .where(and(eq(products.id, id), eq(products.storeId, userStore.id)));
+    const product = await db.query.products.findFirst({
+      where: and(eq(products.id, id), eq(products.storeId, userStore.id)),
+      columns: { name: true },
+    });
+    if (!product) {
+      return { error: 'Produk tidak ditemukan atau tidak dapat dihapus.' };
+    }
+
+    const productName = product.name;
+
+    await db.transaction(async (tx) => {
+      await tx
+        .delete(products)
+        .where(and(eq(products.id, id), eq(products.storeId, userStore.id)));
+      await tx.insert(eventLogs).values({
+        storeId: userStore.id,
+        title: 'Asset Terminated',
+        detail: productName,
+      });
+    });
 
     revalidatePath('/dashboard/inventory');
     revalidatePath('/dashboard');

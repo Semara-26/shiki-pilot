@@ -46,3 +46,12 @@ export const messages = pgTable('messages', {
   content: text('content').notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
+
+// 5. Tabel Event Logs (untuk Dashboard: Create/Update/Delete produk)
+export const eventLogs = pgTable('event_logs', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  storeId: uuid('store_id').references(() => stores.id, { onDelete: 'cascade' }).notNull(),
+  title: text('title').notNull(),
+  detail: text('detail'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});

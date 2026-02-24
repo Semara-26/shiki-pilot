@@ -9,8 +9,7 @@ import { embed } from 'ai';
 import { google } from '@ai-sdk/google';
 import { createSupabaseClient } from '../supabase/server';
 import { db } from '../../db';
-import { stores } from '../../db/schema';
-import { products } from '../../db/schema';
+import { stores, products, eventLogs } from '../../db/schema';
 
 const MAX_IMAGE_SIZE_BYTES = 2 * 1024 * 1024; // 2MB
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
@@ -142,6 +141,12 @@ export async function createProduct(
       embedding,
     });
 
+    await db.insert(eventLogs).values({
+      storeId: userStore.id,
+      title: 'New Asset Registered',
+      detail: name,
+    });
+
     revalidatePath('/dashboard');
     return { success: true };
   } catch (err) {
@@ -261,6 +266,12 @@ export async function updateProduct(
         embedding,
       })
       .where(and(eq(products.id, id), eq(products.storeId, userStore.id)));
+
+    await db.insert(eventLogs).values({
+      storeId: userStore.id,
+      title: 'Asset Parameters Updated',
+      detail: name,
+    });
 
     revalidatePath('/dashboard/inventory');
     revalidatePath('/dashboard');

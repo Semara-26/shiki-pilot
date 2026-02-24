@@ -1,8 +1,8 @@
 import { auth } from "@clerk/nextjs/server";
 import Link from "next/link";
-import { eq } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 import { db } from "@/src/db";
-import { stores, products } from "@/src/db/schema";
+import { stores, products, eventLogs } from "@/src/db/schema";
 import { DashboardHeader } from "@/src/components/dashboard-header";
 import { MetricsRow, type MetricProduct } from "@/src/components/metrics-row";
 import { ProductsTable } from "@/src/components/products-table";
@@ -66,19 +66,22 @@ export default async function DashboardPage() {
     value: p.stock,
   }));
 
-  const recentProductsForLog = [...productsList]
-    .sort(
-      (a, b) =>
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    )
-    .slice(0, 3);
-
-  const eventLogItems = recentProductsForLog.map((p) => ({
-    id: p.id,
-    title: "New Asset Registered",
-    detail: p.name,
-    date: new Date(p.createdAt).toISOString(),
-  }));
+  const eventLogItems =
+    userStore?.id != null
+      ? (
+          await db.query.eventLogs.findMany({
+            where: eq(eventLogs.storeId, userStore.id),
+            orderBy: [desc(eventLogs.createdAt)],
+            columns: { id: true, title: true, detail: true, createdAt: true },
+            limit: 8,
+          })
+        ).map((row) => ({
+          id: row.id,
+          title: row.title,
+          detail: row.detail ?? undefined,
+          date: new Date(row.createdAt).toISOString(),
+        }))
+      : [];
 
   if (!userStore) {
     return (
