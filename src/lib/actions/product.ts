@@ -2,7 +2,8 @@
 
 import { auth } from '@clerk/nextjs/server';
 import { revalidatePath } from 'next/cache';
-import { eq } from 'drizzle-orm';
+import { redirect } from 'next/navigation';
+import { eq, and } from 'drizzle-orm';
 import { z } from 'zod';
 import { embed } from 'ai';
 import { google } from '@ai-sdk/google';
@@ -150,4 +151,125 @@ export async function createProduct(
         err instanceof Error ? err.message : 'Gagal menyimpan produk. Coba lagi.',
     };
   }
+}
+
+export async function updateProduct(
+  _prevState: CreateProductState,
+  formData: FormData
+): Promise<CreateProductState> {
+  try {
+    const id = formData.get('id');
+    if (typeof id !== 'string' || !id) {
+      return { error: 'ID produk tidak valid.' };
+    }
+
+    const { userId } = await auth();
+    if (!userId) {
+      return { error: 'Anda harus login untuk mengubah produk.' };
+    }
+
+    const userStore = await db.query.stores.findFirst({
+      where: eq(stores.userId, userId),
+      columns: { id: true },
+    });
+    if (!userStore) {
+      return { error: 'Toko tidak ditemukan.' };
+    }
+
+    const existing = await db.query.products.findFirst({
+      where: and(eq(products.id, id), eq(products.storeId, userStore.id)),
+      columns: { id: true, imageUrl: true },
+    });
+    if (!existing) {
+      return { error: 'Produk tidak ditemukan atau tidak dapat diubah.' };
+    }
+
+    const raw = {
+      name: formData.get('name') ?? '',
+      price: formData.get('price') ?? '',
+      stock: formData.get('stock') ?? '',
+      description: formData.get('description') ?? '',
+    };
+
+    const parsed = createProductSchema.safeParse(raw);
+    if (!parsed.success) {
+      const fieldErrors: CreateProductState['fieldErrors'] = {};
+      for (const issue of parsed.error.issues) {
+        const path = issue.path[0] as keyof CreateProductState['fieldErrors'];
+        if (path && !fieldErrors[path]) fieldErrors[path] = [];
+        if (path) fieldErrors[path]!.push(issue.message);
+      }
+      return { fieldErrors };
+    }
+
+    const { name, price, stock, description } = parsed.data;
+
+    let imageUrl: string | null = existing.imageUrl;
+    const imageFile = formData.get('image');
+    if (imageFile instanceof File && imageFile.size > 0) {
+      if (!ALLOWED_IMAGE_TYPES.includes(imageFile.type)) {
+        return {
+          fieldErrors: { image: ['Format file harus gambar (JPEG, PNG, WebP, atau GIF).'] },
+        };
+      }
+      if (imageFile.size > MAX_IMAGE_SIZE_BYTES) {
+        return {
+          fieldErrors: { image: ['Ukuran gambar maksimal 2MB.'] },
+        };
+      }
+      const ext = imageFile.name.split('.').pop()?.toLowerCase() || 'jpg';
+      const safeExt = ['jpeg', 'jpg', 'png', 'webp', 'gif'].includes(ext) ? ext : 'jpg';
+      const filePath = `${crypto.randomUUID()}.${safeExt}`;
+      const supabase = createSupabaseClient();
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('product-images')
+        .upload(filePath, imageFile, { upsert: false });
+      if (uploadError) {
+        console.error('Supabase upload error:', uploadError);
+        return { error: 'Gagal mengunggah gambar. Coba lagi.' };
+      }
+      const { data: urlData } = supabase.storage
+        .from('product-images')
+        .getPublicUrl(uploadData.path);
+      imageUrl = urlData.publicUrl;
+    }
+
+    const model = google.textEmbeddingModel("gemini-embedding-001");
+    const { embedding: rawEmbedding } = await embed({
+      model,
+      value: description,
+    });
+
+    const embeddingArray = Array.isArray(rawEmbedding)
+      ? rawEmbedding
+      : (rawEmbedding as unknown as number[]);
+    const embedding =
+      embeddingArray.length > EMBEDDING_DIMENSIONS
+        ? embeddingArray.slice(0, EMBEDDING_DIMENSIONS)
+        : embeddingArray.length < EMBEDDING_DIMENSIONS
+          ? [...embeddingArray, ...new Array(EMBEDDING_DIMENSIONS - embeddingArray.length).fill(0)]
+          : embeddingArray;
+
+    await db
+      .update(products)
+      .set({
+        name,
+        price,
+        stock,
+        description,
+        imageUrl,
+        embedding,
+      })
+      .where(and(eq(products.id, id), eq(products.storeId, userStore.id)));
+
+    revalidatePath('/dashboard/inventory');
+    revalidatePath('/dashboard');
+  } catch (err) {
+    console.error('updateProduct error:', err);
+    return {
+      error:
+        err instanceof Error ? err.message : 'Gagal menyimpan perubahan. Coba lagi.',
+    };
+  }
+  redirect('/dashboard/inventory');
 }

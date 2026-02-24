@@ -2,9 +2,12 @@
 
 import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2, Loader2 } from "lucide-react";
 import { cn } from "@/src/lib/utils";
-import { useState } from "react";
+import { useState, useTransition } from "react";
+import Link from "next/link";
+import { deleteProduct } from "@/src/actions/product-actions";
+import { ConfirmDeleteModal } from "@/src/components/confirm-delete-modal";
 
 const tableContainerVariants = {
   initial: {},
@@ -56,6 +59,23 @@ export function ProductsTable({ products, className, showActions }: ProductsTabl
   const colCount = showActions ? 7 : 6;
   const [selectedProduct, setSelectedProduct] = useState<ProductRow | null>(null);
   const [isOpen, setIsOpen] = useState(false);
+  const [isPending, startTransition] = useTransition();
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  function handleDeleteClick(product: ProductRow, e: React.MouseEvent) {
+    e.stopPropagation();
+    setDeletingId(product.id);
+  }
+
+  function handleConfirmDelete() {
+    if (!deletingId) return;
+    const idToDelete = deletingId;
+    startTransition(() => {
+      deleteProduct(idToDelete)
+        .then(() => setDeletingId(null))
+        .catch(() => setDeletingId(null));
+    });
+  }
 
   return (
     <>
@@ -175,19 +195,28 @@ export function ProductsTable({ products, className, showActions }: ProductsTabl
                         onClick={(e) => e.stopPropagation()}
                       >
                         <div className="flex items-center justify-end gap-2">
-                          <button
-                            type="button"
+                          <Link
+                            href={`/dashboard/products/${product.id}/edit`}
                             className="rounded-md p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-primary dark:hover:bg-white/10 dark:hover:text-primary"
                             aria-label="Edit"
+                            onClick={(e) => e.stopPropagation()}
                           >
                             <Pencil className="h-4 w-4" />
-                          </button>
+                          </Link>
                           <button
                             type="button"
-                            className="rounded-md p-2 text-gray-500 transition-colors hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/30 dark:hover:text-red-400"
+                            onClick={(e) => handleDeleteClick(product, e)}
+                            disabled={isPending && deletingId === product.id}
+                            className={cn(
+                              "rounded-md p-2 text-gray-500 transition-colors hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/30 dark:hover:text-red-400 disabled:opacity-50 disabled:pointer-events-none"
+                            )}
                             aria-label="Delete"
                           >
-                            <Trash2 className="h-4 w-4" />
+                            {deletingId === product.id ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Trash2 className="h-4 w-4" />
+                            )}
                           </button>
                         </div>
                       </td>
@@ -314,6 +343,13 @@ export function ProductsTable({ products, className, showActions }: ProductsTabl
           </motion.div>
         )}
       </AnimatePresence>
+
+      <ConfirmDeleteModal
+        isOpen={deletingId !== null}
+        onClose={() => setDeletingId(null)}
+        onConfirm={handleConfirmDelete}
+        isPending={isPending}
+      />
     </>
   );
 }
