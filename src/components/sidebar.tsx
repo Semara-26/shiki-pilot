@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useUser } from "@clerk/nextjs";
 import { motion } from "framer-motion";
 import {
   LayoutGrid,
@@ -29,10 +30,22 @@ const navItems = [
   { href: "/dashboard/products/new", label: "Add Product", icon: PlusCircle },
 ];
 
+const MAX_NAME_LENGTH = 16;
+
+function truncateWithEllipsis(str: string, maxLen: number): string {
+  if (str.length <= maxLen) return str;
+  return `${str.slice(0, maxLen - 3)}...`;
+}
+
 export function Sidebar() {
   const pathname = usePathname();
+  const { user, isLoaded } = useUser();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
+
+  const displayName = user?.fullName
+    ? truncateWithEllipsis(user.fullName, MAX_NAME_LENGTH)
+    : "SYSTEM_OPERATOR";
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -107,14 +120,26 @@ export function Sidebar() {
           aria-expanded={isProfileOpen}
           aria-label="Operator profile"
         >
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-white dark:bg-white/10">
-            <User className="h-4 w-4 text-gray-600 dark:text-sidebar-foreground" />
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-md border border-gray-200 bg-white dark:border-white/10 dark:bg-white/10">
+            {!isLoaded ? (
+              <span className="h-4 w-4 animate-pulse rounded bg-gray-200 dark:bg-white/20" />
+            ) : user?.imageUrl ? (
+              <img
+                src={user.imageUrl}
+                alt=""
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <User className="h-4 w-4 text-gray-600 dark:text-sidebar-foreground" />
+            )}
           </div>
           <div className="hidden min-w-0 overflow-hidden text-left transition-opacity duration-200 group-hover:block group-hover:opacity-100">
             <p className="truncate text-xs font-medium text-gray-700 dark:text-sidebar-foreground">
-              Profile
+              {displayName}
             </p>
-            <p className="truncate text-xs text-gray-500 dark:text-muted-foreground">Operator</p>
+            <p className="truncate text-xs text-gray-500 dark:text-muted-foreground">
+              {user?.primaryEmailAddress?.emailAddress ?? "Operator"}
+            </p>
           </div>
         </button>
         <OperatorIdPanel

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import { useUser } from "@clerk/nextjs";
 import { useTheme } from "next-themes";
 import { AnimatePresence, motion } from "framer-motion";
 import {
@@ -15,14 +16,13 @@ import { cn } from "@/src/lib/utils";
 import { SystemPreferencesModal } from "@/src/components/system-preferences-modal";
 import { DocumentationModal } from "@/src/components/documentation-modal";
 
-const DEFAULT_USER_PROFILE = {
-  name: "SHIKIZIMA OPERATOR",
-  email: "admin@shikizima.net",
-  role: "ROLE // SYSTEM_OPERATOR",
-  avatar:
-    "https://lh3.googleusercontent.com/aida-public/AB6AXuDk1qukePOU9rNGnVDPRzYJf0ooNQEkK5swjYentFD6gEPngQ6IwDpPuoaKBHAVigQD3d4Z_HjNUk9MJvFSYhO0z46Foq8zTzhFItWsBXn_Sa8ST0fkGR5zO1_Dl_C9AX1US9M95EWA2WRYQ7xA3v1-h-uQvrjyPKjuIpO0lQ40VxXR4c-_7TOyXawYhkQb4mmgzbkmOOUA0tXMYx-1cntjzTEt-BYoridTq3pLQLgQveBIgLDz5639gJ61CAt7WpRJWIjYlZDtEvdF",
-  storeName: "Tuna Bites",
-};
+const ROLE_LABEL = "ROLE // SYSTEM_OPERATOR";
+const MAX_NAME_LENGTH = 24;
+
+function truncateWithEllipsis(str: string, maxLen: number): string {
+  if (str.length <= maxLen) return str;
+  return `${str.slice(0, maxLen - 3)}...`;
+}
 
 interface OperatorIdPanelProps {
   isOpen: boolean;
@@ -31,14 +31,34 @@ interface OperatorIdPanelProps {
 
 export function OperatorIdPanel({ isOpen, onClose }: OperatorIdPanelProps) {
   const { theme, setTheme } = useTheme();
+  const { user, isLoaded } = useUser();
   const [isPrefsOpen, setIsPrefsOpen] = useState(false);
   const [isDocOpen, setIsDocOpen] = useState(false);
-  const [userProfile, setUserProfile] = useState(DEFAULT_USER_PROFILE);
+  const [localOverrides, setLocalOverrides] = useState<Partial<{
+    name: string;
+    email: string;
+    avatar: string;
+    storeName: string;
+  }>>({});
+
+  const userProfile = useMemo(() => {
+    const baseName = user?.fullName ?? "SYSTEM_OPERATOR";
+    const baseEmail = user?.primaryEmailAddress?.emailAddress ?? "";
+    const baseAvatar = user?.imageUrl ?? "";
+    return {
+      name: localOverrides.name ?? baseName,
+      email: localOverrides.email ?? baseEmail,
+      role: ROLE_LABEL,
+      avatar: localOverrides.avatar ?? baseAvatar,
+      storeName: localOverrides.storeName ?? "",
+    };
+  }, [user?.fullName, user?.primaryEmailAddress?.emailAddress, user?.imageUrl, localOverrides]);
 
   const isDark = theme !== "light";
   const toggleTheme = () => setTheme(isDark ? "light" : "dark");
 
-  const initials = userProfile.name
+  const nameForInitials = localOverrides.name ?? user?.fullName ?? "SYSTEM_OPERATOR";
+  const initials = nameForInitials
     .split(/\s+/)
     .slice(0, 2)
     .map((w) => w[0] ?? "")
@@ -82,7 +102,9 @@ export function OperatorIdPanel({ isOpen, onClose }: OperatorIdPanelProps) {
               </span>
               <div className="flex items-start gap-3">
                 <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-primary bg-paper font-mono text-sm font-semibold text-ink dark:bg-muted dark:text-foreground">
-                  {userProfile.avatar ? (
+                  {!isLoaded ? (
+                    <span className="h-4 w-4 animate-pulse rounded bg-gray-300 dark:bg-white/20" />
+                  ) : userProfile.avatar ? (
                     <img
                       src={userProfile.avatar}
                       alt=""
@@ -93,9 +115,16 @@ export function OperatorIdPanel({ isOpen, onClose }: OperatorIdPanelProps) {
                   )}
                 </div>
                 <div className="min-w-0 flex-1 pt-0.5">
-                  <p className="font-black leading-tight text-ink dark:text-white">
-                    {userProfile.name}
-                  </p>
+                  {!isLoaded ? (
+                    <div className="h-5 w-24 animate-pulse rounded bg-gray-200 dark:bg-white/20" />
+                  ) : (
+                    <p
+                      className="font-black leading-tight text-ink dark:text-white truncate"
+                      title={userProfile.name}
+                    >
+                      {truncateWithEllipsis(userProfile.name, MAX_NAME_LENGTH)}
+                    </p>
+                  )}
                   <p className="mt-1 font-mono text-[10px] uppercase tracking-wider text-primary">
                     {userProfile.role}
                   </p>
@@ -226,7 +255,7 @@ export function OperatorIdPanel({ isOpen, onClose }: OperatorIdPanelProps) {
         onClose={() => setIsPrefsOpen(false)}
         currentProfile={userProfile}
         onSave={(newData) =>
-          setUserProfile((prev) => ({ ...prev, ...newData }))
+          setLocalOverrides((prev) => ({ ...prev, ...newData }))
         }
       />
       <DocumentationModal

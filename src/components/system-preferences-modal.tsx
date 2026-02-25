@@ -38,12 +38,12 @@ const NAV_TABS = [
 type TabLabel = (typeof NAV_TABS)[number]["label"];
 
 const INITIAL_FORM_DATA = {
-  username: "Kael_V",
-  email: "kael@nexus-systems.com",
-  storeName: "Raja Tuna",
+  username: "",
+  email: "",
+  storeName: "",
   businessType: "F&B / Retail",
-  contactEmail: "hello@rajatuna.com",
-  phone: "+62 812-3456-7890",
+  contactEmail: "",
+  phone: "",
   address: "",
   currentPassword: "",
   newPassword: "",
@@ -132,7 +132,12 @@ export function SystemPreferencesModal({
                 {avatarUrl ? (
                   <img src={avatarUrl} alt="Avatar" className="h-full w-full object-cover" />
                 ) : (
-                  "KV"
+                  (formData.username
+                    .split(/\s+/)
+                    .slice(0, 2)
+                    .map((w) => w[0] ?? "")
+                    .join("")
+                    .toUpperCase() || "OP")
                 )}
               </div>
               <button
