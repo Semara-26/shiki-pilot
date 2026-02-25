@@ -22,13 +22,13 @@ const createProductSchema = z.object({
     .min(1, 'Nama produk wajib diisi')
     .max(200, 'Nama produk maksimal 200 karakter'),
   price: z.coerce
-    .number({ invalid_type_error: 'Harga harus berupa angka' })
-    .int('Harga harus bilangan bulat')
-    .min(0, 'Harga tidak boleh negatif'),
+    .number({ error: 'Harga harus berupa angka' })
+    .int({ error: 'Harga harus bilangan bulat' })
+    .min(0, { error: 'Harga tidak boleh negatif' }),
   stock: z.coerce
-    .number({ invalid_type_error: 'Stok harus berupa angka' })
-    .int('Stok harus bilangan bulat')
-    .min(0, 'Stok tidak boleh negatif'),
+    .number({ error: 'Stok harus berupa angka' })
+    .int({ error: 'Stok harus bilangan bulat' })
+    .min(0, { error: 'Stok tidak boleh negatif' }),
   description: z
     .string()
     .min(1, 'Deskripsi produk wajib diisi')
@@ -74,11 +74,11 @@ export async function createProduct(
 
     const parsed = createProductSchema.safeParse(raw);
     if (!parsed.success) {
-      const fieldErrors: CreateProductState['fieldErrors'] = {};
+      const fieldErrors: Record<string, string[]> = {};
       for (const issue of parsed.error.issues) {
-        const path = issue.path[0] as keyof CreateProductState['fieldErrors'];
-        if (path && !fieldErrors[path]) fieldErrors[path] = [];
-        if (path) fieldErrors[path]!.push(issue.message);
+        const path = String(issue.path[0] ?? '');
+        if (!fieldErrors[path]) fieldErrors[path] = [];
+        fieldErrors[path].push(issue.message);
       }
       return { fieldErrors };
     }
@@ -198,11 +198,11 @@ export async function updateProduct(
 
     const parsed = createProductSchema.safeParse(raw);
     if (!parsed.success) {
-      const fieldErrors: CreateProductState['fieldErrors'] = {};
+      const fieldErrors: Record<string, string[]> = {};
       for (const issue of parsed.error.issues) {
-        const path = issue.path[0] as keyof CreateProductState['fieldErrors'];
-        if (path && !fieldErrors[path]) fieldErrors[path] = [];
-        if (path) fieldErrors[path]!.push(issue.message);
+        const path = String(issue.path[0] ?? '');
+        if (!fieldErrors[path]) fieldErrors[path] = [];
+        fieldErrors[path].push(issue.message);
       }
       return { fieldErrors };
     }

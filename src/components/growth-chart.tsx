@@ -8,7 +8,6 @@ import {
   YAxis,
   Tooltip,
   CartesianGrid,
-  TooltipProps,
 } from "recharts";
 import { useTheme } from "next-themes";
 import { motion } from "framer-motion";
@@ -44,11 +43,16 @@ function CustomCursor({ x, y, width, height }: CursorShape) {
   );
 }
 
-function HoloTooltip({ active, payload }: TooltipProps<number, string>) {
+interface HoloTooltipProps {
+  active?: boolean;
+  payload?: Array<{ payload?: { name?: string; value?: number }; value?: number }>;
+}
+
+function HoloTooltip({ active, payload }: HoloTooltipProps) {
   if (!active || !payload?.length) return null;
-  const item = payload[0].payload;
-  const fullName = item.name ?? payload[0].payload?.name;
-  const stock = item.value ?? payload[0].value;
+  const item = payload[0].payload ?? payload[0];
+  const fullName = (item as { name?: string })?.name ?? "";
+  const stock = (item as { value?: number })?.value ?? (payload[0].value as number) ?? 0;
   return (
     <motion.div
       initial={{ opacity: 0, y: 10, scale: 0.95 }}

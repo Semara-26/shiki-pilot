@@ -1,5 +1,4 @@
 import { pgTable, uuid, text, integer, timestamp, vector, index } from 'drizzle-orm/pg-core';
-import { sql } from 'drizzle-orm';
 
 // 1. Tabel Stores (Toko)
 export const stores = pgTable('stores', {
@@ -55,3 +54,17 @@ export const eventLogs = pgTable('event_logs', {
   detail: text('detail'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
+
+// 6. Tabel Transactions (Penjualan / Barang Keluar)
+export const transactions = pgTable('transactions', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  storeId: uuid('store_id').references(() => stores.id, { onDelete: 'cascade' }).notNull(),
+  productId: uuid('product_id').references(() => products.id, { onDelete: 'cascade' }).notNull(),
+  quantity: integer('quantity').notNull(),
+  totalPrice: integer('total_price').notNull(),
+  type: text('type').notNull().default('out'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+}, (table) => ({
+  storeIdx: index('transaction_store_idx').on(table.storeId),
+  productIdx: index('transaction_product_idx').on(table.productId),
+}));

@@ -6,7 +6,6 @@ import {
   Pie,
   Cell,
   Tooltip,
-  TooltipProps,
 } from "recharts";
 import { motion } from "framer-motion";
 import { cn } from "@/src/lib/utils";
@@ -37,7 +36,12 @@ function formatRupiahShort(value: number): string {
   return formatRupiah(value); // Penuh, misal Rp 500.000
 }
 
-function HoloTooltip({ active, payload }: TooltipProps<number, string>) {
+interface HoloTooltipProps {
+  active?: boolean;
+  payload?: Array<{ name?: string; value?: number }>;
+}
+
+function HoloTooltip({ active, payload }: HoloTooltipProps) {
   if (!active || !payload?.length) return null;
   const item = payload[0];
   const name = item.name ?? "";
