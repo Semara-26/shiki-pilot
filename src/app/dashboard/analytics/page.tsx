@@ -68,7 +68,7 @@ export default async function AnalyticsPage() {
           }
         />
       </div>
-      <div className="flex flex-1 flex-col overflow-y-auto p-6">
+      <div className="flex flex-1 flex-col overflow-y-auto p-4 md:p-6">
         <AnalyticsClient
           rawTransactions={rawTransactions}
           hasStore={!!userStore}

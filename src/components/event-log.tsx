@@ -48,7 +48,7 @@ export function EventLog({
         className
       )}
     >
-      <div className="border-b border-gray-200 px-4 py-3 dark:border-white/10">
+      <div className="border-b border-gray-200 px-4 py-3 md:px-6 dark:border-white/10">
         <p className="text-sm font-bold uppercase tracking-widest text-ink dark:text-white">
           {title}
         </p>
@@ -57,7 +57,7 @@ export function EventLog({
         {displayEvents.map((event) => (
           <li
             key={event.id}
-            className="flex gap-3 px-4 py-3 transition-colors hover:bg-gray-50 dark:hover:bg-white/5"
+            className="flex gap-3 px-4 py-3 md:px-6 transition-colors hover:bg-gray-50 dark:hover:bg-white/5"
           >
             <div className="flex min-w-[7rem] shrink-0 items-center gap-1.5 text-sm font-medium text-gray-500 dark:text-gray-400">
               <Clock className="h-3.5 w-3.5 shrink-0" />

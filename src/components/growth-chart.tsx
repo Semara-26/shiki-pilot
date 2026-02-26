@@ -94,7 +94,7 @@ export function GrowthChart({ data, title, className }: GrowthChartProps) {
   return (
     <div
       className={cn(
-        "flex h-full flex-col overflow-hidden rounded-lg border-2 border-ink bg-white p-4 dark:border-white/10 dark:bg-surface-dark",
+        "flex h-full flex-col overflow-hidden rounded-lg border-2 border-ink bg-white p-4 md:p-6 dark:border-white/10 dark:bg-surface-dark",
         className
       )}
     >
@@ -103,7 +103,7 @@ export function GrowthChart({ data, title, className }: GrowthChartProps) {
           {title}
         </p>
       )}
-      <div className="flex-1 w-full h-full min-h-0 relative mt-4">
+      <div className="relative mt-4 w-full min-h-[300px] h-[300px]">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
             data={data}

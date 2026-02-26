@@ -212,10 +212,10 @@ export function AnalyticsClient({ rawTransactions, hasStore }: AnalyticsClientPr
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       {/* Row 1: Revenue Over Time + Time Filter Toggle */}
-      <div className="rounded-lg border-2 border-ink bg-white p-6 dark:border-white/20 dark:bg-[#0a0a0a]">
-        <div className="mb-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="rounded-lg border-2 border-ink bg-white p-4 md:p-6 dark:border-white/20 dark:bg-[#0a0a0a]">
+        <div className="mb-4 flex flex-col gap-3 md:gap-4 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm font-bold uppercase tracking-widest text-ink dark:text-gray-300">
             REVENUE OVER TIME
           </p>
@@ -247,7 +247,7 @@ export function AnalyticsClient({ rawTransactions, hasStore }: AnalyticsClientPr
             </div>
           </div>
         </div>
-        <div className="h-[320px] min-h-0 w-full">
+        <div className="w-full min-h-[300px] h-[300px] md:h-[320px]">
           <SalesChart
             data={revenueOverTimeData.length > 0 ? revenueOverTimeData : [{ name: "—", value: 0 }]}
             embedded
@@ -257,15 +257,15 @@ export function AnalyticsClient({ rawTransactions, hasStore }: AnalyticsClientPr
       </div>
 
       {/* Row 2: Top Products + Distribution */}
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-        <div className="h-[320px] min-h-0">
+      <div className="grid grid-cols-1 gap-4 md:gap-6 md:grid-cols-2">
+        <div className="w-full min-h-[300px] h-[300px] md:h-[320px]">
           <TopProductsBarChart
             data={topProductsData}
             title="PRODUK TERLARIS (UNIT TERJUAL)"
             className="h-full"
           />
         </div>
-        <div className="h-[320px] min-h-0">
+        <div className="w-full min-h-[350px] h-[350px]">
           <ProductDistributionDonut
             data={distributionData}
             title="KONTRIBUSI PENDAPATAN"

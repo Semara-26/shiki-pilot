@@ -81,7 +81,7 @@ export function SalesChart({ data, title, className, embedded }: SalesChartProps
     <div
       className={cn(
         "flex h-full flex-col overflow-hidden",
-        !embedded && "rounded-lg border-2 border-ink bg-white p-6 dark:border-white/20 dark:bg-[#0a0a0a]",
+        !embedded && "rounded-lg border-2 border-ink bg-white p-4 md:p-6 dark:border-white/20 dark:bg-[#0a0a0a]",
         className
       )}
     >
@@ -90,7 +90,7 @@ export function SalesChart({ data, title, className, embedded }: SalesChartProps
           {title}
         </p>
       )}
-      <div className="mt-4 flex-1 min-h-0 w-full">
+      <div className="mt-4 w-full min-h-[300px] h-[300px]">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart
             data={data}

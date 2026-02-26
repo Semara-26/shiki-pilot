@@ -86,7 +86,7 @@ export function ProductDistributionDonut({
   return (
     <div
       className={cn(
-        "flex h-full flex-col overflow-hidden rounded-lg border-2 border-ink bg-white p-6 dark:border-white/20 dark:bg-[#0a0a0a]",
+        "flex h-full flex-col overflow-hidden rounded-lg border-2 border-ink bg-white p-4 md:p-6 dark:border-white/20 dark:bg-[#0a0a0a]",
         className
       )}
     >
@@ -100,7 +100,7 @@ export function ProductDistributionDonut({
           <p className="font-mono text-sm text-muted-foreground">No revenue data</p>
         </div>
       ) : (
-        <div className="relative mt-4 flex flex-1 min-h-[200px]">
+        <div className="relative mt-4 w-full min-h-[350px] h-[350px]">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie

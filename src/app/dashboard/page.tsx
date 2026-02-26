@@ -119,8 +119,8 @@ export default async function DashboardPage() {
         <div className="flex-none">
           <DashboardHeader products={productsList} />
         </div>
-        <div className="flex-1 overflow-y-auto p-6">
-          <div className="flex flex-col gap-6">
+        <div className="flex-1 overflow-y-auto p-4 md:p-6">
+          <div className="flex flex-col gap-4 md:gap-6">
             <MetricsRow
               totalValue={metrics.totalValue}
               totalProducts={metrics.totalProducts}
@@ -142,10 +142,16 @@ export default async function DashboardPage() {
               </div>
               <ProductsTable products={productsList.slice(0, 5)} />
             </div>
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 h-[350px]">
-              <GrowthChart data={stockChartData} title="CURRENT STOCK LEVELS" className="h-full" />
-              <AssetDonutChart data={productsList} title="ASSET DISTRIBUTION" className="h-full" />
-              <EventLog events={eventLogItems} className="h-full" />
+            <div className="grid grid-cols-1 gap-4 md:gap-6 lg:grid-cols-3 lg:min-h-[350px]">
+              <div className="min-h-[300px] w-full lg:h-full">
+                <GrowthChart data={stockChartData} title="CURRENT STOCK LEVELS" className="h-full" />
+              </div>
+              <div className="min-h-[350px] w-full lg:h-full">
+                <AssetDonutChart data={productsList} title="ASSET DISTRIBUTION" className="h-full" />
+              </div>
+              <div className="min-h-[300px] w-full lg:h-full">
+                <EventLog events={eventLogItems} className="h-full" />
+              </div>
             </div>
           </div>
         </div>

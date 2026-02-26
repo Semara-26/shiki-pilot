@@ -98,7 +98,7 @@ export function AssetDonutChart({
   return (
     <div
       className={cn(
-        "flex h-full flex-col overflow-hidden rounded-lg border-2 border-ink bg-white p-4 dark:border-white/10 dark:bg-surface-dark",
+        "flex h-full flex-col overflow-hidden rounded-lg border-2 border-ink bg-white p-4 md:p-6 dark:border-white/10 dark:bg-surface-dark",
         className
       )}
     >
@@ -115,7 +115,7 @@ export function AssetDonutChart({
       ) : (
         <>
           {/* Chart area with center text */}
-          <div className="h-[200px] w-full shrink-0 relative">
+          <div className="h-[250px] min-h-[250px] w-full shrink-0 relative">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
