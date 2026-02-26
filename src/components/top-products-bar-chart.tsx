@@ -76,7 +76,7 @@ export function TopProductsBarChart({ data, title, className }: TopProductsBarCh
         </p>
       )}
       <div className="mt-4 w-full min-h-[300px] h-[300px]">
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer width="100%" height="100%" minWidth={0}>
           <BarChart
             data={data}
             layout="vertical"

@@ -104,7 +104,7 @@ export function GrowthChart({ data, title, className }: GrowthChartProps) {
         </p>
       )}
       <div className="relative mt-4 w-full min-h-[300px] h-[300px]">
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer width="100%" height="100%" minWidth={0}>
           <BarChart
             data={data}
             margin={{ top: 10, right: 10, left: -20, bottom: 15 }}

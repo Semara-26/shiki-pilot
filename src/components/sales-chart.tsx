@@ -91,7 +91,7 @@ export function SalesChart({ data, title, className, embedded }: SalesChartProps
         </p>
       )}
       <div className="mt-4 w-full min-h-[300px] h-[300px]">
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer width="100%" height="100%" minWidth={0}>
           <AreaChart
             data={data}
             margin={{ top: 10, right: 30, left: 0, bottom: 0 }}

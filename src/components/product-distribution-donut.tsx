@@ -6,7 +6,6 @@ import {
   Pie,
   Cell,
   Tooltip,
-  Legend,
 } from "recharts";
 import { useTheme } from "next-themes";
 import { motion } from "framer-motion";
@@ -100,92 +99,110 @@ export function ProductDistributionDonut({
           <p className="font-mono text-sm text-muted-foreground">No revenue data</p>
         </div>
       ) : (
-        <div className="relative mt-4 w-full min-h-[350px] h-[350px]">
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie
-                data={chartData}
-                dataKey="value"
-                nameKey="name"
-                innerRadius={45}
-                outerRadius={60}
-                paddingAngle={2}
-                stroke="transparent"
-                label={(props) => {
-                  const { x, y, textAnchor, percent, cx, cy, index } = props as {
-                    x?: number;
-                    y?: number;
-                    textAnchor?: string;
-                    percent?: number;
-                    cx?: number;
-                    cy?: number;
-                    index?: number;
-                  };
-                  const showPct = (percent ?? 0) >= 0.03;
-                  const centerLabel =
-                    index === 0 ? (
-                      <text
-                        x={cx}
-                        y={cy}
-                        textAnchor="middle"
-                        dominantBaseline="central"
-                        style={{ fontFamily: "monospace" }}
-                      >
-                        <tspan
-                          x={cx}
-                          dy="-0.5em"
-                          fill={isDark ? "#9ca3af" : "#6b7280"}
-                          fontSize={10}
-                        >
-                          TOTAL
-                        </tspan>
-                        <tspan
-                          x={cx}
-                          dy="1.5em"
-                          fill={isDark ? "#ffffff" : "#111827"}
-                          fontSize={12}
-                          fontWeight="bold"
-                        >
-                          {totalDisplay}
-                        </tspan>
-                      </text>
-                    ) : null;
-                  return (
-                    <>
-                      {centerLabel}
-                      {showPct && (
+        <div className="flex flex-col gap-4">
+          <div className="w-full min-h-[320px] h-[320px] shrink-0">
+            <ResponsiveContainer width="100%" height="100%" minWidth={0}>
+              <PieChart>
+                <Pie
+                  data={chartData}
+                  dataKey="value"
+                  nameKey="name"
+                  innerRadius={70}
+                  outerRadius={90}
+                  paddingAngle={2}
+                  stroke="transparent"
+                  label={(props) => {
+                    const { x, y, textAnchor, percent, cx, cy, index } = props as {
+                      x?: number;
+                      y?: number;
+                      textAnchor?: string;
+                      percent?: number;
+                      cx?: number;
+                      cy?: number;
+                      index?: number;
+                    };
+                    const showPct = (percent ?? 0) >= 0.03;
+                    const centerLabel =
+                      index === 0 ? (
                         <text
-                          x={x}
-                          y={y}
-                          textAnchor={(textAnchor as "start" | "middle" | "end") ?? "middle"}
-                          fill={labelColor}
-                          fontSize={11}
+                          x={cx}
+                          y={cy}
+                          textAnchor="middle"
+                          dominantBaseline="central"
+                          style={{ fontFamily: "monospace" }}
                         >
-                          {((percent ?? 0) * 100).toFixed(0)}%
+                          <tspan
+                            x={cx}
+                            dy="-0.5em"
+                            fill={isDark ? "#9ca3af" : "#6b7280"}
+                            fontSize={14}
+                          >
+                            TOTAL
+                          </tspan>
+                          <tspan
+                            x={cx}
+                            dy="1.6em"
+                            fill={isDark ? "#ffffff" : "#111827"}
+                            fontSize={18}
+                            fontWeight="bold"
+                          >
+                            {totalDisplay}
+                          </tspan>
                         </text>
-                      )}
-                    </>
-                  );
-                }}
-                labelLine={{ stroke: labelColor, strokeWidth: 1 }}
+                      ) : null;
+                    return (
+                      <>
+                        {centerLabel}
+                        {showPct && (
+                          <text
+                            x={x}
+                            y={y}
+                            textAnchor={(textAnchor as "start" | "middle" | "end") ?? "middle"}
+                            fill={labelColor}
+                            fontSize={11}
+                          >
+                            {((percent ?? 0) * 100).toFixed(0)}%
+                          </text>
+                        )}
+                      </>
+                    );
+                  }}
+                  labelLine={{ stroke: labelColor, strokeWidth: 1 }}
+                >
+                  {chartData.map((_, i) => (
+                    <Cell key={i} fill={NERV_COLORS[i % NERV_COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip content={<DonutTooltip />} />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+          {/* Custom Legend: vertikal agar nama produk tidak terpotong */}
+          <div
+            className="flex flex-col gap-2 pt-2 border-t border-gray-200 dark:border-white/10"
+            role="list"
+            aria-label="Keterangan produk"
+          >
+            {chartData.map((item, i) => (
+              <div
+                key={`${item.name}-${i}`}
+                className="flex items-center gap-2 font-mono text-xs"
+                role="listitem"
               >
-                {chartData.map((_, i) => (
-                  <Cell key={i} fill={NERV_COLORS[i % NERV_COLORS.length]} />
-                ))}
-              </Pie>
-              <Tooltip content={<DonutTooltip />} />
-              <Legend
-                verticalAlign="bottom"
-                height={36}
-                wrapperStyle={{ paddingTop: 16 }}
-                formatter={(value) => (
-                  <span style={{ color: labelColor, fontSize: 11 }}>
-                    {value}
-                  </span>
-                )}
-              />
-            </PieChart>
-          </ResponsiveContainer>
+                <span
+                  className="h-3 w-3 shrink-0 rounded-full border border-gray-300 dark:border-white/20"
+                  style={{ backgroundColor: NERV_COLORS[i % NERV_COLORS.length] }}
+                  aria-hidden
+                />
+                <span className="min-w-0 flex-1 text-ink dark:text-gray-200 break-words">
+                  {item.name}
+                </span>
+                <span className="shrink-0 tabular-nums text-gray-600 dark:text-gray-400">
+                  {(item.percentage ?? 0).toFixed(0)}%
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>

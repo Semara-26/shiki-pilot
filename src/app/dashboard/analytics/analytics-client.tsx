@@ -265,7 +265,7 @@ export function AnalyticsClient({ rawTransactions, hasStore }: AnalyticsClientPr
             className="h-full"
           />
         </div>
-        <div className="w-full min-h-[350px] h-[350px]">
+        <div className="w-full min-h-[450px] h-[450px]">
           <ProductDistributionDonut
             data={distributionData}
             title="KONTRIBUSI PENDAPATAN"

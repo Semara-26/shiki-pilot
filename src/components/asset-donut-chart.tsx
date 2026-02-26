@@ -116,7 +116,7 @@ export function AssetDonutChart({
         <>
           {/* Chart area with center text */}
           <div className="h-[250px] min-h-[250px] w-full shrink-0 relative">
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height="100%" minWidth={0}>
               <PieChart>
                 <Pie
                   data={chartData}
