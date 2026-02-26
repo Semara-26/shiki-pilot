@@ -4,8 +4,9 @@ import { db } from "@/src/db";
 import { stores, transactions, products } from "@/src/db/schema";
 import { DashboardHeader } from "@/src/components/dashboard-header";
 import { AnalyticsClient } from "./analytics-client";
+import { SeedDataButton } from "./seed-data-button";
 
-const DAYS_AGO = 31; // Support monthly view
+const DAYS_AGO = 365; // 12 months - support monthly filter
 
 export type RawTransaction = {
   productName: string;
@@ -60,6 +61,11 @@ export default async function AnalyticsPage() {
         <DashboardHeader
           breadcrumbs="TERMINAL / ANALYTICS"
           title="ANALYTICS MODULE // BI"
+          actions={
+            userStore?.id ? (
+              <SeedDataButton storeId={userStore.id} />
+            ) : undefined
+          }
         />
       </div>
       <div className="flex flex-1 flex-col overflow-y-auto p-6">

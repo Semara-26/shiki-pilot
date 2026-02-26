@@ -15,6 +15,7 @@ interface DashboardHeaderProps {
   breadcrumbs?: string;
   title?: string;
   products?: DashboardHeaderProduct[];
+  actions?: React.ReactNode;
   className?: string;
 }
 
@@ -24,6 +25,7 @@ export function DashboardHeader({
   breadcrumbs = "TERMINAL / ACTIVE PROJECTS",
   title = "DATA REPOSITORY",
   products = [],
+  actions,
   className,
 }: DashboardHeaderProps) {
   const lowStockProducts = products.filter((p) => p.stock < LOW_STOCK_THRESHOLD);
@@ -61,6 +63,7 @@ export function DashboardHeader({
         </div>
 
         <div className="flex items-center gap-2">
+          {actions}
           {/* Search */}
           <div className="relative hidden md:block">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500 dark:text-gray-400" />

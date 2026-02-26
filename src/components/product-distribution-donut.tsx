@@ -6,7 +6,9 @@ import {
   Pie,
   Cell,
   Tooltip,
+  Legend,
 } from "recharts";
+import { useTheme } from "next-themes";
 import { motion } from "framer-motion";
 import { cn } from "@/src/lib/utils";
 
@@ -62,10 +64,15 @@ function DonutTooltip({ active, payload }: TooltipProps) {
 
 export function ProductDistributionDonut({
   data,
-  title = "REVENUE DISTRIBUTION",
+  title = "KONTRIBUSI PENDAPATAN",
   className,
 }: ProductDistributionDonutProps) {
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === "dark";
+  const labelColor = isDark ? "#e5e7eb" : "#374151";
   const total = data.reduce((acc, d) => acc + d.value, 0);
+  const totalDisplay =
+    total >= 1e6 ? `Rp ${(total / 1e6).toFixed(1)}jt` : formatRupiah(total);
   const chartData = data
     .map((d) => ({
       ...d,
@@ -100,26 +107,85 @@ export function ProductDistributionDonut({
                 data={chartData}
                 dataKey="value"
                 nameKey="name"
-                innerRadius={55}
-                outerRadius={75}
+                innerRadius={45}
+                outerRadius={60}
                 paddingAngle={2}
                 stroke="transparent"
+                label={(props) => {
+                  const { x, y, textAnchor, percent, cx, cy, index } = props as {
+                    x?: number;
+                    y?: number;
+                    textAnchor?: string;
+                    percent?: number;
+                    cx?: number;
+                    cy?: number;
+                    index?: number;
+                  };
+                  const showPct = (percent ?? 0) >= 0.03;
+                  const centerLabel =
+                    index === 0 ? (
+                      <text
+                        x={cx}
+                        y={cy}
+                        textAnchor="middle"
+                        dominantBaseline="central"
+                        style={{ fontFamily: "monospace" }}
+                      >
+                        <tspan
+                          x={cx}
+                          dy="-0.5em"
+                          fill={isDark ? "#9ca3af" : "#6b7280"}
+                          fontSize={10}
+                        >
+                          TOTAL
+                        </tspan>
+                        <tspan
+                          x={cx}
+                          dy="1.5em"
+                          fill={isDark ? "#ffffff" : "#111827"}
+                          fontSize={12}
+                          fontWeight="bold"
+                        >
+                          {totalDisplay}
+                        </tspan>
+                      </text>
+                    ) : null;
+                  return (
+                    <>
+                      {centerLabel}
+                      {showPct && (
+                        <text
+                          x={x}
+                          y={y}
+                          textAnchor={(textAnchor as "start" | "middle" | "end") ?? "middle"}
+                          fill={labelColor}
+                          fontSize={11}
+                        >
+                          {((percent ?? 0) * 100).toFixed(0)}%
+                        </text>
+                      )}
+                    </>
+                  );
+                }}
+                labelLine={{ stroke: labelColor, strokeWidth: 1 }}
               >
                 {chartData.map((_, i) => (
                   <Cell key={i} fill={NERV_COLORS[i % NERV_COLORS.length]} />
                 ))}
               </Pie>
               <Tooltip content={<DonutTooltip />} />
+              <Legend
+                verticalAlign="bottom"
+                height={36}
+                wrapperStyle={{ paddingTop: 16 }}
+                formatter={(value) => (
+                  <span style={{ color: labelColor, fontSize: 11 }}>
+                    {value}
+                  </span>
+                )}
+              />
             </PieChart>
           </ResponsiveContainer>
-          <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none" aria-hidden>
-            <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-              TOTAL
-            </p>
-            <p className="mt-0.5 font-mono text-sm font-bold tabular-nums text-ink dark:text-white">
-              {total >= 1e6 ? `Rp ${(total / 1e6).toFixed(1)}jt` : formatRupiah(total)}
-            </p>
-          </div>
         </div>
       )}
     </div>

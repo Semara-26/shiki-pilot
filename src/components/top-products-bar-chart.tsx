@@ -8,6 +8,7 @@ import {
   YAxis,
   Tooltip,
   CartesianGrid,
+  LabelList,
 } from "recharts";
 import { useTheme } from "next-themes";
 import { motion } from "framer-motion";
@@ -79,7 +80,7 @@ export function TopProductsBarChart({ data, title, className }: TopProductsBarCh
           <BarChart
             data={data}
             layout="vertical"
-            margin={{ top: 5, right: 20, left: 10, bottom: 5 }}
+            margin={{ top: 5, right: 42, left: 10, bottom: 5 }}
           >
             <CartesianGrid
               strokeDasharray="3 3"
@@ -112,7 +113,14 @@ export function TopProductsBarChart({ data, title, className }: TopProductsBarCh
               radius={[0, 4, 4, 0]}
               name="Qty"
               animationDuration={1000}
-            />
+            >
+              <LabelList
+                dataKey="value"
+                position="right"
+                fill="#888888"
+                fontSize={12}
+              />
+            </Bar>
           </BarChart>
         </ResponsiveContainer>
       </div>

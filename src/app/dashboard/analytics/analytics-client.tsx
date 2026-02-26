@@ -10,7 +10,7 @@ import type { RawTransaction } from "./page";
 
 export type TimeFilter = "daily" | "weekly" | "monthly";
 
-const DAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const MONTH_LABELS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 /** Fallback raw transactions saat DB kosong */
 const FALLBACK_RAW: RawTransaction[] = (() => {
@@ -44,38 +44,72 @@ function processRevenueOverTime(
 ): { name: string; value: number }[] {
   if (transactions.length === 0) return [];
 
+  const now = new Date();
   const buckets = new Map<string, number>();
 
+  if (filter === "daily") {
+    // Last 14 days, aggregate per day. X-axis: "DD MMM"
+    for (let i = 13; i >= 0; i--) {
+      const d = new Date(now);
+      d.setDate(d.getDate() - i);
+      const key = d.toISOString().slice(0, 10);
+      buckets.set(key, 0);
+    }
+    for (const tx of transactions) {
+      const d = new Date(tx.createdAt);
+      const key = d.toISOString().slice(0, 10);
+      if (buckets.has(key)) {
+        buckets.set(key, (buckets.get(key) ?? 0) + tx.totalPrice);
+      }
+    }
+    return Array.from(buckets.entries())
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([dateStr, value]) => {
+        const [y, m, day] = dateStr.split("-").map(Number);
+        const short = `${String(day).padStart(2, "0")} ${MONTH_LABELS[m - 1]}`;
+        return { name: short, value };
+      });
+  }
+
+  if (filter === "weekly") {
+    // Last 8 weeks, aggregate per week. X-axis: "Week 1" .. "Week 8"
+    const msPerWeek = 7 * 24 * 60 * 60 * 1000;
+    for (let w = 0; w < 8; w++) buckets.set(`W${w}`, 0);
+    for (const tx of transactions) {
+      const d = new Date(tx.createdAt);
+      const diffMs = now.getTime() - d.getTime();
+      const weeksAgo = Math.floor(diffMs / msPerWeek);
+      if (weeksAgo >= 0 && weeksAgo < 8) {
+        const key = `W${7 - weeksAgo}`;
+        buckets.set(key, (buckets.get(key) ?? 0) + tx.totalPrice);
+      }
+    }
+    return Array.from({ length: 8 }, (_, i) => ({
+      name: `Week ${i + 1}`,
+      value: buckets.get(`W${i}`) ?? 0,
+    }));
+  }
+
+  // monthly: Last 12 months. X-axis: "Jan", "Feb", "Mar", ...
+  for (let i = 0; i < 12; i++) {
+    const d = new Date(now.getFullYear(), now.getMonth() - (11 - i), 1);
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+    buckets.set(key, 0);
+  }
   for (const tx of transactions) {
     const d = new Date(tx.createdAt);
-    let key: string;
-    if (filter === "daily") {
-      // Group by date string (YYYY-MM-DD)
-      key = d.toISOString().slice(0, 10);
-    } else if (filter === "weekly") {
-      key = DAY_LABELS[d.getDay()];
-    } else {
-      const weekOfMonth = Math.ceil(d.getDate() / 7);
-      key = `Week ${weekOfMonth}`;
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+    if (buckets.has(key)) {
+      buckets.set(key, (buckets.get(key) ?? 0) + tx.totalPrice);
     }
-    buckets.set(key, (buckets.get(key) ?? 0) + tx.totalPrice);
   }
-
-  if (filter === "daily") {
-    const dates = Array.from(buckets.keys()).sort();
-    return dates.slice(-7).map((dateStr) => {
-      const [y, m, d] = dateStr.split("-").map(Number);
-      const short = `${String(d).padStart(2, "0")}/${String(m).padStart(2, "0")}`;
-      return { name: short, value: buckets.get(dateStr) ?? 0 };
+  return Array.from(buckets.entries())
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([key, value]) => {
+      const [, mStr] = key.split("-");
+      const m = parseInt(mStr, 10);
+      return { name: MONTH_LABELS[m - 1], value };
     });
-  }
-
-  const order =
-    filter === "weekly"
-      ? ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
-      : ["Week 1", "Week 2", "Week 3", "Week 4"];
-
-  return order.map((name) => ({ name, value: buckets.get(name) ?? 0 }));
 }
 
 function processTopProducts(transactions: RawTransaction[]): { name: string; value: number }[] {
@@ -99,16 +133,36 @@ function processDistribution(transactions: RawTransaction[]): { name: string; va
     .sort((a, b) => b.value - a.value);
 }
 
+const DAYS_BY_FILTER: Record<TimeFilter, number> = {
+  daily: 14,
+  weekly: 56, // 8 weeks
+  monthly: 365, // 12 months
+};
+
 export function AnalyticsClient({ rawTransactions, hasStore }: AnalyticsClientProps) {
   const [timeFilter, setTimeFilter] = useState<TimeFilter>("weekly");
   const txs = rawTransactions.length > 0 ? rawTransactions : FALLBACK_RAW;
 
+  const filteredTransactions = useMemo(() => {
+    const daysBack = DAYS_BY_FILTER[timeFilter];
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - daysBack);
+    cutoff.setHours(0, 0, 0, 0);
+    return txs.filter((tx) => new Date(tx.createdAt) >= cutoff);
+  }, [txs, timeFilter]);
+
   const revenueOverTimeData = useMemo(
-    () => processRevenueOverTime(txs, timeFilter),
-    [txs, timeFilter]
+    () => processRevenueOverTime(filteredTransactions, timeFilter),
+    [filteredTransactions, timeFilter]
   );
-  const topProductsData = useMemo(() => processTopProducts(txs), [txs]);
-  const distributionData = useMemo(() => processDistribution(txs), [txs]);
+  const topProductsData = useMemo(
+    () => processTopProducts(filteredTransactions),
+    [filteredTransactions]
+  );
+  const distributionData = useMemo(
+    () => processDistribution(filteredTransactions),
+    [filteredTransactions]
+  );
 
   if (!hasStore) {
     return (
@@ -175,14 +229,14 @@ export function AnalyticsClient({ rawTransactions, hasStore }: AnalyticsClientPr
         <div className="h-[320px] min-h-0">
           <TopProductsBarChart
             data={topProductsData}
-            title="TOP PRODUCTS (VOLUME)"
+            title="PRODUK TERLARIS (UNIT TERJUAL)"
             className="h-full"
           />
         </div>
         <div className="h-[320px] min-h-0">
           <ProductDistributionDonut
             data={distributionData}
-            title="REVENUE DISTRIBUTION"
+            title="KONTRIBUSI PENDAPATAN"
             className="h-full"
           />
         </div>

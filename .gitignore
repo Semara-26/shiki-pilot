@@ -43,6 +43,5 @@ shikipilot-backlog.md
 next-env.d.ts
 
 # meta
-meta/*
 drizzle/meta/*
 drizzle/*
