@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
-import { ArrowLeft, BarChart3 } from "lucide-react";
+import { ArrowLeft, BarChart3, Download } from "lucide-react";
 import { SalesChart } from "@/src/components/sales-chart";
 import { TopProductsBarChart } from "@/src/components/top-products-bar-chart";
 import { ProductDistributionDonut } from "@/src/components/product-distribution-donut";
@@ -164,6 +164,28 @@ export function AnalyticsClient({ rawTransactions, hasStore }: AnalyticsClientPr
     [filteredTransactions]
   );
 
+  const handleExportCSV = () => {
+    const headers = ["Tanggal", "Nama Produk", "Kuantitas", "Total Pendapatan (Rp)"];
+    const escapeCsv = (val: string | number) => {
+      const s = String(val);
+      return s.includes(";") || s.includes('"') || s.includes("\n")
+        ? `"${s.replace(/"/g, '""')}"`
+        : s;
+    };
+    const rows = filteredTransactions.map((tx) => {
+      const date = new Date(tx.createdAt).toLocaleDateString("id-ID");
+      return [escapeCsv(date), escapeCsv(tx.productName), tx.quantity, tx.totalPrice].join(";");
+    });
+    const csvContent = "\uFEFF" + [headers.join(";"), ...rows].join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `shikipilot_report_${timeFilter}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   if (!hasStore) {
     return (
       <div className="flex min-h-[400px] items-center justify-center rounded-lg border-2 border-ink dark:border-white/20 bg-white dark:bg-[#0a0a0a] p-8">
@@ -197,7 +219,16 @@ export function AnalyticsClient({ rawTransactions, hasStore }: AnalyticsClientPr
           <p className="text-sm font-bold uppercase tracking-widest text-ink dark:text-gray-300">
             REVENUE OVER TIME
           </p>
-          <div className="flex rounded-md border-2 border-ink dark:border-white/20 p-0.5">
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handleExportCSV}
+              className="flex items-center gap-1.5 rounded-md border-2 border-ink bg-transparent px-3 py-1.5 font-mono text-xs font-medium uppercase tracking-wider text-ink transition-colors hover:bg-ink hover:text-white dark:border-white/20 dark:text-gray-300 dark:hover:bg-white/20 dark:hover:text-white"
+            >
+              <Download size={14} />
+              EXPORT CSV
+            </button>
+            <div className="flex rounded-md border-2 border-ink dark:border-white/20 p-0.5">
             {(["daily", "weekly", "monthly"] as const).map((f) => (
               <button
                 key={f}
@@ -213,6 +244,7 @@ export function AnalyticsClient({ rawTransactions, hasStore }: AnalyticsClientPr
                 {f === "daily" ? "Daily" : f === "weekly" ? "Weekly" : "Monthly"}
               </button>
             ))}
+            </div>
           </div>
         </div>
         <div className="h-[320px] min-h-0 w-full">
