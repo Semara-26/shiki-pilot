@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
+import { toast } from "sonner";
 import {
   User,
   Store,
@@ -76,6 +77,25 @@ export function SystemPreferencesModal({
     }
   }, [isOpen, currentProfile]);
 
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("shiki_store_info");
+      if (saved) {
+        const parsed = JSON.parse(saved) as Partial<typeof INITIAL_FORM_DATA>;
+        setFormData((prev) => ({
+          ...prev,
+          storeName: parsed.storeName ?? prev.storeName,
+          businessType: parsed.businessType ?? prev.businessType,
+          contactEmail: parsed.contactEmail ?? prev.contactEmail,
+          phone: parsed.phone ?? prev.phone,
+          address: parsed.address ?? prev.address,
+        }));
+      }
+    } catch {
+      // ignore parse errors
+    }
+  }, []);
+
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -101,12 +121,29 @@ export function SystemPreferencesModal({
 
   const handleSyncData = () => {
     setIsSyncing(true);
+    try {
+      localStorage.setItem(
+        "shiki_store_info",
+        JSON.stringify({
+          storeName: formData.storeName,
+          businessType: formData.businessType,
+          contactEmail: formData.contactEmail,
+          phone: formData.phone,
+          address: formData.address,
+        })
+      );
+    } catch {
+      // ignore
+    }
     setTimeout(() => {
       onSave?.({
         name: formData.username,
         email: formData.email,
         avatar: avatarUrl || undefined,
         storeName: formData.storeName,
+      });
+      toast.success("Data tersimpan", {
+        description: "Profil dan info toko telah disinkronkan.",
       });
       setIsSyncing(false);
       onClose();

@@ -339,6 +339,12 @@ export async function processAiImport(rawText: string): Promise<ProcessAiImportR
       }))
     );
 
+    await db.insert(eventLogs).values({
+      storeId: userStore.id,
+      title: 'New Assets Registered via AI',
+      detail: `[${validItems.length}] items`,
+    });
+
     revalidatePath('/dashboard/inventory');
     revalidatePath('/dashboard');
     return { success: true, count: validItems.length };
