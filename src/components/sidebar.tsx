@@ -91,7 +91,10 @@ export function Sidebar() {
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground">
           <span className="font-mono text-lg font-bold">会社</span>
         </div>
-        <span className="hidden whitespace-nowrap text-sm font-semibold tracking-[0.2em] text-gray-700 opacity-0 transition-opacity duration-200 group-hover:block group-hover:opacity-100 dark:text-sidebar-foreground md:group-hover:opacity-100">
+        <span className={cn(
+          "whitespace-nowrap text-sm font-semibold tracking-[0.2em] text-gray-700 transition-opacity duration-200 dark:text-sidebar-foreground",
+          sidebar?.isOpen ? "block opacity-100" : "hidden opacity-0 group-hover:block group-hover:opacity-100 md:group-hover:block md:group-hover:opacity-100"
+        )}>
           SHIKIPILOT
         </span>
         </Link>
@@ -116,11 +119,14 @@ export function Sidebar() {
                 )}
               >
                 <Icon className="h-5 w-5 shrink-0" />
-                <span className="hidden whitespace-nowrap opacity-0 transition-opacity duration-200 group-hover:block group-hover:opacity-100 md:group-hover:opacity-100">
+                <span className={cn(
+                  "whitespace-nowrap transition-opacity duration-200",
+                  sidebar?.isOpen ? "block opacity-100" : "hidden opacity-0 group-hover:block group-hover:opacity-100 md:group-hover:block md:group-hover:opacity-100"
+                )}>
                   {item.label}
                 </span>
                 {isActive && (
-                  <ChevronRight className="ml-auto hidden group-hover:block" />
+                  <ChevronRight className={cn("ml-auto", sidebar?.isOpen ? "block" : "hidden group-hover:block")} />
                 )}
               </Link>
             </motion.div>
@@ -150,7 +156,10 @@ export function Sidebar() {
               <User className="h-4 w-4 text-gray-600 dark:text-sidebar-foreground" />
             )}
           </div>
-          <div className="hidden min-w-0 overflow-hidden text-left transition-opacity duration-200 group-hover:block group-hover:opacity-100 md:group-hover:opacity-100">
+          <div className={cn(
+            "min-w-0 overflow-hidden text-left transition-opacity duration-200",
+            sidebar?.isOpen ? "block opacity-100" : "hidden opacity-0 group-hover:block group-hover:opacity-100 md:group-hover:block md:group-hover:opacity-100"
+          )}>
             <p className="truncate text-xs font-medium text-gray-700 dark:text-sidebar-foreground">
               {displayName}
             </p>

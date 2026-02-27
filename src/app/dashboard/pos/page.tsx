@@ -57,14 +57,14 @@ export default async function POSPage() {
   }
 
   return (
-    <div className="flex h-full flex-col overflow-hidden bg-white dark:bg-[#0a0a0a]">
+    <div className="flex flex-col h-[100dvh] overflow-hidden bg-white dark:bg-[#0a0a0a]">
       <div className="flex-none">
         <DashboardHeader
           breadcrumbs="TERMINAL / POS"
           title="KERANJANG PINTAR // MICRO-POS"
         />
       </div>
-      <div className="flex flex-1 flex-col overflow-hidden">
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
         <POSClient
           products={productsList}
           storeId={userStore.id}

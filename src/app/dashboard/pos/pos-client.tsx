@@ -14,7 +14,7 @@ function formatRupiah(value: number) {
   }).format(value);
 }
 
-type CartItem = POSProduct & { quantity: number };
+type CartItem = POSProduct & { quantity: number | "" };
 
 interface POSClientProps {
   products: POSProduct[];
@@ -26,7 +26,7 @@ export function POSClient({ products, storeId }: POSClientProps) {
   const [cashReceived, setCashReceived] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const grandTotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const grandTotal = cart.reduce((sum, item) => sum + item.price * (Number(item.quantity) || 0), 0);
   const cashNum = parseInt(cashReceived.replace(/\D/g, ""), 10) || 0;
   const change = Math.max(0, cashNum - grandTotal);
 
@@ -49,30 +49,32 @@ export function POSClient({ products, storeId }: POSClientProps) {
       cart
         .map((c) => {
           if (c.id !== productId) return c;
-          const qty = Math.max(0, Math.min(c.stock, c.quantity + delta));
+          const current = Number(c.quantity) || 0;
+          const qty = Math.max(0, Math.min(c.stock, current + delta));
           return { ...c, quantity: qty };
         })
-        .filter((c) => c.quantity > 0)
+        .filter((c) => (Number(c.quantity) || 0) > 0)
     );
   };
 
   const setQuantityDirect = (productId: string, value: number | "") => {
-    const num = value === "" || value < 0 ? 0 : Math.min(Math.floor(value), 9999);
     setCart(
       cart
         .map((c) => {
           if (c.id !== productId) return c;
+          if (value === "") return { ...c, quantity: "" as const };
+          const num = value < 0 ? 0 : Math.min(Math.floor(value), 9999);
           const qty = Math.max(0, Math.min(c.stock, num));
           return { ...c, quantity: qty };
         })
-        .filter((c) => c.quantity > 0 || c.id === productId)
+        .filter((c) => c.quantity === "" || (Number(c.quantity) || 0) > 0 || c.id === productId)
     );
   };
 
   const handleQuantityBlur = (productId: string) => {
     const item = cart.find((c) => c.id === productId);
-    if (item && item.quantity < 1) {
-      setQuantityDirect(productId, 1);
+    if (item && (!item.quantity || item.quantity <= 0)) {
+      updateQuantity(productId, 1);
     }
   };
 
@@ -92,11 +94,13 @@ export function POSClient({ products, storeId }: POSClientProps) {
 
     setIsSubmitting(true);
     try {
-      const items = cart.map((item) => ({
-        productId: item.id,
-        quantity: item.quantity,
-        totalPrice: item.price * item.quantity,
-      }));
+      const items = cart
+        .filter((item) => (Number(item.quantity) || 0) > 0)
+        .map((item) => ({
+          productId: item.id,
+          quantity: Number(item.quantity) || 0,
+          totalPrice: item.price * (Number(item.quantity) || 0),
+        }));
 
       const result = await createBulkTransactions(storeId, items);
 
@@ -122,49 +126,51 @@ export function POSClient({ products, storeId }: POSClientProps) {
   };
 
   return (
-    <div className="flex h-full flex-col overflow-hidden">
-      {/* Katalog Produk */}
-      <div className="shrink-0 border-b-2 border-ink dark:border-white/20 bg-white dark:bg-[#0a0a0a] p-4">
-        <p className="mb-3 font-mono text-xs font-bold uppercase tracking-widest text-ink dark:text-gray-300">
-          KATALOG PRODUK
-        </p>
-        {products.length === 0 ? (
-          <p className="font-mono text-sm text-gray-500 dark:text-gray-400">
-            Belum ada produk. Tambah produk di Inventory.
+    <div className="flex h-full flex-1 flex-col overflow-hidden">
+      {/* Area Katalog & Keranjang - scrollable, mengisi sisa ruang */}
+      <div className="flex flex-1 flex-col overflow-y-auto p-4 md:p-6 gap-6 min-h-0">
+        {/* Katalog Produk */}
+        <div className="shrink-0 border-b-2 border-ink dark:border-white/20 bg-white dark:bg-[#0a0a0a] pb-4">
+          <p className="mb-3 font-mono text-xs font-bold uppercase tracking-widest text-ink dark:text-gray-300">
+            KATALOG PRODUK
           </p>
-        ) : (
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
-            {products.map((p) => (
-              <button
-                key={p.id}
-                type="button"
-                onClick={() => addToCart(p)}
-                disabled={p.stock === 0}
-                className="flex flex-col items-stretch gap-1 rounded-lg border-2 border-ink bg-white p-3 text-left transition-colors hover:border-primary hover:bg-primary/5 dark:border-white/20 dark:bg-white/5 dark:hover:border-[#22d3ee] dark:hover:bg-[#22d3ee]/10 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <span className="truncate font-mono text-xs font-medium text-ink dark:text-white">
-                  {p.name}
-                </span>
-                <span className="font-mono text-lg font-bold text-primary dark:text-[#22d3ee]">
-                  {formatRupiah(p.price)}
-                </span>
-                <span className="flex items-center justify-between gap-1">
-                  <span className="text-[10px] text-gray-500 dark:text-gray-400">
-                    Stok: {p.stock}
+          {products.length === 0 ? (
+            <p className="font-mono text-sm text-gray-500 dark:text-gray-400">
+              Belum ada produk. Tambah produk di Inventory.
+            </p>
+          ) : (
+            <div className="flex flex-row overflow-x-auto gap-4 pb-4 snap-x [&::-webkit-scrollbar]:hidden">
+              {products.map((p) => (
+                <button
+                  key={p.id}
+                  type="button"
+                  onClick={() => addToCart(p)}
+                  disabled={p.stock === 0}
+                  className="min-w-[160px] max-w-[200px] flex-shrink-0 snap-center flex flex-col items-stretch gap-1 rounded-lg border-2 border-ink bg-white p-3 text-left transition-colors hover:border-primary hover:bg-primary/5 dark:border-white/20 dark:bg-white/5 dark:hover:border-[#22d3ee] dark:hover:bg-[#22d3ee]/10 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <span className="truncate font-mono text-xs font-medium text-ink dark:text-white">
+                    {p.name}
                   </span>
-                  <Plus className="h-4 w-4 shrink-0 text-primary dark:text-[#22d3ee]" />
-                </span>
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
+                  <span className="font-mono text-lg font-bold text-primary dark:text-[#22d3ee]">
+                    {formatRupiah(p.price)}
+                  </span>
+                  <span className="flex items-center justify-between gap-1">
+                    <span className="text-[10px] text-gray-500 dark:text-gray-400">
+                      Stok: {p.stock}
+                    </span>
+                    <Plus className="h-4 w-4 shrink-0 text-primary dark:text-[#22d3ee]" />
+                  </span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
 
-      {/* Keranjang */}
-      <div className="flex-1 overflow-y-auto p-4">
-        <p className="mb-3 font-mono text-xs font-bold uppercase tracking-widest text-ink dark:text-gray-300">
-          KERANJANG
-        </p>
+        {/* Keranjang - flex-1 mengisi seluruh sisa ruang di bawah katalog */}
+        <div className="flex flex-1 flex-col min-h-0 overflow-y-auto">
+          <p className="mb-3 font-mono text-xs font-bold uppercase tracking-widest text-ink dark:text-gray-300">
+            KERANJANG
+          </p>
         {cart.length === 0 ? (
           <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-ink/30 dark:border-white/20 py-12">
             <ShoppingCart className="h-12 w-12 text-gray-400 dark:text-gray-500" />
@@ -184,8 +190,8 @@ export function POSClient({ products, storeId }: POSClientProps) {
                     {item.name}
                   </p>
                   <p className="font-mono text-xs text-gray-500 dark:text-gray-400">
-                    {formatRupiah(item.price)} × {item.quantity} ={" "}
-                    {formatRupiah(item.price * item.quantity)}
+                    {formatRupiah(item.price)} × {item.quantity === "" ? "…" : item.quantity} ={" "}
+                    {formatRupiah(item.price * (Number(item.quantity) || 0))}
                   </p>
                 </div>
                 <div className="flex items-center gap-1">
@@ -200,11 +206,15 @@ export function POSClient({ products, storeId }: POSClientProps) {
                     type="number"
                     min={0}
                     max={item.stock}
-                    value={item.quantity}
+                    value={item.quantity === "" ? "" : item.quantity}
                     onChange={(e) => {
                       const v = e.target.value;
-                      const num = v === "" ? "" : parseInt(v, 10);
-                      setQuantityDirect(item.id, num as number);
+                      if (v === "") {
+                        setQuantityDirect(item.id, "");
+                      } else {
+                        const num = parseInt(v, 10);
+                        if (!Number.isNaN(num)) setQuantityDirect(item.id, num);
+                      }
                     }}
                     onBlur={() => handleQuantityBlur(item.id)}
                     className="w-12 text-center font-mono text-sm font-bold tabular-nums bg-transparent border-b border-ink/30 dark:border-white/30 text-ink dark:text-white focus:outline-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
@@ -212,7 +222,7 @@ export function POSClient({ products, storeId }: POSClientProps) {
                   <button
                     type="button"
                     onClick={() => updateQuantity(item.id, 1)}
-                    disabled={item.quantity >= item.stock}
+                    disabled={(Number(item.quantity) || 0) >= item.stock}
                     className="flex h-9 w-9 items-center justify-center rounded border-2 border-ink dark:border-white/20 text-ink dark:text-white hover:bg-ink hover:text-white dark:hover:bg-white/20 dark:hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <Plus className="h-4 w-4" />
@@ -222,10 +232,11 @@ export function POSClient({ products, storeId }: POSClientProps) {
             ))}
           </div>
         )}
+        </div>
       </div>
 
-      {/* Panel Kalkulator - Sticky Bottom */}
-      <div className="sticky bottom-0 shrink-0 border-t-2 border-ink dark:border-white/20 bg-white dark:bg-[#0a0a0a] p-4">
+      {/* Panel Kalkulator Bawah - statis di akhir flexbox, terdorong keyboard saat muncul */}
+      <div className="flex-shrink-0 border-t border-ink/30 dark:border-white/20 bg-white dark:bg-[#0a0a0a] p-4">
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <span className="font-mono text-sm uppercase tracking-wider text-ink dark:text-gray-300">
