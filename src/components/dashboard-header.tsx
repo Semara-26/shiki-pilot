@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Search, Bell } from "lucide-react";
+import { SidebarTrigger } from "@/src/components/sidebar";
 import { AnimatePresence, motion } from "framer-motion";
 import { cn } from "@/src/lib/utils";
 
@@ -52,14 +53,17 @@ export function DashboardHeader({
         className
       )}
     >
-      <div className="flex h-16 items-center justify-between gap-4 px-6">
-        <div className="flex min-w-0 flex-col gap-0.5">
-          <p className="text-xs font-medium uppercase tracking-widest text-gray-500 dark:text-gray-400">
-            {breadcrumbs}
-          </p>
-          <h1 className="text-xl font-semibold tracking-tight text-ink md:text-2xl dark:text-white">
-            {title}
-          </h1>
+      <div className="flex h-16 items-center justify-between gap-4 px-4 md:px-6">
+        <div className="flex min-w-0 flex-1 items-center gap-3">
+          <SidebarTrigger />
+          <div className="flex min-w-0 flex-col gap-0.5">
+            <p className="text-xs font-medium uppercase tracking-widest text-gray-500 dark:text-gray-400">
+              {breadcrumbs}
+            </p>
+            <h1 className="text-xl font-semibold tracking-tight text-ink md:text-2xl dark:text-white">
+              {title}
+            </h1>
+          </div>
         </div>
 
         <div className="flex items-center gap-2">
