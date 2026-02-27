@@ -1,20 +1,44 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
+import { processAiImport } from "@/src/lib/actions/product";
 
 export function AiImportButton() {
+  const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [importText, setImportText] = useState("");
+  const [isProcessing, setIsProcessing] = useState(false);
 
-  const handleExtract = () => {
-    console.log(importText);
-    setImportText("");
-    setIsModalOpen(false);
+  const handleExtract = async () => {
+    if (!importText.trim() || isProcessing) return;
+    setIsProcessing(true);
+    try {
+      const result = await processAiImport(importText);
+      if (result.success) {
+        setImportText("");
+        setIsModalOpen(false);
+        toast.success("Import berhasil", {
+          description: `${result.count} produk telah disimpan ke inventori.`,
+        });
+        router.refresh();
+      } else {
+        toast.error("Import gagal", { description: result.error });
+      }
+    } catch {
+      toast.error("Import gagal", { description: "Terjadi kesalahan." });
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const handleCancel = () => {
-    setImportText("");
-    setIsModalOpen(false);
+    if (!isProcessing) {
+      setImportText("");
+      setIsModalOpen(false);
+    }
   };
 
   return (
@@ -74,9 +98,17 @@ Kopi Susu harganya 5000"
               <button
                 type="button"
                 onClick={handleExtract}
-                className="inline-flex items-center gap-2 rounded-md border-2 border-primary bg-primary px-4 py-2 font-mono text-sm font-bold text-primary-foreground transition-colors hover:bg-primary/90 dark:border-[#22d3ee] dark:bg-[#22d3ee] dark:text-[#0a0a0a] dark:hover:bg-[#22d3ee]/90"
+                disabled={isProcessing || !importText.trim()}
+                className="inline-flex items-center gap-2 rounded-md border-2 border-primary bg-primary px-4 py-2 font-mono text-sm font-bold text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-70 disabled:cursor-not-allowed dark:border-[#22d3ee] dark:bg-[#22d3ee] dark:text-[#0a0a0a] dark:hover:bg-[#22d3ee]/90"
               >
-                ✨ Ekstrak & Simpan
+                {isProcessing ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Memproses AI...
+                  </>
+                ) : (
+                  "✨ Ekstrak & Simpan"
+                )}
               </button>
             </div>
           </div>

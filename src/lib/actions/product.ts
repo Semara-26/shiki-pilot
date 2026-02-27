@@ -5,7 +5,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { eq, and } from 'drizzle-orm';
 import { z } from 'zod';
-import { embed } from 'ai';
+import { embed, generateText } from 'ai';
 import { google } from '@ai-sdk/google';
 import { createSupabaseClient } from '../supabase/server';
 import { db } from '../../db';
@@ -283,4 +283,68 @@ export async function updateProduct(
     };
   }
   redirect('/dashboard/inventory');
+}
+
+const AI_IMPORT_SYSTEM_PROMPT = `Kamu adalah API ekstraksi data. Ubah teks mentah berikut yang berisi daftar produk menjadi format JSON Array murni (tanpa block code markdown \`\`\`json). Setiap objek harus memiliki key: 'name' (string), 'price' (number integer, hilangkan Rp/titik/koma), dan 'stock' (number, berikan nilai 0 jika tidak disebutkan di teks). Contoh output wajib: [{"name": "Kopi Susu", "price": 5000, "stock": 0}]`;
+
+export type ProcessAiImportResult = { success: true; count: number } | { success: false; error: string };
+
+export async function processAiImport(rawText: string): Promise<ProcessAiImportResult> {
+  try {
+    const { userId } = await auth();
+    if (!userId) {
+      return { success: false, error: 'Anda harus login untuk mengimpor produk.' };
+    }
+
+    const userStore = await db.query.stores.findFirst({
+      where: eq(stores.userId, userId),
+      columns: { id: true },
+    });
+    if (!userStore) {
+      return { success: false, error: 'Buat toko terlebih dahulu.' };
+    }
+
+    const trimmed = rawText?.trim();
+    if (!trimmed) {
+      return { success: false, error: 'Teks kosong. Ketik atau paste daftar produk.' };
+    }
+
+    const { text } = await generateText({
+      model: google('gemini-flash-latest'),
+      system: AI_IMPORT_SYSTEM_PROMPT,
+      prompt: trimmed,
+    });
+
+    const cleaned = text.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
+    const parsed = JSON.parse(cleaned) as Array<{ name: string; price: number; stock: number }>;
+
+    if (!Array.isArray(parsed) || parsed.length === 0) {
+      return { success: false, error: 'AI tidak menemukan produk valid. Coba format teks yang lebih jelas.' };
+    }
+
+    const validItems = parsed.filter(
+      (p) => p && typeof p.name === 'string' && typeof p.price === 'number' && typeof p.stock === 'number'
+    );
+    if (validItems.length === 0) {
+      return { success: false, error: 'Tidak ada produk valid untuk disimpan.' };
+    }
+
+    await db.insert(products).values(
+      validItems.map((p) => ({
+        storeId: userStore.id,
+        name: String(p.name).trim().slice(0, 200),
+        price: Math.max(0, Math.floor(p.price)),
+        stock: Math.max(0, Math.floor(p.stock)),
+        description: String(p.name).trim().slice(0, 5000) || 'Imported via AI',
+      }))
+    );
+
+    revalidatePath('/dashboard/inventory');
+    revalidatePath('/dashboard');
+    return { success: true, count: validItems.length };
+  } catch (err) {
+    console.error('processAiImport error:', err);
+    const message = err instanceof Error ? err.message : 'Gagal memproses import. Coba lagi.';
+    return { success: false, error: message };
+  }
 }
