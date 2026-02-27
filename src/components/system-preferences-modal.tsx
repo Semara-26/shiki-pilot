@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   User,
@@ -435,14 +436,14 @@ export function SystemPreferencesModal({
     }
   }
 
-  return (
+  const modalContent = (
     <AnimatePresence>
       {isOpen && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
+          className="fixed inset-0 z-[110] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
           onClick={onClose}
         >
           <motion.div
@@ -450,102 +451,108 @@ export function SystemPreferencesModal({
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ type: "spring", stiffness: 300, damping: 28 }}
-            className="flex h-[600px] max-h-[90vh] w-full max-w-5xl overflow-hidden rounded-md border-2 border-ink bg-white shadow-neo dark:border-red-500/20 dark:bg-[#0a0a0a] dark:shadow-[0_0_30px_rgba(255,0,0,0.1)]"
+            className="flex h-[90vh] w-[95vw] max-h-screen max-w-4xl overflow-hidden rounded-md border-2 border-ink bg-white shadow-neo dark:border-red-500/20 dark:bg-[#0a0a0a] dark:shadow-[0_0_30px_rgba(255,0,0,0.1)] md:h-[600px]"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Kolom Kiri — Navigasi */}
-            <aside className="flex min-h-0 w-72 shrink-0 flex-col overflow-y-auto border-r-2 border-ink bg-gray-50 dark:border-white/10 dark:bg-surface-dark">
-              <div className="shrink-0 border-b border-ink/20 p-4 dark:border-white/10">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-primary/60 bg-white font-mono text-sm font-semibold text-ink dark:bg-muted dark:text-foreground">
-                    SP
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold uppercase tracking-wide text-ink dark:text-foreground">
-                      SYSTEM PREFS
-                    </p>
-                    <p className="font-mono text-[10px] text-gray-500 dark:text-muted-foreground">
-                      V2.0.4 // ONLINE
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <nav className="min-h-0 flex-1 space-y-0.5 overflow-y-auto p-2">
-                {NAV_TABS.map(({ id, label, icon: Icon }) => {
-                  const isActive = activeTab === label;
-                  return (
-                    <button
-                      key={id}
-                      type="button"
-                      onClick={() => setActiveTab(label)}
-                      className={cn(
-                        "flex w-full items-center gap-3 rounded-sm border-l-2 px-3 py-2.5 text-left text-sm font-bold transition-colors",
-                        isActive
-                          ? "border-primary bg-ink text-white dark:bg-primary dark:text-primary-foreground"
-                          : "border-transparent text-gray-600 hover:bg-gray-200 hover:text-ink dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-white"
-                      )}
-                    >
-                      <Icon className="h-4 w-4 shrink-0" />
-                      {label}
-                    </button>
-                  );
-                })}
-              </nav>
-              <div className="shrink-0 border-t border-ink/20 p-3 font-mono text-[10px] text-gray-500 dark:border-white/10 dark:text-muted-foreground">
-                <p>SERVER: US-EAST-1</p>
-                <p className="mt-1 flex items-center gap-1.5">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                  CONNECTED
-                </p>
-              </div>
-            </aside>
-
-            {/* Kolom Kanan — Konten (Modular Grid) */}
-            <main className="flex flex-1 flex-col overflow-y-auto bg-paper/50 dark:bg-muted/30">
-              <div className="shrink-0 border-b border-ink/20 px-6 py-4 dark:border-white/10">
-                <div className="flex items-center justify-between">
+            <div className="flex h-full w-full flex-col md:flex-row">
+              {/* Menu Navigasi — Horizontal tabs di mobile, sidebar di desktop */}
+              <aside className="flex flex-shrink-0 flex-row overflow-x-auto border-b border-ink/20 bg-gray-50 p-4 dark:border-white/10 dark:bg-surface-dark [&::-webkit-scrollbar]:hidden md:w-64 md:flex-col md:overflow-visible md:border-b-0 md:border-r-2 md:border-ink/20 md:p-0">
+                <div className="hidden shrink-0 border-b border-ink/20 p-4 dark:border-white/10 md:block">
                   <div className="flex items-center gap-3">
-                    <div className="h-8 w-0.5 bg-primary" />
-                    <h2 className="text-lg font-black uppercase tracking-wide text-ink dark:text-white">
-                      USER PROFILE CONFIGURATION
-                    </h2>
-                  </div>
-                  <div className="flex items-center gap-2 rounded border border-primary/40 bg-white px-2 py-1 font-mono text-[10px] text-gray-500 dark:bg-background/80 dark:text-muted-foreground">
-                    <Lock className="h-3 w-3" />
-                    ENCRYPTED CONNECTION
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-primary/60 bg-white font-mono text-sm font-semibold text-ink dark:bg-muted dark:text-foreground">
+                      SP
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold uppercase tracking-wide text-ink dark:text-foreground">
+                        SYSTEM PREFS
+                      </p>
+                      <p className="font-mono text-[10px] text-gray-500 dark:text-muted-foreground">
+                        V2.0.4 // ONLINE
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
-
-              <div className="flex-1 overflow-y-auto p-6">
-                {renderTabContent()}
-              </div>
-
-              {/* Footer Actions */}
-              <div className="shrink-0 border-t border-ink/20 px-6 py-4 dark:border-white/10">
-                <div className="flex items-center justify-between">
-                  <button
-                    type="button"
-                    onClick={onClose}
-                    className="rounded-sm border-2 border-ink bg-white px-4 py-2 font-mono text-xs font-medium text-ink transition-colors hover:bg-gray-100 dark:border-white/20 dark:bg-background/80 dark:text-foreground dark:hover:bg-white/10"
-                  >
-                    CANCEL CHANGES
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleSyncData}
-                    disabled={isSyncing}
-                    className="flex items-center gap-2 rounded-sm bg-primary px-5 py-2 font-mono text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-70 disabled:pointer-events-none"
-                  >
-                    <RefreshCw className={cn("h-3.5 w-3.5", isSyncing && "animate-spin")} />
-                    {isSyncing ? "UPLOADING..." : "SYNC DATA"}
-                  </button>
+                <nav className="flex gap-2 p-2 md:min-h-0 md:flex-1 md:flex-col md:space-y-0.5 md:overflow-y-auto">
+                  {NAV_TABS.map(({ id, label, icon: Icon }) => {
+                    const isActive = activeTab === label;
+                    return (
+                      <button
+                        key={id}
+                        type="button"
+                        onClick={() => setActiveTab(label)}
+                        className={cn(
+                          "flex flex-shrink-0 items-center gap-2 whitespace-nowrap rounded-sm px-3 py-2.5 text-left text-sm font-bold transition-colors md:w-full md:gap-3 md:border-l-2",
+                          isActive
+                            ? "border-primary bg-ink text-white dark:bg-primary dark:text-primary-foreground md:border-l-primary"
+                            : "border-transparent text-gray-600 hover:bg-gray-200 hover:text-ink dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-white md:border-l-transparent"
+                        )}
+                      >
+                        <Icon className="h-4 w-4 shrink-0" />
+                        {label}
+                      </button>
+                    );
+                  })}
+                </nav>
+                <div className="hidden shrink-0 border-t border-ink/20 p-3 font-mono text-[10px] text-gray-500 dark:border-white/10 dark:text-muted-foreground md:block">
+                  <p>SERVER: US-EAST-1</p>
+                  <p className="mt-1 flex items-center gap-1.5">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                    CONNECTED
+                  </p>
                 </div>
-              </div>
-            </main>
+              </aside>
+
+              {/* Area Konten — flex-1, scroll independen */}
+              <main className="flex min-h-0 flex-1 flex-col overflow-hidden bg-paper/50 dark:bg-muted/30">
+                <div className="shrink-0 border-b border-ink/20 px-4 py-3 md:px-6 md:py-4 dark:border-white/10">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="h-8 w-0.5 shrink-0 bg-primary" />
+                      <h2 className="text-base font-black uppercase tracking-wide text-ink dark:text-white md:text-lg">
+                        USER PROFILE CONFIGURATION
+                      </h2>
+                    </div>
+                    <div className="flex shrink-0 items-center gap-2 rounded border border-primary/40 bg-white px-2 py-1 font-mono text-[10px] text-gray-500 dark:bg-background/80 dark:text-muted-foreground">
+                      <Lock className="h-3 w-3" />
+                      ENCRYPTED CONNECTION
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex-1 overflow-y-auto p-4 md:p-6">
+                  {renderTabContent()}
+                </div>
+
+                {/* Footer Actions */}
+                <div className="shrink-0 border-t border-ink/20 px-4 py-3 md:px-6 md:py-4 dark:border-white/10">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <button
+                      type="button"
+                      onClick={onClose}
+                      className="order-2 rounded-sm border-2 border-ink bg-white px-4 py-2 font-mono text-xs font-medium text-ink transition-colors hover:bg-gray-100 dark:border-white/20 dark:bg-background/80 dark:text-foreground dark:hover:bg-white/10 sm:order-1"
+                    >
+                      CANCEL CHANGES
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleSyncData}
+                      disabled={isSyncing}
+                      className="order-1 flex items-center justify-center gap-2 rounded-sm bg-primary px-5 py-2 font-mono text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:pointer-events-none disabled:opacity-70 sm:order-2"
+                    >
+                      <RefreshCw className={cn("h-3.5 w-3.5", isSyncing && "animate-spin")} />
+                      {isSyncing ? "UPLOADING..." : "SYNC DATA"}
+                    </button>
+                  </div>
+                </div>
+              </main>
+            </div>
           </motion.div>
         </motion.div>
       )}
     </AnimatePresence>
   );
+
+  return typeof document !== "undefined"
+    ? createPortal(modalContent, document.body)
+    : null;
 }

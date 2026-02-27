@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { createPortal } from "react-dom";
 import { useUser } from "@clerk/nextjs";
 import { useTheme } from "next-themes";
 import { AnimatePresence, motion } from "framer-motion";
@@ -65,17 +66,16 @@ export function OperatorIdPanel({ isOpen, onClose }: OperatorIdPanelProps) {
     .join("")
     .toUpperCase() || "OP";
 
-  return (
-    <>
+  const panelContent = (
     <AnimatePresence>
       {isOpen && (
         <motion.div
-          initial={{ opacity: 0, y: 20, scale: 0.95 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: 20, scale: 0.95 }}
-          transition={{ duration: 0.2, ease: "easeOut" }}
-          className="fixed bottom-6 left-[80px] z-[100] w-[320px] max-h-[calc(100vh-3rem)] overflow-y-auto rounded-md border-2 border-ink bg-white shadow-neo backdrop-blur-md dark:border-red-500/30 dark:bg-surface-dark dark:shadow-none"
-        >
+        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, y: 10, scale: 0.95 }}
+        transition={{ duration: 0.2, ease: "easeOut" }}
+        className="fixed bottom-4 left-4 z-[100] w-[320px] max-h-[calc(100vh-3rem)] overflow-y-auto rounded-md border-2 border-ink bg-white shadow-neo backdrop-blur-md dark:border-red-500/30 dark:bg-surface-dark dark:shadow-none origin-bottom-left md:left-[272px]"
+      >
           {/* Scanline overlay */}
           <div
             className="pointer-events-none absolute inset-0 z-[1] opacity-[0.03]"
@@ -249,6 +249,12 @@ export function OperatorIdPanel({ isOpen, onClose }: OperatorIdPanelProps) {
         </motion.div>
       )}
     </AnimatePresence>
+  );
+
+  return (
+    <>
+      {typeof document !== "undefined" &&
+        createPortal(panelContent, document.body)}
 
       <SystemPreferencesModal
         isOpen={isPrefsOpen}
