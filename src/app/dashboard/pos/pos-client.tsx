@@ -131,9 +131,9 @@ export function POSClient({ products, storeId }: POSClientProps) {
   };
 
   return (
-    <div className="flex h-full flex-1 flex-col overflow-hidden">
-      {/* Area Katalog & Keranjang - scrollable, mengisi sisa ruang */}
-      <div className="flex flex-1 flex-col overflow-y-auto p-4 md:p-6 gap-6 min-h-0">
+    <div className="flex flex-col">
+      {/* Area Katalog & Keranjang - native scroll */}
+      <div className="flex flex-col p-4 md:p-6 gap-6">
         {/* Katalog Produk */}
         <div className="shrink-0 border-b-2 border-ink dark:border-white/20 bg-white dark:bg-[#0a0a0a] pb-4">
           <p className="mb-3 font-mono text-xs font-bold uppercase tracking-widest text-ink dark:text-gray-300">
@@ -187,8 +187,8 @@ export function POSClient({ products, storeId }: POSClientProps) {
           )}
         </div>
 
-        {/* Keranjang - flex-1 mengisi seluruh sisa ruang di bawah katalog */}
-        <div className="flex flex-1 flex-col min-h-0 overflow-y-auto">
+        {/* Keranjang */}
+        <div className="flex flex-col">
           <p className="mb-3 font-mono text-xs font-bold uppercase tracking-widest text-ink dark:text-gray-300">
             KERANJANG
           </p>
@@ -256,8 +256,8 @@ export function POSClient({ products, storeId }: POSClientProps) {
         </div>
       </div>
 
-      {/* Panel Kalkulator Bawah - statis di akhir flexbox, terdorong keyboard saat muncul */}
-      <div className="flex-shrink-0 border-t border-ink/30 dark:border-white/20 bg-white dark:bg-[#0a0a0a] p-4">
+      {/* Panel Kalkulator - mengikuti scroll alami halaman */}
+      <div className="border-t-2 border-ink dark:border-white/20 bg-white dark:bg-[#0a0a0a] p-4">
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <span className="font-mono text-sm uppercase tracking-wider text-ink dark:text-gray-300">
