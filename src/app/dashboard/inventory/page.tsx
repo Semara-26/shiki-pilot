@@ -6,6 +6,7 @@ import { stores, products } from "@/src/db/schema";
 import { DashboardHeader } from "@/src/components/dashboard-header";
 import { ProductsTable } from "@/src/components/products-table";
 import { PageContainer } from "@/src/components/page-animation";
+import { AiImportButton } from "./ai-import-button";
 
 export default async function InventoryPage() {
   const { userId } = await auth();
@@ -68,6 +69,9 @@ export default async function InventoryPage() {
           />
         </div>
         <div className="flex-1 overflow-y-auto p-6">
+          <div className="mb-6 flex w-full justify-end">
+            <AiImportButton />
+          </div>
           <ProductsTable products={productsList} showActions />
         </div>
       </div>
