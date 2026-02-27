@@ -1,13 +1,12 @@
 "use client";
 
+import { useState } from "react";
 import {
   ResponsiveContainer,
   PieChart,
   Pie,
   Cell,
-  Tooltip,
 } from "recharts";
-import { motion } from "framer-motion";
 import { cn } from "@/src/lib/utils";
 
 const NERV_COLORS = [
@@ -35,31 +34,6 @@ function formatRupiahShort(value: number): string {
   return formatRupiah(value); // Penuh, misal Rp 500.000
 }
 
-interface HoloTooltipProps {
-  active?: boolean;
-  payload?: Array<{ name?: string; value?: number }>;
-}
-
-function HoloTooltip({ active, payload }: HoloTooltipProps) {
-  if (!active || !payload?.length) return null;
-  const item = payload[0];
-  const name = item.name ?? "";
-  const value = (item.value as number) ?? 0;
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 10, scale: 0.95 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ duration: 0.4, ease: "easeOut" }}
-      className="relative z-50 rounded-md border border-white/20 bg-ink p-3 shadow-2xl dark:bg-ink dark:border-white/20"
-    >
-      <p className="mb-1 font-mono text-xs text-white">{name}</p>
-      <p className="font-mono text-xl font-semibold tabular-nums text-white">
-        {formatRupiah(value)}
-      </p>
-    </motion.div>
-  );
-}
-
 export interface AssetDonutProduct {
   name: string;
   price: number;
@@ -77,6 +51,8 @@ export function AssetDonutChart({
   title = "ASSET DISTRIBUTION",
   className,
 }: AssetDonutChartProps) {
+  const [hoveredData, setHoveredData] = useState<{ name: string; value: number } | null>(null);
+
   const chartData = data
     .map((p) => ({
       name: p.name,
@@ -114,37 +90,43 @@ export function AssetDonutChart({
       ) : (
         <>
           {/* Chart area with center text */}
-          <div className="h-[250px] min-h-[250px] w-full shrink-0 relative">
-            <ResponsiveContainer width="100%" height="100%" minWidth={0}>
-              <PieChart>
-                <Pie
-                  data={chartData}
-                  dataKey="value"
-                  nameKey="name"
-                  innerRadius={60}
-                  outerRadius={80}
-                  paddingAngle={1}
-                  stroke="transparent"
-                >
-                  {chartData.map((_, index) => (
-                    <Cell
-                      key={`cell-${index}`}
-                      fill={NERV_COLORS[index % NERV_COLORS.length]}
-                    />
-                  ))}
-                </Pie>
-                <Tooltip content={<HoloTooltip />} />
-              </PieChart>
-            </ResponsiveContainer>
+          <div className="relative h-[250px] min-h-[250px] w-full shrink-0">
             <div
-              className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none"
+              className="h-full w-full"
+              onMouseLeave={() => setHoveredData(null)}
+            >
+              <ResponsiveContainer width="100%" height="100%" minWidth={0}>
+                <PieChart>
+                  <Pie
+                    data={chartData}
+                    dataKey="value"
+                    nameKey="name"
+                    innerRadius={60}
+                    outerRadius={80}
+                    paddingAngle={1}
+                    stroke="transparent"
+                    onMouseEnter={(_, index) => setHoveredData(chartData[index])}
+                    onMouseLeave={() => setHoveredData(null)}
+                  >
+                    {chartData.map((_, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={NERV_COLORS[index % NERV_COLORS.length]}
+                      />
+                    ))}
+                  </Pie>
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+            <div
+              className="pointer-events-none absolute left-1/2 top-1/2 max-w-[140px] -translate-x-1/2 -translate-y-1/2 px-2 text-center"
               aria-hidden
             >
-              <p className="font-mono text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                TOTAL ASSET
+              <p className="truncate font-mono text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                {hoveredData ? hoveredData.name : "TOTAL ASET"}
               </p>
-              <p className="mt-1 font-mono text-base font-bold tabular-nums text-ink sm:text-lg dark:text-white drop-shadow-[0_0_6px_rgba(242,13,13,0.5)]">
-                {formatRupiahShort(totalValue)}
+              <p className="mt-1 truncate font-mono text-base font-bold tabular-nums text-ink drop-shadow-[0_0_6px_rgba(242,13,13,0.5)] sm:text-lg dark:text-white">
+                {hoveredData ? formatRupiahShort(hoveredData.value) : formatRupiahShort(totalValue)}
               </p>
             </div>
           </div>

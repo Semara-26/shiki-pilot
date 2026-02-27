@@ -61,7 +61,7 @@ export default async function DashboardPage() {
     lowStock: lowStock,
   };
 
-  const stockChartData = productsList.slice(0, 5).map((p) => ({
+  const stockChartData = productsList.map((p) => ({
     name: p.name,
     value: p.stock,
   }));

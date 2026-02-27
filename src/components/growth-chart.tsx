@@ -103,51 +103,56 @@ export function GrowthChart({ data, title, className }: GrowthChartProps) {
           {title}
         </p>
       )}
-      <div className="relative mt-4 w-full min-h-[300px] h-[300px]">
-        <ResponsiveContainer width="100%" height="100%" minWidth={0}>
-          <BarChart
-            data={data}
-            margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
-          >
-            <CartesianGrid
-              strokeDasharray="3 3"
-              stroke={gridStroke}
-              strokeOpacity={0.5}
-              vertical={false}
-            />
-            <XAxis
-              dataKey="name"
-              interval={0}
-              tick={{ fill: tickFill, fontSize: 11, angle: -45, textAnchor: "end" }}
-              tickLine={false}
-              axisLine={{ stroke: gridStroke }}
-            />
-            <YAxis
-              tick={{ fill: tickFill, fontSize: 11 }}
-              tickLine={false}
-              axisLine={false}
-              tickFormatter={(v) => String(v)}
-            />
-            <Tooltip
-              content={<HoloTooltip />}
-              cursor={<CustomCursor />}
-            />
-            <Bar
-              dataKey="value"
-              fill={CHART_COLOR}
-              radius={[0, 0, 0, 0]}
-              name="Stock"
-              animationDuration={1500}
-              activeBar={{
-                stroke: "#f20d0d",
-                strokeWidth: 1,
-                fill: "#f20d0d",
-                fillOpacity: 0.8,
-                filter: "drop-shadow(0 0 5px rgba(242,13,13,0.5))",
-              }}
-            />
-          </BarChart>
-        </ResponsiveContainer>
+      <div className="relative mt-4 w-full overflow-x-auto pb-4 custom-scrollbar">
+        <div
+          style={{ minWidth: `${Math.max(data.length * 80, 500)}px` }}
+          className="h-[300px]"
+        >
+          <ResponsiveContainer width="100%" height="100%" minWidth={0}>
+            <BarChart
+              data={data}
+              margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
+            >
+              <CartesianGrid
+                strokeDasharray="3 3"
+                stroke={gridStroke}
+                strokeOpacity={0.5}
+                vertical={false}
+              />
+              <XAxis
+                dataKey="name"
+                interval={0}
+                tick={{ fill: tickFill, fontSize: 11, angle: -45, textAnchor: "end" }}
+                tickLine={false}
+                axisLine={{ stroke: gridStroke }}
+              />
+              <YAxis
+                tick={{ fill: tickFill, fontSize: 11 }}
+                tickLine={false}
+                axisLine={false}
+                tickFormatter={(v) => String(v)}
+              />
+              <Tooltip
+                content={<HoloTooltip />}
+                cursor={<CustomCursor />}
+              />
+              <Bar
+                dataKey="value"
+                fill={CHART_COLOR}
+                radius={[0, 0, 0, 0]}
+                name="Stock"
+                animationDuration={1500}
+                activeBar={{
+                  stroke: "#f20d0d",
+                  strokeWidth: 1,
+                  fill: "#f20d0d",
+                  fillOpacity: 0.8,
+                  filter: "drop-shadow(0 0 5px rgba(242,13,13,0.5))",
+                }}
+              />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
       </div>
     </div>
   );
