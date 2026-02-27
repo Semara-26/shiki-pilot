@@ -74,7 +74,7 @@ export function OperatorIdPanel({ isOpen, onClose }: OperatorIdPanelProps) {
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 20, scale: 0.95 }}
           transition={{ duration: 0.2, ease: "easeOut" }}
-          className="fixed bottom-6 left-[80px] z-[100] w-[320px] overflow-hidden rounded-md border-2 border-ink bg-white shadow-neo backdrop-blur-md dark:border-red-500/30 dark:bg-surface-dark dark:shadow-none"
+          className="fixed bottom-6 left-[80px] z-[100] w-[320px] max-h-[calc(100vh-3rem)] overflow-y-auto rounded-md border-2 border-ink bg-white shadow-neo backdrop-blur-md dark:border-red-500/30 dark:bg-surface-dark dark:shadow-none"
         >
           {/* Scanline overlay */}
           <div

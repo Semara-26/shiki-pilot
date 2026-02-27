@@ -101,7 +101,7 @@ export function Sidebar() {
       </motion.div>
 
       {/* Nav */}
-      <nav className="flex-1 space-y-0.5 overflow-y-auto py-4">
+      <nav className="min-h-0 flex-1 space-y-0.5 overflow-y-auto py-4">
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = item.exact
@@ -135,7 +135,7 @@ export function Sidebar() {
       </nav>
 
       {/* User profile — Operator ID Panel trigger */}
-      <div ref={profileRef} className="relative border-t border-gray-200 p-4 dark:border-white/10">
+      <div ref={profileRef} className="relative shrink-0 border-t border-gray-200 p-4 dark:border-white/10">
         <button
           type="button"
           onClick={() => setIsProfileOpen((v) => !v)}
@@ -196,7 +196,7 @@ export function Sidebar() {
       {/* Sidebar - mobile: slide-in overlay; desktop: always visible */}
       <aside
         className={cn(
-          "group z-50 flex h-full shrink-0 flex-col overflow-hidden border-r border-gray-200 bg-gray-50 text-sidebar-foreground dark:border-white/10 dark:bg-[#0a0a0a] dark:text-sidebar-foreground",
+          "group z-50 flex h-full shrink-0 flex-col overflow-y-auto border-r border-gray-200 bg-gray-50 text-sidebar-foreground dark:border-white/10 dark:bg-[#0a0a0a] dark:text-sidebar-foreground",
           "transition-[transform,width] duration-300 ease-out",
           "fixed inset-y-0 left-0 w-64 md:relative md:inset-auto md:w-20 md:hover:w-64",
           sidebar?.isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"

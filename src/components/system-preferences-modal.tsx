@@ -454,8 +454,8 @@ export function SystemPreferencesModal({
             onClick={(e) => e.stopPropagation()}
           >
             {/* Kolom Kiri — Navigasi */}
-            <aside className="flex w-72 shrink-0 flex-col border-r-2 border-ink bg-gray-50 dark:border-white/10 dark:bg-surface-dark">
-              <div className="border-b border-ink/20 p-4 dark:border-white/10">
+            <aside className="flex min-h-0 w-72 shrink-0 flex-col overflow-y-auto border-r-2 border-ink bg-gray-50 dark:border-white/10 dark:bg-surface-dark">
+              <div className="shrink-0 border-b border-ink/20 p-4 dark:border-white/10">
                 <div className="flex items-center gap-3">
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-primary/60 bg-white font-mono text-sm font-semibold text-ink dark:bg-muted dark:text-foreground">
                     SP
@@ -470,7 +470,7 @@ export function SystemPreferencesModal({
                   </div>
                 </div>
               </div>
-              <nav className="flex-1 space-y-0.5 p-2">
+              <nav className="min-h-0 flex-1 space-y-0.5 overflow-y-auto p-2">
                 {NAV_TABS.map(({ id, label, icon: Icon }) => {
                   const isActive = activeTab === label;
                   return (
@@ -491,7 +491,7 @@ export function SystemPreferencesModal({
                   );
                 })}
               </nav>
-              <div className="border-t border-ink/20 p-3 font-mono text-[10px] text-gray-500 dark:border-white/10 dark:text-muted-foreground">
+              <div className="shrink-0 border-t border-ink/20 p-3 font-mono text-[10px] text-gray-500 dark:border-white/10 dark:text-muted-foreground">
                 <p>SERVER: US-EAST-1</p>
                 <p className="mt-1 flex items-center gap-1.5">
                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
