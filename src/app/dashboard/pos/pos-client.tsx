@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Minus, ShoppingCart } from "lucide-react";
+import { Plus, Minus, ShoppingCart, Search } from "lucide-react";
 import { toast } from "sonner";
 import { createBulkTransactions } from "@/src/lib/actions/transaction";
 import type { POSProduct } from "./page";
@@ -24,7 +24,12 @@ interface POSClientProps {
 export function POSClient({ products, storeId }: POSClientProps) {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [cashReceived, setCashReceived] = useState<string>("");
+  const [searchQuery, setSearchQuery] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const filteredProducts = products.filter((p) =>
+    p.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const grandTotal = cart.reduce((sum, item) => sum + item.price * (Number(item.quantity) || 0), 0);
   const cashNum = parseInt(cashReceived.replace(/\D/g, ""), 10) || 0;
@@ -134,13 +139,29 @@ export function POSClient({ products, storeId }: POSClientProps) {
           <p className="mb-3 font-mono text-xs font-bold uppercase tracking-widest text-ink dark:text-gray-300">
             KATALOG PRODUK
           </p>
+          {products.length > 0 && (
+            <div className="relative mb-4">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500 dark:text-gray-400" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Cari produk..."
+                className="w-full pl-10 pr-4 py-2.5 font-mono text-sm bg-transparent border-b-2 border-ink/50 dark:border-white/30 text-ink dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:border-primary dark:focus:border-[#22d3ee]"
+              />
+            </div>
+          )}
           {products.length === 0 ? (
             <p className="font-mono text-sm text-gray-500 dark:text-gray-400">
               Belum ada produk. Tambah produk di Inventory.
             </p>
+          ) : filteredProducts.length === 0 ? (
+            <p className="font-mono text-sm text-gray-500 dark:text-gray-400">
+              Tidak ada hasil untuk &quot;{searchQuery}&quot;
+            </p>
           ) : (
             <div className="flex flex-row overflow-x-auto gap-4 pb-4 snap-x [&::-webkit-scrollbar]:hidden">
-              {products.map((p) => (
+              {filteredProducts.map((p) => (
                 <button
                   key={p.id}
                   type="button"
