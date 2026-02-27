@@ -107,7 +107,7 @@ export function GrowthChart({ data, title, className }: GrowthChartProps) {
         <ResponsiveContainer width="100%" height="100%" minWidth={0}>
           <BarChart
             data={data}
-            margin={{ top: 10, right: 10, left: -20, bottom: 15 }}
+            margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
           >
             <CartesianGrid
               strokeDasharray="3 3"
@@ -117,14 +117,10 @@ export function GrowthChart({ data, title, className }: GrowthChartProps) {
             />
             <XAxis
               dataKey="name"
-              tick={{ fill: tickFill, fontSize: 11 }}
+              interval={0}
+              tick={{ fill: tickFill, fontSize: 11, angle: -45, textAnchor: "end" }}
               tickLine={false}
               axisLine={{ stroke: gridStroke }}
-              tickFormatter={(value) =>
-                typeof value === "string" && value.length > 10
-                  ? value.substring(0, 10) + "…"
-                  : String(value)
-              }
             />
             <YAxis
               tick={{ fill: tickFill, fontSize: 11 }}

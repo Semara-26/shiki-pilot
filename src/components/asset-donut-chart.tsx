@@ -18,7 +18,6 @@ const NERV_COLORS = [
   "#7f1d1d",
 ];
 
-const LEGEND_MAX_ITEMS = 4;
 
 function formatRupiah(value: number): string {
   return new Intl.NumberFormat("id-ID", {
@@ -51,10 +50,10 @@ function HoloTooltip({ active, payload }: HoloTooltipProps) {
       initial={{ opacity: 0, y: 10, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ duration: 0.4, ease: "easeOut" }}
-      className="rounded-md border border-primary/50 bg-background/90 p-3 shadow-[0_0_20px_rgba(242,13,13,0.3)] backdrop-blur-md"
+      className="relative z-50 rounded-md border border-white/20 bg-ink p-3 shadow-2xl dark:bg-ink dark:border-white/20"
     >
-      <p className="mb-1 font-mono text-xs text-muted-foreground">{name}</p>
-      <p className="font-mono text-xl font-semibold tabular-nums text-foreground drop-shadow-[0_0_8px_rgba(242,13,13,0.8)]">
+      <p className="mb-1 font-mono text-xs text-white">{name}</p>
+      <p className="font-mono text-xl font-semibold tabular-nums text-white">
         {formatRupiah(value)}
       </p>
     </motion.div>
@@ -91,7 +90,7 @@ export function AssetDonutChart({
     percentage: totalValue > 0 ? (d.value / totalValue) * 100 : 0,
   }));
   const sortedByValue = [...chartDataWithPct].sort((a, b) => b.value - a.value);
-  const legendItems = sortedByValue.slice(0, LEGEND_MAX_ITEMS);
+  const legendItems = sortedByValue;
 
   const isEmpty = chartData.length === 0;
 
@@ -150,8 +149,8 @@ export function AssetDonutChart({
             </div>
           </div>
 
-          {/* Custom legend */}
-          <div className="mt-3 flex-1 min-h-0 border-t border-gray-200 pt-3 dark:border-white/10">
+          {/* Custom legend — scrollable agar semua produk muat */}
+          <div className="mt-3 flex-1 min-h-0 max-h-48 overflow-y-auto border-t border-gray-200 pt-3 pr-2 dark:border-white/10">
             <div className="flex flex-col gap-2">
               {legendItems.map((item, index) => (
                 <div

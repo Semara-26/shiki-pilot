@@ -71,7 +71,7 @@ export function SystemPreferencesModal({
         ...prev,
         username: currentProfile.name,
         email: currentProfile.email,
-        storeName: currentProfile.storeName ?? prev.storeName,
+        storeName: currentProfile.storeName?.trim() ? currentProfile.storeName : prev.storeName,
       }));
       setAvatarUrl(currentProfile.avatar ?? "");
     }

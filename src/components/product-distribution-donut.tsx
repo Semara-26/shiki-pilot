@@ -48,14 +48,14 @@ function DonutTooltip({ active, payload }: TooltipProps) {
       initial={{ opacity: 0, y: 10, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ duration: 0.2 }}
-      className="rounded-md border border-ink/30 bg-white p-3 shadow-lg dark:border-white/20 dark:bg-[#0a0a0a]"
+      className="relative z-50 rounded-md border border-white/20 bg-ink p-3 shadow-2xl dark:bg-ink dark:border-white/20"
     >
-      <p className="mb-1 font-mono text-xs text-ink dark:text-gray-300">{name}</p>
-      <p className="font-mono text-base font-semibold tabular-nums text-ink dark:text-gray-100">
+      <p className="mb-1 font-mono text-xs text-white">{name}</p>
+      <p className="font-mono text-base font-semibold tabular-nums text-white">
         {formatRupiah(value)}
       </p>
       {pct != null && (
-        <p className="mt-0.5 font-mono text-xs text-muted-foreground">{pct.toFixed(1)}%</p>
+        <p className="mt-0.5 font-mono text-xs text-white/80">{pct.toFixed(1)}%</p>
       )}
     </motion.div>
   );
@@ -177,9 +177,9 @@ export function ProductDistributionDonut({
               </PieChart>
             </ResponsiveContainer>
           </div>
-          {/* Custom Legend: vertikal agar nama produk tidak terpotong */}
+          {/* Custom Legend: scrollable agar semua produk muat */}
           <div
-            className="flex flex-col gap-2 pt-2 border-t border-gray-200 dark:border-white/10"
+            className="flex max-h-48 flex-col gap-2 overflow-y-auto border-t border-gray-200 pt-2 pr-2 dark:border-white/10"
             role="list"
             aria-label="Keterangan produk"
           >

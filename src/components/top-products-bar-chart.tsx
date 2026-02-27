@@ -80,7 +80,7 @@ export function TopProductsBarChart({ data, title, className }: TopProductsBarCh
           <BarChart
             data={data}
             layout="vertical"
-            margin={{ top: 5, right: 42, left: 10, bottom: 5 }}
+            margin={{ top: 20, right: 42, left: 10, bottom: 60 }}
           >
             <CartesianGrid
               strokeDasharray="3 3"
@@ -98,13 +98,11 @@ export function TopProductsBarChart({ data, title, className }: TopProductsBarCh
             <YAxis
               type="category"
               dataKey="name"
-              tick={{ fill: isDark ? TICK_DARK : TICK_LIGHT, fontSize: 11 }}
+              interval={0}
+              tick={{ fill: isDark ? TICK_DARK : TICK_LIGHT, fontSize: 11, angle: -45, textAnchor: "end" }}
               tickLine={false}
               axisLine={{ stroke: isDark ? GRID_DARK : GRID_LIGHT }}
-              width={100}
-              tickFormatter={(v) =>
-                typeof v === "string" && v.length > 14 ? v.substring(0, 14) + "…" : String(v)
-              }
+              width={120}
             />
             <Tooltip content={<ChartTooltip />} cursor={{ fill: "rgba(0,0,0,0.03)" }} />
             <Bar
