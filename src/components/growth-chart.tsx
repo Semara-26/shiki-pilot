@@ -122,7 +122,9 @@ export function GrowthChart({ data, title, className }: GrowthChartProps) {
               <XAxis
                 dataKey="name"
                 interval={0}
-                tick={{ fill: tickFill, fontSize: 11, angle: -45, textAnchor: "end" }}
+                angle={-45}
+                textAnchor="end"
+                tick={{ fill: tickFill, fontSize: 11 }}
                 tickLine={false}
                 axisLine={{ stroke: gridStroke }}
               />
