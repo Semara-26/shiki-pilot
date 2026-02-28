@@ -14,7 +14,7 @@ function formatRupiah(value: number) {
   }).format(value);
 }
 
-type CartItem = POSProduct & { quantity: number | "" };
+type CartItem = POSProduct & { quantity: number };
 
 interface POSClientProps {
   products: POSProduct[];
@@ -31,7 +31,7 @@ export function POSClient({ products, storeId }: POSClientProps) {
     p.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const grandTotal = cart.reduce((sum, item) => sum + item.price * (Number(item.quantity) || 0), 0);
+  const grandTotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const cashNum = parseInt(cashReceived.replace(/\D/g, ""), 10) || 0;
   const change = Math.max(0, cashNum - grandTotal);
 
@@ -54,31 +54,29 @@ export function POSClient({ products, storeId }: POSClientProps) {
       cart
         .map((c) => {
           if (c.id !== productId) return c;
-          const current = Number(c.quantity) || 0;
-          const qty = Math.max(0, Math.min(c.stock, current + delta));
+          const qty = Math.max(0, Math.min(c.stock, c.quantity + delta));
           return { ...c, quantity: qty };
         })
-        .filter((c) => (Number(c.quantity) || 0) > 0)
+        .filter((c) => c.quantity > 0)
     );
   };
 
-  const setQuantityDirect = (productId: string, value: number | "") => {
+  const setQuantityDirect = (productId: string, value: number) => {
     setCart(
       cart
         .map((c) => {
           if (c.id !== productId) return c;
-          if (value === "") return { ...c, quantity: "" as const };
           const num = value < 0 ? 0 : Math.min(Math.floor(value), 9999);
           const qty = Math.max(0, Math.min(c.stock, num));
           return { ...c, quantity: qty };
         })
-        .filter((c) => c.quantity === "" || (Number(c.quantity) || 0) > 0 || c.id === productId)
+        .filter((c) => c.quantity > 0 || c.id === productId)
     );
   };
 
   const handleQuantityBlur = (productId: string) => {
     const item = cart.find((c) => c.id === productId);
-    if (item && (!item.quantity || item.quantity <= 0)) {
+    if (item && item.quantity <= 0) {
       updateQuantity(productId, 1);
     }
   };
@@ -100,11 +98,11 @@ export function POSClient({ products, storeId }: POSClientProps) {
     setIsSubmitting(true);
     try {
       const items = cart
-        .filter((item) => (Number(item.quantity) || 0) > 0)
+        .filter((item) => item.quantity > 0)
         .map((item) => ({
           productId: item.id,
-          quantity: Number(item.quantity) || 0,
-          totalPrice: item.price * (Number(item.quantity) || 0),
+          quantity: item.quantity,
+          totalPrice: item.price * item.quantity,
         }));
 
       const result = await createBulkTransactions(storeId, items);
@@ -211,8 +209,8 @@ export function POSClient({ products, storeId }: POSClientProps) {
                     {item.name}
                   </p>
                   <p className="font-mono text-xs text-gray-500 dark:text-gray-400">
-                    {formatRupiah(item.price)} × {item.quantity === "" ? "…" : item.quantity} ={" "}
-                    {formatRupiah(item.price * (Number(item.quantity) || 0))}
+                    {formatRupiah(item.price)} × {item.quantity} ={" "}
+                    {formatRupiah(item.price * item.quantity)}
                   </p>
                 </div>
                 <div className="flex items-center gap-1">
@@ -227,11 +225,11 @@ export function POSClient({ products, storeId }: POSClientProps) {
                     type="number"
                     min={0}
                     max={item.stock}
-                    value={item.quantity === "" ? "" : item.quantity}
+                    value={item.quantity}
                     onChange={(e) => {
                       const v = e.target.value;
                       if (v === "") {
-                        setQuantityDirect(item.id, "");
+                        setQuantityDirect(item.id, 0);
                       } else {
                         const num = parseInt(v, 10);
                         if (!Number.isNaN(num)) setQuantityDirect(item.id, num);
@@ -243,7 +241,7 @@ export function POSClient({ products, storeId }: POSClientProps) {
                   <button
                     type="button"
                     onClick={() => updateQuantity(item.id, 1)}
-                    disabled={(Number(item.quantity) || 0) >= item.stock}
+                    disabled={item.quantity >= item.stock}
                     className="flex h-9 w-9 items-center justify-center rounded border-2 border-ink dark:border-white/20 text-ink dark:text-white hover:bg-ink hover:text-white dark:hover:bg-white/20 dark:hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <Plus className="h-4 w-4" />
