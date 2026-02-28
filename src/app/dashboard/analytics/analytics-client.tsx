@@ -6,6 +6,7 @@ import { ArrowLeft, BarChart3, Download } from "lucide-react";
 import { SalesChart } from "@/src/components/sales-chart";
 import { TopProductsBarChart } from "@/src/components/top-products-bar-chart";
 import { ProductDistributionDonut } from "@/src/components/product-distribution-donut";
+import { AiInsightBox } from "@/src/components/ai-insight-box";
 import type { RawTransaction } from "./page";
 
 export type TimeFilter = "daily" | "weekly" | "monthly";
@@ -164,6 +165,15 @@ export function AnalyticsClient({ rawTransactions, hasStore }: AnalyticsClientPr
     [filteredTransactions]
   );
 
+  const chartDataSummary = useMemo(
+    () => ({
+      revenueOverTime: revenueOverTimeData,
+      topProducts: topProductsData,
+      distribution: distributionData,
+    }),
+    [revenueOverTimeData, topProductsData, distributionData]
+  );
+
   const handleExportCSV = () => {
     const headers = ["Tanggal", "Nama Produk", "Kuantitas", "Total Pendapatan (Rp)"];
     const escapeCsv = (val: string | number) => {
@@ -273,6 +283,9 @@ export function AnalyticsClient({ rawTransactions, hasStore }: AnalyticsClientPr
           />
         </div>
       </div>
+
+      {/* Row 3: AI Insight */}
+      <AiInsightBox chartData={chartDataSummary} dateRange={timeFilter} />
     </div>
   );
 }
