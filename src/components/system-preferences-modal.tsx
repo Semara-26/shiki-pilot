@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { toast } from "sonner";
+import { getStoreByUserId, updateStoreInfo } from "@/src/lib/actions/store";
 import {
   User,
   Store,
@@ -43,7 +44,7 @@ const INITIAL_FORM_DATA = {
   username: "",
   email: "",
   storeName: "",
-  businessType: "F&B / Retail",
+  businessType: "",
   contactEmail: "",
   phone: "",
   address: "",
@@ -61,9 +62,31 @@ export function SystemPreferencesModal({
   const [activeTab, setActiveTab] = useState<TabLabel>("ACCOUNT");
   const [formData, setFormData] = useState(INITIAL_FORM_DATA);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [isLoadingStore, setIsLoadingStore] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string>("");
   const [showPassword, setShowPassword] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const loadStoreData = useCallback(async () => {
+    setIsLoadingStore(true);
+    try {
+      const store = await getStoreByUserId();
+      if (store) {
+        setFormData((prev) => ({
+          ...prev,
+          storeName: store.name ?? "",
+          businessType: store.businessType ?? "",
+          contactEmail: store.contactEmail ?? "",
+          phone: store.phone ?? "",
+          address: store.address ?? "",
+        }));
+      }
+    } catch {
+      // ignore
+    } finally {
+      setIsLoadingStore(false);
+    }
+  }, []);
 
   useEffect(() => {
     if (isOpen && currentProfile) {
@@ -71,30 +94,16 @@ export function SystemPreferencesModal({
         ...prev,
         username: currentProfile.name,
         email: currentProfile.email,
-        storeName: currentProfile.storeName?.trim() ? currentProfile.storeName : prev.storeName,
       }));
       setAvatarUrl(currentProfile.avatar ?? "");
     }
   }, [isOpen, currentProfile]);
 
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem("shiki_store_info");
-      if (saved) {
-        const parsed = JSON.parse(saved) as Partial<typeof INITIAL_FORM_DATA>;
-        setFormData((prev) => ({
-          ...prev,
-          storeName: parsed.storeName ?? prev.storeName,
-          businessType: parsed.businessType ?? prev.businessType,
-          contactEmail: parsed.contactEmail ?? prev.contactEmail,
-          phone: parsed.phone ?? prev.phone,
-          address: parsed.address ?? prev.address,
-        }));
-      }
-    } catch {
-      // ignore parse errors
+    if (isOpen) {
+      loadStoreData();
     }
-  }, []);
+  }, [isOpen, loadStoreData]);
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -119,35 +128,38 @@ export function SystemPreferencesModal({
     setFormData((prev) => ({ ...prev, [id]: value }));
   };
 
-  const handleSyncData = () => {
+  const handleSyncData = async () => {
     setIsSyncing(true);
     try {
-      localStorage.setItem(
-        "shiki_store_info",
-        JSON.stringify({
-          storeName: formData.storeName,
-          businessType: formData.businessType,
-          contactEmail: formData.contactEmail,
-          phone: formData.phone,
-          address: formData.address,
-        })
-      );
-    } catch {
-      // ignore
-    }
-    setTimeout(() => {
+      const storeResult = await updateStoreInfo(null, {
+        name: formData.storeName || undefined,
+        businessType: formData.businessType || null,
+        contactEmail: formData.contactEmail || null,
+        phone: formData.phone || null,
+        address: formData.address || null,
+      });
+
+      if (storeResult.error) {
+        toast.error("Gagal menyimpan", { description: storeResult.error });
+        return;
+      }
+
       onSave?.({
         name: formData.username,
         email: formData.email,
         avatar: avatarUrl || undefined,
         storeName: formData.storeName,
       });
+
       toast.success("Data tersimpan", {
         description: "Profil dan info toko telah disinkronkan.",
       });
-      setIsSyncing(false);
       onClose();
-    }, 1500);
+    } catch {
+      toast.error("Gagal menyimpan", { description: "Terjadi kesalahan. Coba lagi." });
+    } finally {
+      setIsSyncing(false);
+    }
   };
 
   const inputClass =
@@ -255,6 +267,27 @@ export function SystemPreferencesModal({
   }
 
   function renderStoreInfoTab() {
+    if (isLoadingStore) {
+      return (
+        <div className="space-y-6">
+          <div>
+            <h3 className="text-base font-bold uppercase tracking-wide text-ink dark:text-white">
+              STORE CONFIGURATION
+            </h3>
+            <p className="mt-1 text-xs text-gray-600 dark:text-gray-400">
+              Memuat data toko...
+            </p>
+          </div>
+          <section className="rounded-md border border-gray-200 bg-gray-50/50 p-4 dark:border-white/10 dark:bg-background/80">
+            <div className="mt-4 space-y-4">
+              <div className="h-10 animate-pulse rounded bg-gray-200 dark:bg-white/10" />
+              <div className="h-10 animate-pulse rounded bg-gray-200 dark:bg-white/10" />
+              <div className="h-10 animate-pulse rounded bg-gray-200 dark:bg-white/10" />
+            </div>
+          </section>
+        </div>
+      );
+    }
     return (
       <div className="space-y-6">
         <div>
@@ -293,6 +326,7 @@ export function SystemPreferencesModal({
                 onChange={handleInputChange}
                 className={inputClass}
               >
+                <option value="" className="text-black dark:text-white">Pilih tipe bisnis</option>
                 <option value="F&B / Retail" className="text-black dark:text-white">F&B / Retail</option>
                 <option value="Services" className="text-black dark:text-white">Services</option>
                 <option value="Manufacturing" className="text-black dark:text-white">Manufacturing</option>
@@ -574,10 +608,10 @@ export function SystemPreferencesModal({
                       type="button"
                       onClick={handleSyncData}
                       disabled={isSyncing}
-                      className="order-1 flex items-center justify-center gap-2 rounded-sm bg-primary px-5 py-2 font-mono text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:pointer-events-none disabled:opacity-70 sm:order-2"
+                      className="order-1 flex min-w-[120px] items-center justify-center gap-2 rounded-sm bg-primary px-5 py-2 font-mono text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-70 sm:order-2"
                     >
-                      <RefreshCw className={cn("h-3.5 w-3.5", isSyncing && "animate-spin")} />
-                      {isSyncing ? "UPLOADING..." : "SYNC DATA"}
+                      <RefreshCw className={cn("h-3.5 w-3.5 shrink-0", isSyncing && "animate-spin")} />
+                      {isSyncing ? "Menyimpan..." : "SYNC DATA"}
                     </button>
                   </div>
                 </div>

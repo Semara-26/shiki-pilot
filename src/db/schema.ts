@@ -7,6 +7,10 @@ export const stores = pgTable('stores', {
   name: text('name').notNull(),
   slug: text('slug').notNull().unique(),
   description: text('description'),
+  businessType: text('business_type'),
+  contactEmail: text('contact_email'),
+  phone: text('phone'),
+  address: text('address'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 

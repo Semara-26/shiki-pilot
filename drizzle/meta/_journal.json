@@ -15,6 +15,13 @@
       "when": 1772014933829,
       "tag": "0001_mean_jasper_sitwell",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1772259049947,
+      "tag": "0002_add_store_info_columns",
+      "breakpoints": true
     }
   ]
 }
