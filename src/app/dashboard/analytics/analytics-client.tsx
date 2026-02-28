@@ -37,6 +37,7 @@ const FALLBACK_RAW: RawTransaction[] = (() => {
 interface AnalyticsClientProps {
   rawTransactions: RawTransaction[];
   hasStore: boolean;
+  businessName?: string;
 }
 
 function processRevenueOverTime(
@@ -140,7 +141,7 @@ const DAYS_BY_FILTER: Record<TimeFilter, number> = {
   monthly: 365, // 12 months
 };
 
-export function AnalyticsClient({ rawTransactions, hasStore }: AnalyticsClientProps) {
+export function AnalyticsClient({ rawTransactions, hasStore, businessName }: AnalyticsClientProps) {
   const [timeFilter, setTimeFilter] = useState<TimeFilter>("weekly");
   const txs = rawTransactions.length > 0 ? rawTransactions : FALLBACK_RAW;
 
@@ -285,7 +286,11 @@ export function AnalyticsClient({ rawTransactions, hasStore }: AnalyticsClientPr
       </div>
 
       {/* Row 3: AI Insight */}
-      <AiInsightBox chartData={chartDataSummary} dateRange={timeFilter} />
+      <AiInsightBox
+        chartData={chartDataSummary}
+        timeFilter={timeFilter}
+        businessName={businessName}
+      />
     </div>
   );
 }

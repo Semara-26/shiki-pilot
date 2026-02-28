@@ -12,15 +12,28 @@ export interface ChartDataSummary {
 
 interface AiInsightBoxProps {
   chartData: ChartDataSummary;
+  /** daily | weekly | monthly */
+  timeFilter?: string;
+  /** Nama toko/bisnis (opsional, dari profil user) */
+  businessName?: string;
+  /** @deprecated use timeFilter */
   dateRange?: string;
   className?: string;
 }
 
-async function fetchInsight(data: ChartDataSummary, dateRange?: string): Promise<string> {
+async function fetchInsight(
+  chartData: ChartDataSummary,
+  timeFilter?: string,
+  businessName?: string
+): Promise<string> {
   const res = await fetch("/api/ai/insight", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ data, dateRange }),
+    body: JSON.stringify({
+      chartData,
+      timeFilter: timeFilter ?? "weekly",
+      ...(businessName && { businessName }),
+    }),
   });
   if (!res.ok) throw new Error("Gagal mengambil insight");
   const json = await res.json();
@@ -29,9 +42,12 @@ async function fetchInsight(data: ChartDataSummary, dateRange?: string): Promise
 
 export function AiInsightBox({
   chartData,
-  dateRange = "weekly",
+  timeFilter,
+  dateRange,
+  businessName,
   className,
 }: AiInsightBoxProps) {
+  const filter = timeFilter ?? dateRange ?? "weekly";
   const [insight, setInsight] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
@@ -39,14 +55,14 @@ export function AiInsightBox({
     setIsLoading(true);
     setInsight("");
     try {
-      const text = await fetchInsight(chartData, dateRange);
+      const text = await fetchInsight(chartData, filter, businessName);
       setInsight(text);
     } catch {
       setInsight("Maaf, tidak dapat memuat insight saat ini.");
     } finally {
       setIsLoading(false);
     }
-  }, [chartData, dateRange]);
+  }, [chartData, filter, businessName]);
 
   useEffect(() => {
     loadInsight();

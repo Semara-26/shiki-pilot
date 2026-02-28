@@ -20,7 +20,7 @@ export default async function AnalyticsPage() {
   const userStore = userId
     ? await db.query.stores.findFirst({
         where: eq(stores.userId, userId),
-        columns: { id: true },
+        columns: { id: true, name: true },
       })
     : null;
 
@@ -72,6 +72,7 @@ export default async function AnalyticsPage() {
         <AnalyticsClient
           rawTransactions={rawTransactions}
           hasStore={!!userStore}
+          businessName={userStore?.name}
         />
       </div>
     </div>
