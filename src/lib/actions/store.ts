@@ -150,7 +150,7 @@ export type UpdateStoreInfoState = { success?: boolean; error?: string };
 
 /** Update info toko (Store Info tab di System Preferences) */
 export async function updateStoreInfo(
-  _prevState: UpdateStoreInfoState,
+  _prevState: UpdateStoreInfoState | null,
   data: {
     name?: string;
     businessType?: string | null;
