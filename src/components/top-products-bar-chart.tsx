@@ -99,7 +99,9 @@ export function TopProductsBarChart({ data, title, className }: TopProductsBarCh
               type="category"
               dataKey="name"
               interval={0}
-              tick={{ fill: isDark ? TICK_DARK : TICK_LIGHT, fontSize: 11, angle: -45, textAnchor: "end" }}
+              angle={-45}
+              textAnchor="end"
+              tick={{ fill: isDark ? TICK_DARK : TICK_LIGHT, fontSize: 11 }}
               tickLine={false}
               axisLine={{ stroke: isDark ? GRID_DARK : GRID_LIGHT }}
               width={120}
