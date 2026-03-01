@@ -2,14 +2,13 @@ import type { Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
 import { ThemeProvider } from "next-themes";
 import { Toaster } from "sonner";
-import { IBM_Plex_Sans_Condensed } from "next/font/google";
+import { Poppins } from "next/font/google";
 import "./globals.css";
 
-const ibmPlexSansCondensed = IBM_Plex_Sans_Condensed({
-  weight: ["400", "500", "600", "700"],
+const poppins = Poppins({
   subsets: ["latin"],
-  variable: "--font-mono",
-  display: "swap",
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-poppins",
 });
 
 export const metadata: Metadata = {
@@ -25,7 +24,7 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en" suppressHydrationWarning>
-        <body className={ibmPlexSansCondensed.variable}>
+        <body className={`${poppins.variable} font-sans antialiased`}>
           <ThemeProvider attribute="class" defaultTheme="dark">
             <Toaster
               theme="dark"

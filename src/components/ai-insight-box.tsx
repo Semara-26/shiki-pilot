@@ -35,8 +35,12 @@ async function fetchInsight(
       ...(businessName && { businessName }),
     }),
   });
-  if (!res.ok) throw new Error("Gagal mengambil insight");
-  const json = await res.json();
+  const json = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(
+      (json as { error?: string }).error ?? "Maaf, tidak dapat memuat insight saat ini."
+    );
+  }
   return json.insight ?? json.message ?? "";
 }
 
@@ -57,8 +61,10 @@ export function AiInsightBox({
     try {
       const text = await fetchInsight(chartData, filter, businessName);
       setInsight(text);
-    } catch {
-      setInsight("Maaf, tidak dapat memuat insight saat ini.");
+    } catch (err) {
+      setInsight(
+        err instanceof Error ? err.message : "Maaf, tidak dapat memuat insight saat ini."
+      );
     } finally {
       setIsLoading(false);
     }

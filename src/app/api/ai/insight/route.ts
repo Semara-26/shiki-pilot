@@ -2,6 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import { generateText } from "ai";
 import { google } from "@ai-sdk/google";
 import { NextResponse } from "next/server";
+import { checkRateLimit } from "@/src/lib/rate-limit";
 
 const PROMPT_TEMPLATE = `Kamu adalah asisten bisnis UMKM yang santai tapi analitis. Bisnis ini beroperasi dengan nama {businessName} dan menjual produk-produk seperti: {productNames}. Berdasarkan data penjualan periode {timeFilter} berikut: {chartDataJson}, berikan insight singkat maksimal 3 kalimat. Soroti tren utama dan berikan satu saran praktis (actionable). Gunakan bahasa Indonesia sehari-hari yang luwes, jangan terdengar seperti robot, dan hindari menyebutkan ulang angka mentah secara kaku.`;
 
@@ -37,6 +38,14 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const { allowed } = await checkRateLimit(userId);
+    if (!allowed) {
+      return NextResponse.json(
+        { error: "Asisten AI sedang memproses banyak data, mohon tunggu sekitar satu menit." },
+        { status: 429 }
+      );
+    }
+
     const body = await req.json().catch(() => ({}));
     const { chartData, timeFilter, businessName } = body;
 
@@ -60,7 +69,11 @@ export async function POST(req: Request) {
   } catch (err) {
     console.error("AI insight API error:", err);
     return NextResponse.json(
-      { error: "Terjadi kesalahan", insight: "" },
+      {
+        error:
+          "Maaf, asisten AI sedang mengalami gangguan koneksi. Silakan coba beberapa saat lagi.",
+        insight: "",
+      },
       { status: 500 }
     );
   }

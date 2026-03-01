@@ -4,8 +4,12 @@ import { useState, useRef, useEffect } from 'react';
 import { useChat } from '@ai-sdk/react';
 import { DefaultChatTransport } from 'ai';
 import ReactMarkdown from 'react-markdown';
+import { toast } from 'sonner';
 import { DashboardHeader } from '@/src/components/dashboard-header';
 import { saveMessage } from '@/src/lib/actions/chat';
+
+const AI_ERROR_MESSAGE =
+  'Maaf, asisten AI sedang mengalami gangguan koneksi. Silakan coba beberapa saat lagi.';
 
 export type UIMessageLike = {
   id: string;
@@ -65,6 +69,14 @@ export function ChatClient({ chatId, initialMessages }: ChatClientProps) {
       setPendingUserMessage(null);
     }
   }, [messages, pendingUserMessage]);
+
+  useEffect(() => {
+    if (error) {
+      toast.error(error.message || AI_ERROR_MESSAGE, {
+        duration: 5000,
+      });
+    }
+  }, [error]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -166,12 +178,6 @@ export function ChatClient({ chatId, initialMessages }: ChatClientProps) {
             </div>
           )}
         </div>
-
-        {error && (
-          <div className="border-t border-destructive/50 bg-destructive/10 px-4 py-2">
-            <p className="font-mono text-sm text-destructive">{error.message}</p>
-          </div>
-        )}
 
         <form
           onSubmit={handleSubmit}

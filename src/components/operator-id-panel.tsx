@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { createPortal } from "react-dom";
-import { useUser } from "@clerk/nextjs";
+import { useUser, useClerk } from "@clerk/nextjs";
 import { useTheme } from "next-themes";
 import { AnimatePresence, motion } from "framer-motion";
 import {
@@ -33,6 +33,7 @@ interface OperatorIdPanelProps {
 export function OperatorIdPanel({ isOpen, onClose }: OperatorIdPanelProps) {
   const { theme, setTheme } = useTheme();
   const { user, isLoaded } = useUser();
+  const { signOut } = useClerk();
   const [isPrefsOpen, setIsPrefsOpen] = useState(false);
   const [isDocOpen, setIsDocOpen] = useState(false);
   const [localOverrides, setLocalOverrides] = useState<Partial<{
@@ -232,7 +233,7 @@ export function OperatorIdPanel({ isOpen, onClose }: OperatorIdPanelProps) {
             <div className="p-4">
               <button
                 type="button"
-                onClick={onClose}
+                onClick={() => signOut({ redirectUrl: "/" })}
                 className="flex w-full items-center justify-center gap-2 rounded-md border-2 border-ink bg-white py-3 font-mono text-sm font-semibold text-primary transition-colors hover:bg-red-50 dark:border-primary/50 dark:bg-transparent dark:hover:bg-primary dark:hover:text-primary-foreground"
               >
                 <Power className="h-4 w-4" />

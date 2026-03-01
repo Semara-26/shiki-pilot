@@ -6,6 +6,7 @@ import { streamText, convertToModelMessages } from 'ai';
 import { db } from '../../../db';
 import { stores } from '../../../db/schema';
 import { products } from '../../../db/schema';
+import { checkRateLimit } from '@/src/lib/rate-limit';
 
 const EMBEDDING_DIMENSIONS = 768;
 const RAG_TOP_K = 3;
@@ -23,6 +24,14 @@ export async function POST(req: Request) {
     const { userId } = await auth();
     if (!userId) {
       return new Response('Unauthorized', { status: 401 });
+    }
+
+    const { allowed } = await checkRateLimit(userId);
+    if (!allowed) {
+      return new Response(
+        JSON.stringify({ error: 'Asisten AI sedang memproses banyak data, mohon tunggu sekitar satu menit.' }),
+        { status: 429, headers: { 'Content-Type': 'application/json' } }
+      );
     }
 
     const userStore = await db.query.stores.findFirst({
@@ -111,8 +120,14 @@ export async function POST(req: Request) {
   } catch (err) {
     console.error('Chat API error:', err);
     return new Response(
-      err instanceof Error ? err.message : 'Terjadi kesalahan',
-      { status: 500 }
+      JSON.stringify({
+        error:
+          'Maaf, asisten AI sedang mengalami gangguan koneksi. Silakan coba beberapa saat lagi.',
+      }),
+      {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      }
     );
   }
 }
