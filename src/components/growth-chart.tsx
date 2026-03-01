@@ -8,6 +8,7 @@ import {
   YAxis,
   Tooltip,
   CartesianGrid,
+  LabelList,
 } from "recharts";
 import { useTheme } from "next-themes";
 import { motion } from "framer-motion";
@@ -17,10 +18,9 @@ const CHART_COLOR = "#f20d0d";
 
 type CursorShape = { x?: number; y?: number; width?: number; height?: number };
 
-/** Targeting Laser cursor: subtle highlight + vertical dashed line at bar center */
+/** Targeting Laser cursor: subtle highlight for horizontal bar */
 function CustomCursor({ x, y, width, height }: CursorShape) {
   if (width == null || height == null || x == null || y == null) return null;
-  const centerX = x + width / 2;
   return (
     <g className="pointer-events-none">
       <rect
@@ -28,16 +28,7 @@ function CustomCursor({ x, y, width, height }: CursorShape) {
         y={y}
         width={width}
         height={height}
-        fill="rgba(242, 13, 13, 0.05)"
-      />
-      <line
-        x1={centerX}
-        y1={y}
-        x2={centerX}
-        y2={y + height}
-        stroke={CHART_COLOR}
-        strokeWidth={1}
-        strokeDasharray="3 3"
+        fill="rgba(242, 13, 13, 0.08)"
       />
     </g>
   );
@@ -85,6 +76,58 @@ const GRID_STROKE_DARK = "rgba(255,255,255,0.1)";
 const TICK_FILL_LIGHT = "#6b7280";
 const TICK_FILL_DARK = "#9ca3af";
 
+const MAX_CHARS_PER_LINE = 18;
+
+/** Pecah teks panjang untuk label YAxis (satu kolom penuh) */
+function wrapLabelText(text: string): string[] {
+  if (!text || text.length <= MAX_CHARS_PER_LINE) return [text];
+  const words = text.split(/\s+/);
+  const lines: string[] = [];
+  let current = "";
+  for (const w of words) {
+    if (current.length + w.length + 1 <= MAX_CHARS_PER_LINE) {
+      current += (current ? " " : "") + w;
+    } else {
+      if (current) lines.push(current);
+      current = w.length > MAX_CHARS_PER_LINE ? w.slice(0, MAX_CHARS_PER_LINE) : w;
+    }
+  }
+  if (current) lines.push(current);
+  return lines;
+}
+
+interface WrappedYAxisTickProps {
+  x?: number;
+  y?: number;
+  payload?: { value?: string; name?: string };
+  fill?: string;
+  fontSize?: number;
+}
+
+function WrappedYAxisTick({ x = 0, y = 0, payload, fill, fontSize = 11 }: WrappedYAxisTickProps) {
+  const text = payload?.value ?? payload?.name ?? "";
+  const lines = wrapLabelText(text);
+  const lineHeight = fontSize + 2;
+
+  return (
+    <g transform={`translate(${x}, ${y})`}>
+      <text
+        textAnchor="end"
+        fill={fill}
+        fontSize={fontSize}
+        fontFamily="monospace"
+        style={{ fontWeight: 500 }}
+      >
+        {lines.map((line, i) => (
+          <tspan key={i} x={0} dy={i === 0 ? 0 : lineHeight}>
+            {line}
+          </tspan>
+        ))}
+      </text>
+    </g>
+  );
+}
+
 export function GrowthChart({ data, title, className }: GrowthChartProps) {
   const { resolvedTheme } = useTheme();
   const isDark = resolvedTheme === "dark";
@@ -103,36 +146,38 @@ export function GrowthChart({ data, title, className }: GrowthChartProps) {
           {title}
         </p>
       )}
-      <div className="relative mt-4 w-full overflow-x-auto pb-4 custom-scrollbar">
+      <div className="relative mt-4 max-h-[320px] w-full overflow-y-auto overflow-x-hidden custom-scrollbar">
         <div
-          style={{ minWidth: `${Math.max(data.length * 80, 500)}px` }}
-          className="h-[300px]"
+          style={{ height: `${Math.max(data.length * 44, 280)}px` }}
+          className="w-full"
         >
-          <ResponsiveContainer width="100%" height="100%" minWidth={0}>
+          <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
             <BarChart
               data={data}
-              margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
+              layout="vertical"
+              margin={{ top: 10, right: 50, left: 8, bottom: 10 }}
             >
               <CartesianGrid
                 strokeDasharray="3 3"
                 stroke={gridStroke}
                 strokeOpacity={0.5}
-                vertical={false}
+                horizontal={false}
               />
               <XAxis
-                dataKey="name"
-                interval={0}
-                angle={-45}
-                textAnchor="end"
+                type="number"
                 tick={{ fill: tickFill, fontSize: 11 }}
                 tickLine={false}
                 axisLine={{ stroke: gridStroke }}
+                tickFormatter={(v) => String(Math.round(Number(v)))}
               />
               <YAxis
-                tick={{ fill: tickFill, fontSize: 11 }}
+                type="category"
+                dataKey="name"
+                interval={0}
+                width={140}
                 tickLine={false}
-                axisLine={false}
-                tickFormatter={(v) => String(v)}
+                axisLine={{ stroke: gridStroke }}
+                tick={<WrappedYAxisTick fill={tickFill} fontSize={11} />}
               />
               <Tooltip
                 content={<HoloTooltip />}
@@ -141,9 +186,10 @@ export function GrowthChart({ data, title, className }: GrowthChartProps) {
               <Bar
                 dataKey="value"
                 fill={CHART_COLOR}
-                radius={[0, 0, 0, 0]}
+                radius={[0, 4, 4, 0]}
                 name="Stock"
                 animationDuration={1500}
+                barSize={28}
                 activeBar={{
                   stroke: "#f20d0d",
                   strokeWidth: 1,
@@ -151,7 +197,14 @@ export function GrowthChart({ data, title, className }: GrowthChartProps) {
                   fillOpacity: 0.8,
                   filter: "drop-shadow(0 0 5px rgba(242,13,13,0.5))",
                 }}
-              />
+              >
+                <LabelList
+                  dataKey="value"
+                  position="right"
+                  fill={tickFill}
+                  fontSize={11}
+                />
+              </Bar>
             </BarChart>
           </ResponsiveContainer>
         </div>
