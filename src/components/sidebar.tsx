@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
@@ -86,17 +87,17 @@ export function Sidebar() {
         <Link
           href="/dashboard"
           onClick={sidebar?.close}
-          className="flex h-16 shrink-0 items-center gap-3 border-b border-gray-200 px-4 transition-colors hover:bg-white dark:border-white/10 dark:hover:bg-white/5"
+          className="flex h-20 shrink-0 items-center gap-3 border-b border-gray-200 px-4 transition-colors hover:bg-white dark:border-white/10 dark:hover:bg-white/5"
         >
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground">
-          <span className="font-mono text-lg font-bold">会社</span>
-        </div>
-        <span className={cn(
-          "whitespace-nowrap text-sm font-semibold tracking-[0.2em] text-gray-700 transition-opacity duration-200 dark:text-sidebar-foreground",
-          sidebar?.isOpen ? "block opacity-100" : "hidden opacity-0 group-hover:block group-hover:opacity-100 md:group-hover:block md:group-hover:opacity-100"
-        )}>
-          SHIKIPILOT
-        </span>
+          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-md">
+            <Image src="/icon.png" alt="ShikiPilot" width={80} height={80} className="object-contain" />
+          </div>
+          <span className={cn(
+            "whitespace-nowrap text-xl font-black tracking-[0.15em] text-gray-700 transition-opacity duration-200 dark:text-sidebar-foreground",
+            sidebar?.isOpen ? "block opacity-100" : "hidden opacity-0 group-hover:block group-hover:opacity-100 md:group-hover:block md:group-hover:opacity-100"
+          )}>
+            SHIKIPILOT
+          </span>
         </Link>
       </motion.div>
 

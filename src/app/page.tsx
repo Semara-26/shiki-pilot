@@ -1,4 +1,44 @@
+"use client";
+
+import Image from "next/image";
 import Link from "next/link";
+import { motion } from "framer-motion";
+import { Instagram, Linkedin, Github } from "lucide-react";
+
+/* ── Reusable animation wrappers ── */
+const fadeUp = (delay = 0) => ({
+  initial: { opacity: 0, y: 32 },
+  whileInView: { opacity: 1, y: 0 },
+  viewport: { once: true, margin: "-60px" },
+  transition: { duration: 0.55, delay, ease: "easeOut" as const },
+});
+
+const fadeLeft = (delay = 0) => ({
+  initial: { opacity: 0, x: -40 },
+  whileInView: { opacity: 1, x: 0 },
+  viewport: { once: true, margin: "-60px" },
+  transition: { duration: 0.6, delay, ease: "easeOut" as const },
+});
+
+const fadeRight = (delay = 0) => ({
+  initial: { opacity: 0, x: 40 },
+  whileInView: { opacity: 1, x: 0 },
+  viewport: { once: true, margin: "-60px" },
+  transition: { duration: 0.6, delay, ease: "easeOut" as const },
+});
+
+/* ── Logo component ── */
+function ShikiLogo({ size = 56, className = "" }: { size?: number; className?: string }) {
+  return (
+    <Image
+      src="/icon.png"
+      alt="ShikiPilot"
+      width={size}
+      height={size}
+      className={`object-contain ${className}`}
+    />
+  );
+}
 
 export default function Home() {
   return (
@@ -7,38 +47,60 @@ export default function Home() {
 
         {/* ── Header ── */}
         <header className="w-full border-b border-surface-border bg-background-dark/80 backdrop-blur-md fixed top-0 z-50">
-          <div className="max-w-[1280px] mx-auto px-6 h-16 flex items-center justify-between">
+          <div className="max-w-[1280px] mx-auto px-6 h-20 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="size-8 text-primary">
-                <span className="material-symbols-outlined text-3xl">rocket_launch</span>
-              </div>
-              <h2 className="text-white text-xl font-black tracking-tight">ShikiPilot</h2>
+              <ShikiLogo size={80} className="h-10 w-10 md:h-16 md:w-16" />
+              <h2 className="text-white text-2xl md:text-3xl font-black tracking-tight">ShikiPilot</h2>
             </div>
           </div>
         </header>
 
-        <main className="flex-grow pt-16">
+        <main className="flex-grow pt-20">
 
           {/* ── Hero ── */}
           <section className="relative px-6 py-20 lg:py-32 flex flex-col items-center justify-center text-center bg-background-dark">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-primary/10 via-transparent to-transparent opacity-40 pointer-events-none"></div>
             <div className="relative max-w-4xl mx-auto flex flex-col gap-8 z-10">
-              <div className="inline-flex items-center justify-center gap-2 px-3 py-1 rounded-full bg-surface-dark border border-surface-border mx-auto mb-4">
+
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5, ease: "easeOut" }}
+                className="inline-flex items-center justify-center gap-2 px-3 py-1 rounded-full bg-surface-dark border border-surface-border mx-auto mb-4"
+              >
                 <span className="relative flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
                 </span>
                 <span className="text-xs font-medium text-text-muted tracking-wide uppercase">OPERASIONAL SISTEM NORMAL</span>
-              </div>
-              <h1 className="text-5xl md:text-6xl lg:text-7xl font-black leading-tight tracking-tight text-white drop-shadow-lg">
+              </motion.div>
+
+              <motion.h1
+                initial={{ opacity: 0, y: 24 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.65, delay: 0.1, ease: "easeOut" }}
+                className="text-5xl md:text-6xl lg:text-7xl font-black leading-tight tracking-tight text-white drop-shadow-lg"
+              >
                 Sistem Manajemen Inventaris &amp; Micro-POS Cerdas{" "}
                 <br className="hidden md:block" />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-white to-text-muted">untuk Bisnismu</span>
-              </h1>
-              <p className="text-lg md:text-xl text-text-muted max-w-2xl mx-auto leading-relaxed">
+              </motion.h1>
+
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.25, ease: "easeOut" }}
+                className="text-lg md:text-xl text-text-muted max-w-2xl mx-auto leading-relaxed"
+              >
                 Kelola inventaris dan transaksi dengan mudah dalam satu platform yang terintegrasi, modern, dan dirancang untuk kecepatan.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center mt-4">
+              </motion.p>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.4, ease: "easeOut" }}
+                className="flex flex-col sm:flex-row gap-4 justify-center mt-4"
+              >
                 <Link
                   href="/dashboard"
                   className="group relative inline-flex h-12 items-center justify-center overflow-hidden rounded-lg bg-primary px-8 font-bold text-white transition-all duration-300 hover:bg-primary-hover hover:scale-105 hover:shadow-[0_0_20px_-5px_#f20d0d]"
@@ -48,24 +110,25 @@ export default function Home() {
                     <span className="material-symbols-outlined transition-transform group-hover:translate-x-1 text-lg">arrow_forward</span>
                   </span>
                 </Link>
-              </div>
+              </motion.div>
+
             </div>
           </section>
 
           {/* ── System Modules ── */}
           <section className="px-6 py-24 bg-[#0a0a0a] border-y border-surface-border relative overflow-hidden">
             <div className="max-w-[1280px] mx-auto">
-              <div className="text-center mb-20">
+
+              <motion.div {...fadeUp()} className="text-center mb-20">
                 <h2 className="text-3xl md:text-5xl font-black text-white mb-4 tracking-tight">System Modules</h2>
                 <p className="max-w-2xl mx-auto font-mono text-xs uppercase tracking-widest text-primary">Eksplorasi Ekosistem ShikiPilot</p>
-              </div>
+              </motion.div>
 
               <div className="flex flex-col gap-32">
 
                 {/* ── Module 1: Dashboard ── */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                  {/* Mock */}
-                  <div className="order-2 lg:order-1 relative group">
+                  <motion.div {...fadeRight(0.1)} className="order-2 lg:order-1 relative group">
                     <div className="absolute -inset-1 bg-gradient-to-r from-primary to-red-900 rounded-xl blur opacity-10 group-hover:opacity-30 transition duration-1000 group-hover:duration-200"></div>
                     <div className="relative rounded-xl bg-surface-dark border border-surface-border overflow-hidden shadow-2xl">
                       <div className="flex items-center gap-2 px-4 py-2 border-b border-surface-border bg-[#050505]">
@@ -83,16 +146,16 @@ export default function Home() {
                           <div className="space-y-3 flex-1 overflow-hidden">
                             {[
                               { name: "Kerupuk Tuna Bawang", pct: "100%", val: "100" },
-                              { name: "Kerupuk Tuna Pedas", pct: "100%", val: "100" },
-                              { name: "Tuna Rasa Sayange", pct: "75%", val: "75" },
+                              { name: "Kerupuk Tuna Pedas",  pct: "100%", val: "100" },
+                              { name: "Tuna Rasa Sayange",   pct: "75%",  val: "75"  },
                               { name: "Kerupuk Tuna Original", pct: "80%", val: "80" },
-                              { name: "Kerupuk udang kecil", pct: "20%", val: "20" },
-                              { name: "Kerupuk cumi pedas", pct: "70%", val: "70" },
+                              { name: "Kerupuk udang kecil", pct: "20%",  val: "20"  },
+                              { name: "Kerupuk cumi pedas",  pct: "70%",  val: "70"  },
                             ].map((item) => (
                               <div key={item.name} className="flex items-center gap-2 text-[8px]">
                                 <span className="w-24 text-right truncate text-text-muted">{item.name}</span>
                                 <div className="flex-1 h-3 bg-surface-dark rounded-sm overflow-hidden relative border border-surface-border">
-                                  <div className={`absolute top-0 left-0 h-full bg-primary`} style={{ width: item.pct }}></div>
+                                  <div className="absolute top-0 left-0 h-full bg-primary" style={{ width: item.pct }}></div>
                                 </div>
                                 <span className="w-6 text-right">{item.val}</span>
                               </div>
@@ -144,9 +207,9 @@ export default function Home() {
                         </div>
                       </div>
                     </div>
-                  </div>
-                  {/* Copy */}
-                  <div className="order-1 lg:order-2">
+                  </motion.div>
+
+                  <motion.div {...fadeLeft(0.2)} className="order-1 lg:order-2">
                     <div className="flex items-center gap-3 mb-4">
                       <span className="material-symbols-outlined text-primary text-3xl">dashboard</span>
                       <h3 className="text-2xl font-bold text-white tracking-tight">Dashboard Interaktif</h3>
@@ -160,13 +223,12 @@ export default function Home() {
                         </li>
                       ))}
                     </ul>
-                  </div>
+                  </motion.div>
                 </div>
 
                 {/* ── Module 2: Inventory ── */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                  {/* Copy */}
-                  <div className="order-1">
+                  <motion.div {...fadeLeft(0.1)} className="order-1">
                     <div className="flex items-center gap-3 mb-4">
                       <span className="material-symbols-outlined text-primary text-3xl">inventory_2</span>
                       <h3 className="text-2xl font-bold text-white tracking-tight">Manajemen Aset Lengkap</h3>
@@ -180,9 +242,9 @@ export default function Home() {
                         </li>
                       ))}
                     </ul>
-                  </div>
-                  {/* Mock */}
-                  <div className="order-2 relative group">
+                  </motion.div>
+
+                  <motion.div {...fadeRight(0.2)} className="order-2 relative group">
                     <div className="absolute -inset-1 bg-gradient-to-l from-primary to-red-900 rounded-xl blur opacity-10 group-hover:opacity-30 transition duration-1000 group-hover:duration-200"></div>
                     <div className="relative rounded-xl bg-surface-dark border border-surface-border overflow-hidden shadow-2xl">
                       <div className="flex items-center gap-2 px-4 py-2 border-b border-surface-border bg-[#050505]">
@@ -215,9 +277,9 @@ export default function Home() {
                           <div className="p-3 space-y-4">
                             {[
                               { id: "#c7c4", name: "Kerupuk Tuna Rasa Bawang", price: "17.000", stock: "100" },
-                              { id: "#149a", name: "Kerupuk Tuna Pedas", price: "20.000", stock: "100" },
-                              { id: "#052c", name: "Kerupuk Tuna Sayange", price: "20.000", stock: "75" },
-                              { id: "#a7e7", name: "Kerupuk Tuna Original", price: "15.000", stock: "80" },
+                              { id: "#149a", name: "Kerupuk Tuna Pedas",       price: "20.000", stock: "100" },
+                              { id: "#052c", name: "Kerupuk Tuna Sayange",     price: "20.000", stock: "75"  },
+                              { id: "#a7e7", name: "Kerupuk Tuna Original",    price: "15.000", stock: "80"  },
                             ].map((p) => (
                               <div key={p.id} className="grid grid-cols-6 gap-2 items-center text-white text-[10px]">
                                 <span className="text-text-muted">{p.id}</span>
@@ -231,13 +293,12 @@ export default function Home() {
                         </div>
                       </div>
                     </div>
-                  </div>
+                  </motion.div>
                 </div>
 
                 {/* ── Module 3: Micro-POS ── */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                  {/* Mock */}
-                  <div className="order-2 lg:order-1 relative group">
+                  <motion.div {...fadeRight(0.1)} className="order-2 lg:order-1 relative group">
                     <div className="absolute -inset-1 bg-gradient-to-r from-primary to-red-900 rounded-xl blur opacity-10 group-hover:opacity-30 transition duration-1000 group-hover:duration-200"></div>
                     <div className="relative rounded-xl bg-surface-dark border border-surface-border overflow-hidden shadow-2xl">
                       <div className="flex items-center gap-2 px-4 py-2 border-b border-surface-border bg-[#050505]">
@@ -258,8 +319,8 @@ export default function Home() {
                         <div className="grid grid-cols-3 gap-2">
                           {[
                             { name: "Kerupuk Tuna Bawang", price: "Rp 17.000", stock: 100 },
-                            { name: "Kerupuk Tuna Pedas", price: "Rp 20.000", stock: 100 },
-                            { name: "Kerupuk Tuna Sayange", price: "Rp 20.000", stock: 75 },
+                            { name: "Kerupuk Tuna Pedas",  price: "Rp 20.000", stock: 100 },
+                            { name: "Kerupuk Tuna Sayange",price: "Rp 20.000", stock: 75  },
                           ].map((p) => (
                             <div key={p.name} className="border border-surface-border bg-surface-dark/30 p-2 relative group hover:border-primary/50 transition-colors cursor-pointer">
                               <p className="text-[9px] text-white font-bold mb-1">{p.name}</p>
@@ -286,9 +347,9 @@ export default function Home() {
                         </div>
                       </div>
                     </div>
-                  </div>
-                  {/* Copy */}
-                  <div className="order-1 lg:order-2">
+                  </motion.div>
+
+                  <motion.div {...fadeLeft(0.2)} className="order-1 lg:order-2">
                     <div className="flex items-center gap-3 mb-4">
                       <span className="material-symbols-outlined text-primary text-3xl">point_of_sale</span>
                       <h3 className="text-2xl font-bold text-white tracking-tight">Micro-POS / Keranjang Pintar</h3>
@@ -302,13 +363,12 @@ export default function Home() {
                         </li>
                       ))}
                     </ul>
-                  </div>
+                  </motion.div>
                 </div>
 
                 {/* ── Module 4: Analytics ── */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                  {/* Copy */}
-                  <div className="order-1">
+                  <motion.div {...fadeLeft(0.1)} className="order-1">
                     <div className="flex items-center gap-3 mb-4">
                       <span className="material-symbols-outlined text-primary text-3xl">analytics</span>
                       <h3 className="text-2xl font-bold text-white tracking-tight">Analytics &amp; Business Intelligence</h3>
@@ -322,9 +382,9 @@ export default function Home() {
                         </li>
                       ))}
                     </ul>
-                  </div>
-                  {/* Mock */}
-                  <div className="order-2 relative group">
+                  </motion.div>
+
+                  <motion.div {...fadeRight(0.2)} className="order-2 relative group">
                     <div className="absolute -inset-1 bg-gradient-to-l from-primary to-red-900 rounded-xl blur opacity-10 group-hover:opacity-30 transition duration-1000 group-hover:duration-200"></div>
                     <div className="relative rounded-xl bg-surface-dark border border-surface-border overflow-hidden shadow-2xl">
                       <div className="flex items-center gap-2 px-4 py-2 border-b border-surface-border bg-[#050505]">
@@ -373,7 +433,6 @@ export default function Home() {
                           </div>
                         </div>
                         <div className="flex-1 grid grid-cols-2 gap-4">
-                          {/* Top Products */}
                           <div className="border border-surface-border bg-surface-dark/20 p-3 flex flex-col">
                             <h4 className="text-[9px] font-bold uppercase mb-2 tracking-wider text-white">Produk Terlaris (Unit)</h4>
                             <div className="flex-1 flex flex-col justify-center gap-3">
@@ -396,7 +455,6 @@ export default function Home() {
                               {["0","40","80","120","160"].map((n) => <span key={n}>{n}</span>)}
                             </div>
                           </div>
-                          {/* Revenue Contribution */}
                           <div className="border border-surface-border bg-surface-dark/20 p-3 flex flex-col items-center">
                             <h4 className="text-[9px] font-bold uppercase mb-1 tracking-wider text-white w-full text-left">Kontribusi Pendapatan</h4>
                             <div className="relative w-24 h-24 my-auto">
@@ -424,13 +482,12 @@ export default function Home() {
                         </div>
                       </div>
                     </div>
-                  </div>
+                  </motion.div>
                 </div>
 
                 {/* ── Module 5: AI Assistant ── */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                  {/* Mock */}
-                  <div className="order-2 lg:order-1 relative group">
+                  <motion.div {...fadeRight(0.1)} className="order-2 lg:order-1 relative group">
                     <div className="absolute -inset-1 bg-gradient-to-r from-primary to-red-900 rounded-xl blur opacity-10 group-hover:opacity-30 transition duration-1000 group-hover:duration-200"></div>
                     <div className="relative rounded-xl bg-surface-dark border border-surface-border overflow-hidden shadow-2xl">
                       <div className="flex items-center gap-2 px-4 py-2 border-b border-surface-border bg-[#050505]">
@@ -477,9 +534,9 @@ export default function Home() {
                         </div>
                       </div>
                     </div>
-                  </div>
-                  {/* Copy */}
-                  <div className="order-1 lg:order-2">
+                  </motion.div>
+
+                  <motion.div {...fadeLeft(0.2)} className="order-1 lg:order-2">
                     <div className="flex items-center gap-3 mb-4">
                       <span className="material-symbols-outlined text-primary text-3xl">smart_toy</span>
                       <h3 className="text-2xl font-bold text-white tracking-tight">AI Assistant</h3>
@@ -493,7 +550,7 @@ export default function Home() {
                         </li>
                       ))}
                     </ul>
-                  </div>
+                  </motion.div>
                 </div>
 
               </div>
@@ -509,25 +566,32 @@ export default function Home() {
                     icon: "inventory",
                     title: "Manajemen Inventaris Real-time",
                     desc: "Pantau pergerakan stok secara langsung dengan akurasi tinggi. Notifikasi otomatis saat stok menipis untuk menjaga ketersediaan barang.",
+                    delay: 0,
                   },
                   {
                     icon: "analytics",
                     title: "Analitik Penjualan Cerdas",
                     desc: "Visualisasi data penjualan mendalam untuk pengambilan keputusan strategis. Pahami tren pasar dan perilaku pelanggan Anda.",
+                    delay: 0.12,
                   },
                   {
                     icon: "shield_lock",
                     title: "Keamanan Data Berlapis",
                     desc: "Perlindungan data end-to-end dengan enkripsi standar industri. Pastikan data transaksi dan pelanggan Anda tetap aman.",
+                    delay: 0.24,
                   },
                 ].map((card) => (
-                  <div key={card.title} className="group flex flex-col items-start p-8 bg-transparent border border-red-900/30 hover:border-primary transition-colors duration-300 rounded-lg h-full">
+                  <motion.div
+                    key={card.title}
+                    {...fadeUp(card.delay)}
+                    className="group flex flex-col items-start p-8 bg-transparent border border-red-900/30 hover:border-primary transition-colors duration-300 rounded-lg h-full"
+                  >
                     <div className="mb-6 text-primary">
                       <span className="material-symbols-outlined text-4xl font-light">{card.icon}</span>
                     </div>
                     <h3 className="text-xl font-bold text-white mb-3 tracking-tight">{card.title}</h3>
                     <p className="text-text-muted text-sm leading-relaxed font-light">{card.desc}</p>
-                  </div>
+                  </motion.div>
                 ))}
               </div>
             </div>
@@ -537,12 +601,61 @@ export default function Home() {
 
         {/* ── Footer ── */}
         <footer className="border-t border-surface-border bg-surface-dark py-12 px-6">
-          <div className="max-w-[1280px] mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="flex items-center gap-2">
-              <span className="material-symbols-outlined text-primary text-xl">rocket_launch</span>
-              <span className="text-white font-bold text-lg">ShikiPilot</span>
+          <div className="max-w-[1280px] mx-auto">
+
+            {/* Top row */}
+            <motion.div {...fadeUp()} className="flex flex-col md:flex-row items-start justify-between gap-10 pb-8 border-b border-surface-border/50">
+              {/* Brand */}
+              <div className="flex flex-col gap-3">
+                <div className="flex items-center gap-3">
+                  <ShikiLogo size={72} className="h-12 w-12" />
+                  <span className="text-white font-black text-2xl tracking-tight">ShikiPilot</span>
+                </div>
+                <p className="text-text-muted text-sm max-w-xs leading-relaxed">
+                  Sistem POS & manajemen inventaris cerdas untuk UMKM Indonesia.
+                </p>
+              </div>
+
+              {/* Contact / Social */}
+              <div className="flex flex-col gap-4">
+                <p className="text-white text-sm font-semibold uppercase tracking-widest font-mono">Ikuti Kami</p>
+                <div className="flex items-center gap-4">
+                  <a
+                    href="https://www.instagram.com/semaradana_kadek/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Instagram"
+                    className="flex items-center justify-center w-9 h-9 rounded-md border border-surface-border text-text-muted hover:border-primary hover:text-primary transition-all duration-200 hover:scale-110"
+                  >
+                    <Instagram className="w-4 h-4" />
+                  </a>
+                  <a
+                    href="https://www.linkedin.com/in/kadek-semaradana-322b7128a/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="LinkedIn"
+                    className="flex items-center justify-center w-9 h-9 rounded-md border border-surface-border text-text-muted hover:border-primary hover:text-primary transition-all duration-200 hover:scale-110"
+                  >
+                    <Linkedin className="w-4 h-4" />
+                  </a>
+                  <a
+                    href="https://github.com/Semara-26"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="GitHub"
+                    className="flex items-center justify-center w-9 h-9 rounded-md border border-surface-border text-text-muted hover:border-primary hover:text-primary transition-all duration-200 hover:scale-110"
+                  >
+                    <Github className="w-4 h-4" />
+                  </a>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Bottom row */}
+            <div className="pt-6 flex justify-center">
+              <p className="text-text-muted text-xs font-mono">© 2026 ShikiPilot. All rights reserved.</p>
             </div>
-            <p className="text-text-muted text-sm text-center md:text-right">© 2026 ShikiPilot. All rights reserved.</p>
+
           </div>
         </footer>
 
