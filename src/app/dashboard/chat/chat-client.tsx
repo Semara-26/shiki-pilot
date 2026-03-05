@@ -148,8 +148,45 @@ export function ChatClient({ chatId, initialMessages }: ChatClientProps) {
                   {isUser ? (
                     <p className="font-mono text-sm whitespace-pre-wrap">{text}</p>
                   ) : (
-                    <div className="prose prose-sm max-w-none prose-invert prose-p:my-1 prose-ul:my-1 prose-li:my-0 font-mono text-sm text-foreground">
-                      <ReactMarkdown>{text}</ReactMarkdown>
+                    <div className="font-sans text-base leading-relaxed text-gray-200">
+                      <ReactMarkdown
+                        components={{
+                          p: ({ children }) => (
+                            <p className="mb-3 last:mb-0 leading-relaxed">{children}</p>
+                          ),
+                          ul: ({ children }) => (
+                            <ul className="mb-3 ml-5 list-disc space-y-1 last:mb-0">{children}</ul>
+                          ),
+                          ol: ({ children }) => (
+                            <ol className="mb-3 ml-5 list-decimal space-y-1 last:mb-0">{children}</ol>
+                          ),
+                          li: ({ children }) => (
+                            <li className="leading-relaxed">{children}</li>
+                          ),
+                          strong: ({ children }) => (
+                            <strong className="font-semibold text-white">{children}</strong>
+                          ),
+                          em: ({ children }) => (
+                            <em className="italic text-gray-300">{children}</em>
+                          ),
+                          code: ({ children }) => (
+                            <code className="rounded bg-white/10 px-1.5 py-0.5 font-mono text-sm text-gray-100">
+                              {children}
+                            </code>
+                          ),
+                          h1: ({ children }) => (
+                            <h1 className="mb-2 mt-4 text-lg font-semibold text-white first:mt-0">{children}</h1>
+                          ),
+                          h2: ({ children }) => (
+                            <h2 className="mb-2 mt-3 text-base font-semibold text-white first:mt-0">{children}</h2>
+                          ),
+                          h3: ({ children }) => (
+                            <h3 className="mb-1 mt-2 text-sm font-semibold text-white first:mt-0">{children}</h3>
+                          ),
+                        }}
+                      >
+                        {text}
+                      </ReactMarkdown>
                     </div>
                   )}
                 </div>
