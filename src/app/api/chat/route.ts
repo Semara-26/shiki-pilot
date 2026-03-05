@@ -1,22 +1,13 @@
 import { auth } from '@clerk/nextjs/server';
-import { eq, and, isNotNull, cosineDistance } from 'drizzle-orm';
-import { embed } from 'ai';
+import { eq, sum } from 'drizzle-orm';
 import { google } from '@ai-sdk/google';
 import { streamText, convertToModelMessages } from 'ai';
 import { db } from '../../../db';
-import { stores } from '../../../db/schema';
-import { products } from '../../../db/schema';
+import { stores, products, transactions } from '../../../db/schema';
 import { checkRateLimit } from '@/src/lib/rate-limit';
 
-const EMBEDDING_DIMENSIONS = 768;
-const RAG_TOP_K = 3;
-
-function getTextFromMessageParts(parts: unknown[] | undefined): string {
-  if (!Array.isArray(parts)) return '';
-  return parts
-    .filter((p): p is { type: string; text?: string } => p != null && typeof p === 'object' && 'type' in p && (p as { type: string }).type === 'text')
-    .map((p) => (p.text ?? '') as string)
-    .join('');
+function formatRp(value: number): string {
+  return `Rp ${value.toLocaleString('id-ID')}`;
 }
 
 export async function POST(req: Request) {
@@ -36,7 +27,7 @@ export async function POST(req: Request) {
 
     const userStore = await db.query.stores.findFirst({
       where: eq(stores.userId, userId),
-      columns: { id: true },
+      columns: { id: true, name: true },
     });
     if (!userStore) {
       return new Response('Buat toko terlebih dahulu.', { status: 400 });
@@ -45,68 +36,63 @@ export async function POST(req: Request) {
     const body = await req.json();
     const messages = Array.isArray(body?.messages) ? body.messages : [];
 
-    const lastUserMessage = [...messages].reverse().find(
-      (m: { role?: string }) => m?.role === 'user'
-    );
-    const queryText = lastUserMessage
-      ? getTextFromMessageParts(lastUserMessage.parts)
-      : '';
-
-    let systemPrompt =
-      'Kamu adalah asisten toko bernama ShikiPilot. Jawab pertanyaan dengan ramah dan singkat.';
-
-    if (queryText.trim()) {
-      const embeddingModel = google.textEmbeddingModel('gemini-embedding-001');
-      const { embedding: rawEmbedding } = await embed({
-        model: embeddingModel,
-        value: queryText,
-      });
-      const embeddingArray = Array.isArray(rawEmbedding)
-        ? rawEmbedding
-        : (rawEmbedding as unknown as number[]);
-      const queryEmbedding =
-        embeddingArray.length > EMBEDDING_DIMENSIONS
-          ? embeddingArray.slice(0, EMBEDDING_DIMENSIONS)
-          : embeddingArray.length < EMBEDDING_DIMENSIONS
-            ? [
-                ...embeddingArray,
-                ...new Array(EMBEDDING_DIMENSIONS - embeddingArray.length).fill(
-                  0
-                ),
-              ]
-            : embeddingArray;
-
-      const similarProducts = await db
+    // Fetch full inventory + aggregated sales in parallel for efficiency
+    const [allProducts, salesAgg] = await Promise.all([
+      // 1. All active products — no limit, full picture
+      db
         .select({
-          id: products.id,
           name: products.name,
           price: products.price,
           stock: products.stock,
-          description: products.description,
         })
         .from(products)
-        .where(
-          and(
-            eq(products.storeId, userStore.id),
-            isNotNull(products.embedding)
-          )
-        )
-        .orderBy(cosineDistance(products.embedding, queryEmbedding))
-        .limit(RAG_TOP_K);
+        .where(eq(products.storeId, userStore.id)),
 
-      if (similarProducts.length > 0) {
-        const productData = similarProducts
-          .map(
-            (p) =>
-              `- ${p.name}: Rp ${p.price}, stok ${p.stock}. Deskripsi: ${p.description}`
-          )
-          .join('\n');
-        systemPrompt = `Kamu adalah asisten toko bernama ShikiPilot. Jawab pertanyaan berdasarkan data produk berikut. Jika tidak ada di data, jawab dengan sopan bahwa kamu tidak tahu.\n\nData Produk:\n${productData}`;
-      } else {
-        systemPrompt =
-          'Kamu adalah asisten toko bernama ShikiPilot. Saat ini belum ada data produk. Jawab dengan sopan bahwa informasi produk belum tersedia.';
-      }
-    }
+      // 2. Aggregated sales: total qty sold & revenue per product
+      db
+        .select({
+          productName: products.name,
+          totalQty: sum(transactions.quantity),
+          totalRevenue: sum(transactions.totalPrice),
+        })
+        .from(transactions)
+        .innerJoin(products, eq(transactions.productId, products.id))
+        .where(eq(transactions.storeId, userStore.id))
+        .groupBy(products.id, products.name),
+    ]);
+
+    // Build compact inventory snapshot
+    const inventorySection =
+      allProducts.length > 0
+        ? allProducts
+            .map(
+              (p) =>
+                `- ${p.name} | Harga: ${formatRp(p.price)} | Stok: ${p.stock === 0 ? '0 (HABIS)' : p.stock}`
+            )
+            .join('\n')
+        : '(Belum ada produk di katalog)';
+
+    // Build compact sales performance snapshot
+    const salesSection =
+      salesAgg.length > 0
+        ? salesAgg
+            .map(
+              (s) =>
+                `- ${s.productName} | Terjual: ${s.totalQty ?? 0} unit | Pendapatan: ${formatRp(Number(s.totalRevenue ?? 0))}`
+            )
+            .join('\n')
+        : '(Belum ada transaksi penjualan tercatat)';
+
+    const systemPrompt = `Kamu adalah asisten bisnis cerdas ShikiPilot untuk toko "${userStore.name}". Tugasmu membantu pemilik toko menganalisis stok dan performa penjualan.
+
+=== INVENTARIS SAAT INI ===
+${inventorySection}
+
+=== PERFORMA PENJUALAN (KUMULATIF) ===
+${salesSection}
+(Produk yang tidak tercantum di atas belum pernah terjual)
+
+Gunakan data di atas untuk menjawab setiap pertanyaan. Berikan jawaban dalam Bahasa Indonesia yang ramah, ringkas, dan profesional. Jika ditanya sesuatu di luar data ini, sampaikan dengan jujur bahwa kamu tidak memiliki informasinya.`;
 
     const modelMessages = await convertToModelMessages(messages);
 
