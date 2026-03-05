@@ -161,15 +161,17 @@ export function MetricsRow({
                                 style={{ width: `${percentage}%` }}
                                 aria-hidden
                               />
-                              <div className="relative z-10 grid grid-cols-12 gap-2 items-center text-sm font-mono">
-                                <div className="col-span-5 truncate text-foreground">
+                              <div className="relative z-10 flex flex-col gap-1 font-mono text-sm">
+                                <div className="leading-snug text-foreground">
                                   {p.name}
                                 </div>
-                                <div className="col-span-4 text-xs text-muted-foreground">
-                                  {p.stock} × {formatRupiah(p.price)}
-                                </div>
-                                <div className="col-span-3 text-right text-primary">
-                                  {formatRupiah(subtotal)}
+                                <div className="flex items-center justify-between gap-2">
+                                  <div className="whitespace-nowrap text-xs text-muted-foreground">
+                                    {p.stock} × {formatRupiah(p.price)}
+                                  </div>
+                                  <div className="shrink-0 whitespace-nowrap text-right text-primary">
+                                    {formatRupiah(subtotal)}
+                                  </div>
                                 </div>
                               </div>
                             </div>
