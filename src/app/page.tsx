@@ -1,25 +1,24 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { motion } from "framer-motion";
-import { Instagram, Linkedin, Github } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Instagram, Linkedin, Github, ChevronDown } from "lucide-react";
 
-/* ── Reusable animation wrappers ── */
+/* ── Animation helpers ── */
 const fadeUp = (delay = 0) => ({
   initial: { opacity: 0, y: 32 },
   whileInView: { opacity: 1, y: 0 },
   viewport: { once: true, margin: "-60px" },
   transition: { duration: 0.55, delay, ease: "easeOut" as const },
 });
-
 const fadeLeft = (delay = 0) => ({
   initial: { opacity: 0, x: -40 },
   whileInView: { opacity: 1, x: 0 },
   viewport: { once: true, margin: "-60px" },
   transition: { duration: 0.6, delay, ease: "easeOut" as const },
 });
-
 const fadeRight = (delay = 0) => ({
   initial: { opacity: 0, x: 40 },
   whileInView: { opacity: 1, x: 0 },
@@ -27,7 +26,7 @@ const fadeRight = (delay = 0) => ({
   transition: { duration: 0.6, delay, ease: "easeOut" as const },
 });
 
-/* ── Logo component ── */
+/* ── Logo ── */
 function ShikiLogo({ size = 56, className = "" }: { size?: number; className?: string }) {
   return (
     <Image
@@ -40,626 +39,532 @@ function ShikiLogo({ size = 56, className = "" }: { size?: number; className?: s
   );
 }
 
+/* ── Data ── */
+const PROBLEMS = [
+  {
+    emoji: "📦",
+    title: "Stok Sering Melenceng",
+    desc: "Nyatat manual bikin pusing, barang beda sama catatan.",
+  },
+  {
+    emoji: "🛒",
+    title: "Kasir Ribet & Lelet",
+    desc: "Aplikasi kaku bikin antrean panjang dan pelanggan kabur.",
+  },
+  {
+    emoji: "📈",
+    title: "Pusing Bikin Laporan",
+    desc: "Bingung hitung profit tiap akhir bulan, data berserakan.",
+  },
+];
+
+const SOLUTIONS = [
+  {
+    emoji: "⚡",
+    title: "Pantau Stok Real-Time",
+    desc: "Stok terpotong otomatis saat transaksi. Tidak ada lagi selisih catatan.",
+  },
+  {
+    emoji: "💳",
+    title: "Kasir Kilat (Micro-POS)",
+    desc: "Klik produk, langsung proses. Antarmuka cepat dan bersih tanpa hambatan.",
+  },
+  {
+    emoji: "🤖",
+    title: "Asisten Bisnis AI & Ekspor PDF",
+    desc: "Insight otomatis dari AI dan laporan PDF siap cetak dalam hitungan detik.",
+  },
+];
+
+const STEPS = [
+  {
+    num: "01",
+    emoji: "📦",
+    title: "Setup & Import AI",
+    desc: "Tambahkan produk secara manual atau gunakan fitur Import AI cerdas kami untuk memasukkan ratusan data sekaligus dalam hitungan detik.",
+    images: ["/step-1-setup-manual.png", "/step-1-setup-ai.png"],
+    flip: false,
+  },
+  {
+    num: "02",
+    emoji: "🛒",
+    title: "Langsung Jualan (Kasir)",
+    desc: "Buka menu Micro-POS. Tinggal klik produk, transaksi beres, dan stok gudang otomatis kepotong saat itu juga.",
+    images: ["/step-2-pos.png"],
+    flip: true,
+  },
+  {
+    num: "03",
+    emoji: "📊",
+    title: "Pantau Hasilnya (Analisis)",
+    desc: "Buka Dashboard untuk melihat grafik pendapatan hari ini, atau minta asisten AI memberi saran produk paling menguntungkan.",
+    images: ["/step-3-analytics.png"],
+    flip: false,
+  },
+];
+
+const TECH_STACK = [
+  { name: "Next.js", icon: "▲" },
+  { name: "React", icon: "⚛" },
+  { name: "Tailwind CSS", icon: "✦" },
+  { name: "Drizzle ORM", icon: "◈" },
+  { name: "Gemini AI", icon: "✧" },
+  { name: "jsPDF", icon: "⬡" },
+  { name: "Clerk Auth", icon: "⬢" },
+  { name: "PostgreSQL", icon: "🐘" },
+];
+
+const PRICING_FEATURES = [
+  "Unlimited Produk & Transaksi",
+  "Import AI & Sinkronisasi Real-Time",
+  "Micro-POS Kilat",
+  "AI Analytics & Business Insight",
+  "Ekspor CSV & Laporan PDF",
+  "100% Source Code",
+];
+
+const FAQS = [
+  {
+    q: "Beneran gratis?",
+    a: "100% gratis. ShikiPilot adalah proyek open-source. Kamu bisa pakai, modifikasi, dan deploy sendiri tanpa biaya langganan sepeser pun. Fork aja di GitHub!",
+  },
+  {
+    q: "Butuh internet untuk menjalankannya?",
+    a: "Untuk fitur AI dan sinkronisasi data ke database, butuh koneksi internet. Tapi kalau kamu deploy lokal sendiri, transaksi kasir tetap jalan mulus di jaringan lokal.",
+  },
+  {
+    q: "Bisa dipakai di HP?",
+    a: "Bisa banget! UI ShikiPilot didesain responsif dari awal. Mulai dari dashboard, kasir, sampai analytics semuanya nyaman dipakai di layar HP maupun tablet.",
+  },
+  {
+    q: "Lemot kalau data transaksinya banyak?",
+    a: "Tidak. ShikiPilot dibangun di atas Next.js dengan query database yang dioptimasi. Data ditarik secara efisien dan grafik dirender di client, jadi tetap responsif walaupun data ribuan.",
+  },
+];
+
 export default function Home() {
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
+
   return (
-    <div className="font-sans bg-background-light dark:bg-background-dark text-slate-900 dark:text-text-main antialiased selection:bg-primary selection:text-white overflow-x-hidden">
-      <div className="relative min-h-screen w-full flex flex-col">
+    <div className="font-sans bg-[#050505] text-white antialiased selection:bg-primary selection:text-white overflow-x-hidden">
 
-        {/* ── Header ── */}
-        <header className="w-full border-b border-surface-border bg-background-dark/80 backdrop-blur-md fixed top-0 z-50">
-          <div className="max-w-[1280px] mx-auto px-6 h-20 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <ShikiLogo size={80} className="h-10 w-10 md:h-16 md:w-16" />
-              <h2 className="text-white text-2xl md:text-3xl font-black tracking-tight">ShikiPilot</h2>
-            </div>
+      {/* ── Header ── */}
+      <header className="w-full border-b border-surface-border bg-[#050505]/90 backdrop-blur-md fixed top-0 z-50">
+        <div className="max-w-[1280px] mx-auto px-6 h-20 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <ShikiLogo size={80} className="h-10 w-10 md:h-16 md:w-16" />
+            <h2 className="text-white text-2xl md:text-3xl font-black tracking-tight">ShikiPilot</h2>
           </div>
-        </header>
+          <Link
+            href="/dashboard"
+            className="hidden sm:inline-flex items-center gap-2 rounded-md bg-primary px-5 py-2 text-sm font-bold text-white transition-all hover:bg-primary/90 hover:shadow-[0_0_20px_-5px_rgba(242,13,13,0.7)]"
+          >
+            Dashboard →
+          </Link>
+        </div>
+      </header>
 
-        <main className="flex-grow pt-20">
+      <main className="pt-20">
 
-          {/* ── Hero ── */}
-          <section className="relative px-6 py-20 lg:py-32 flex flex-col items-center justify-center text-center bg-background-dark">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-primary/10 via-transparent to-transparent opacity-40 pointer-events-none"></div>
-            <div className="relative max-w-4xl mx-auto flex flex-col gap-8 z-10">
+        {/* ══════════════════════════════════════
+            HERO
+        ══════════════════════════════════════ */}
+        <section className="relative min-h-[90vh] flex flex-col items-center justify-center text-center px-6 py-28 overflow-hidden">
+          {/* Background glow */}
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-10%,rgba(242,13,13,0.12),transparent)] pointer-events-none" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_40%_at_50%_110%,rgba(242,13,13,0.06),transparent)] pointer-events-none" />
+          {/* Grid pattern */}
+          <div className="absolute inset-0 opacity-[0.03] pointer-events-none"
+            style={{ backgroundImage: "linear-gradient(rgba(255,255,255,0.5) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.5) 1px,transparent 1px)", backgroundSize: "40px 40px" }}
+          />
 
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5, ease: "easeOut" }}
-                className="inline-flex items-center justify-center gap-2 px-3 py-1 rounded-full bg-surface-dark border border-surface-border mx-auto mb-4"
-              >
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
-                </span>
-                <span className="text-xs font-medium text-text-muted tracking-wide uppercase">OPERASIONAL SISTEM NORMAL</span>
-              </motion.div>
+          <div className="relative z-10 max-w-4xl mx-auto flex flex-col items-center gap-7">
 
-              <motion.h1
-                initial={{ opacity: 0, y: 24 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.65, delay: 0.1, ease: "easeOut" }}
-                className="text-5xl md:text-6xl lg:text-7xl font-black leading-tight tracking-tight text-white drop-shadow-lg"
-              >
-                Sistem Manajemen Inventaris &amp; Micro-POS Cerdas{" "}
-                <br className="hidden md:block" />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-white to-text-muted">untuk Bisnismu</span>
-              </motion.h1>
-
-              <motion.p
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.25, ease: "easeOut" }}
-                className="text-lg md:text-xl text-text-muted max-w-2xl mx-auto leading-relaxed"
-              >
-                Kelola inventaris dan transaksi dengan mudah dalam satu platform yang terintegrasi, modern, dan dirancang untuk kecepatan.
-              </motion.p>
-
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.4, ease: "easeOut" }}
-                className="flex flex-col sm:flex-row gap-4 justify-center mt-4"
-              >
-                <Link
-                  href="/dashboard"
-                  className="group relative inline-flex h-12 items-center justify-center overflow-hidden rounded-lg bg-primary px-8 font-bold text-white transition-all duration-300 hover:bg-primary-hover hover:scale-105 hover:shadow-[0_0_20px_-5px_#f20d0d]"
-                >
-                  <span className="relative flex items-center gap-2">
-                    BUKA DASHBOARD
-                    <span className="material-symbols-outlined transition-transform group-hover:translate-x-1 text-lg">arrow_forward</span>
-                  </span>
-                </Link>
-              </motion.div>
-
-            </div>
-          </section>
-
-          {/* ── System Modules ── */}
-          <section className="px-6 py-24 bg-[#0a0a0a] border-y border-surface-border relative overflow-hidden">
-            <div className="max-w-[1280px] mx-auto">
-
-              <motion.div {...fadeUp()} className="text-center mb-20">
-                <h2 className="text-3xl md:text-5xl font-black text-white mb-4 tracking-tight">System Modules</h2>
-                <p className="max-w-2xl mx-auto font-mono text-xs uppercase tracking-widest text-primary">Eksplorasi Ekosistem ShikiPilot</p>
-              </motion.div>
-
-              <div className="flex flex-col gap-32">
-
-                {/* ── Module 1: Dashboard ── */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                  <motion.div {...fadeRight(0.1)} className="order-2 lg:order-1 relative group">
-                    <div className="absolute -inset-1 bg-gradient-to-r from-primary to-red-900 rounded-xl blur opacity-10 group-hover:opacity-30 transition duration-1000 group-hover:duration-200"></div>
-                    <div className="relative rounded-xl bg-surface-dark border border-surface-border overflow-hidden shadow-2xl">
-                      <div className="flex items-center gap-2 px-4 py-2 border-b border-surface-border bg-[#050505]">
-                        <div className="flex gap-1.5">
-                          <div className="w-2.5 h-2.5 rounded-full bg-red-500/20 border border-red-500/50"></div>
-                          <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/20 border border-yellow-500/50"></div>
-                          <div className="w-2.5 h-2.5 rounded-full bg-green-500/20 border border-green-500/50"></div>
-                        </div>
-                        <div className="text-[10px] font-mono text-text-muted ml-2">TERMINAL // DASHBOARD_OVERVIEW</div>
-                      </div>
-                      <div className="bg-[#0a0a0a] p-4 aspect-[16/10] grid grid-cols-1 md:grid-cols-3 gap-4 font-mono text-xs text-white">
-                        {/* Stock Levels */}
-                        <div className="col-span-1 md:col-span-1 border border-surface-border bg-surface-dark/30 p-3 rounded flex flex-col">
-                          <h4 className="text-[10px] font-bold uppercase mb-4 tracking-wider text-white">Current Stock Levels</h4>
-                          <div className="space-y-3 flex-1 overflow-hidden">
-                            {[
-                              { name: "Kerupuk Tuna Bawang", pct: "100%", val: "100" },
-                              { name: "Kerupuk Tuna Pedas",  pct: "100%", val: "100" },
-                              { name: "Tuna Rasa Sayange",   pct: "75%",  val: "75"  },
-                              { name: "Kerupuk Tuna Original", pct: "80%", val: "80" },
-                              { name: "Kerupuk udang kecil", pct: "20%",  val: "20"  },
-                              { name: "Kerupuk cumi pedas",  pct: "70%",  val: "70"  },
-                            ].map((item) => (
-                              <div key={item.name} className="flex items-center gap-2 text-[8px]">
-                                <span className="w-24 text-right truncate text-text-muted">{item.name}</span>
-                                <div className="flex-1 h-3 bg-surface-dark rounded-sm overflow-hidden relative border border-surface-border">
-                                  <div className="absolute top-0 left-0 h-full bg-primary" style={{ width: item.pct }}></div>
-                                </div>
-                                <span className="w-6 text-right">{item.val}</span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                        {/* Asset Distribution */}
-                        <div className="col-span-1 md:col-span-1 border border-surface-border bg-surface-dark/30 p-3 rounded flex flex-col items-center justify-between">
-                          <h4 className="text-[10px] font-bold uppercase mb-2 tracking-wider text-white w-full text-left">Asset Distribution</h4>
-                          <div className="relative w-28 h-28 flex items-center justify-center my-2">
-                            <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
-                              <circle cx="50" cy="50" fill="transparent" r="40" stroke="#2a1010" strokeWidth="16"></circle>
-                              <circle className="opacity-80" cx="50" cy="50" fill="transparent" r="40" stroke="#f20d0d" strokeDasharray="251.2" strokeDashoffset="150" strokeWidth="16"></circle>
-                              <circle className="opacity-90" cx="50" cy="50" fill="transparent" r="40" stroke="#991b1b" strokeDasharray="251.2" strokeDashoffset="200" strokeWidth="16"></circle>
-                            </svg>
-                            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                              <span className="text-[8px] text-text-muted">TOTAL ASET</span>
-                              <span className="text-xs font-bold text-white">Rp 10.7Jt</span>
-                            </div>
-                          </div>
-                          <div className="w-full text-[8px] space-y-1 mt-2 border-t border-surface-border pt-2">
-                            <div className="flex justify-between items-center"><div className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-primary"></span><span className="text-text-muted">Tuna Pedas</span></div><span>18.6%</span></div>
-                            <div className="flex justify-between items-center"><div className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-red-900"></span><span className="text-text-muted">Ikan Paus</span></div><span>18.6%</span></div>
-                            <div className="flex justify-between items-center"><div className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-red-700"></span><span className="text-text-muted">Rasa Bawang</span></div><span>15.8%</span></div>
-                          </div>
-                        </div>
-                        {/* Event Log */}
-                        <div className="col-span-1 md:col-span-1 border border-surface-border bg-surface-dark/30 p-3 rounded flex flex-col">
-                          <h4 className="text-[10px] font-bold uppercase mb-4 tracking-wider text-white">Event Log</h4>
-                          <div className="space-y-4 text-[9px] flex-1 overflow-y-auto pr-1">
-                            {[
-                              { title: "New Assets Registered via AI", sub: "[1] items", date: "27 Feb • 19:33", active: true },
-                              { title: "New Asset Registered", sub: "Kerupuk Tuna Original", date: "27 Feb • 12:22", active: false },
-                              { title: "New Asset Registered", sub: "Kerupuk Tuna Rasa Sayange", date: "27 Feb • 12:20", active: false },
-                              { title: "Asset Parameters Updated", sub: "Kerupuk Tuna Pedas", date: "24 Feb • 18:33", active: false },
-                            ].map((ev, i) => (
-                              <div key={i} className="relative pl-3 border-l border-surface-border">
-                                <div className={`absolute -left-[3px] top-1.5 w-1.5 h-1.5 rounded-full ${ev.active ? "bg-primary" : "bg-surface-border"}`}></div>
-                                <div className="flex flex-col gap-0.5">
-                                  <span className="text-white font-bold">{ev.title}</span>
-                                  <span className="text-text-muted text-[8px]">{ev.sub}</span>
-                                  <div className="flex items-center gap-1 text-[8px] text-text-muted mt-0.5">
-                                    <span className="material-symbols-outlined text-[10px]">schedule</span> {ev.date}
-                                  </div>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </motion.div>
-
-                  <motion.div {...fadeLeft(0.2)} className="order-1 lg:order-2">
-                    <div className="flex items-center gap-3 mb-4">
-                      <span className="material-symbols-outlined text-primary text-3xl">dashboard</span>
-                      <h3 className="text-2xl font-bold text-white tracking-tight">Dashboard Interaktif</h3>
-                    </div>
-                    <p className="text-text-muted leading-relaxed mb-6">Pusat kendali operasional bisnis Anda. Pantau metrik kunci, nilai aset, dan status produk dalam satu tampilan yang terorganisir.</p>
-                    <ul className="space-y-3 mb-8">
-                      {["Real-time asset valuation", "Status stok instan", "Ringkasan performa harian"].map((f) => (
-                        <li key={f} className="flex items-start gap-3">
-                          <span className="material-symbols-outlined text-primary text-sm mt-1">check_circle</span>
-                          <span className="text-sm text-text-muted">{f}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </motion.div>
-                </div>
-
-                {/* ── Module 2: Inventory ── */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                  <motion.div {...fadeLeft(0.1)} className="order-1">
-                    <div className="flex items-center gap-3 mb-4">
-                      <span className="material-symbols-outlined text-primary text-3xl">inventory_2</span>
-                      <h3 className="text-2xl font-bold text-white tracking-tight">Manajemen Aset Lengkap</h3>
-                    </div>
-                    <p className="text-text-muted leading-relaxed mb-6">Kelola ribuan SKU dengan mudah. Fitur pencarian canggih, filter status, dan manajemen stok yang intuitif.</p>
-                    <ul className="space-y-3 mb-8">
-                      {["Import cepat via AI", "Pelacakan ID Produk unik", "Manajemen multi-varian"].map((f) => (
-                        <li key={f} className="flex items-start gap-3">
-                          <span className="material-symbols-outlined text-primary text-sm mt-1">check_circle</span>
-                          <span className="text-sm text-text-muted">{f}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </motion.div>
-
-                  <motion.div {...fadeRight(0.2)} className="order-2 relative group">
-                    <div className="absolute -inset-1 bg-gradient-to-l from-primary to-red-900 rounded-xl blur opacity-10 group-hover:opacity-30 transition duration-1000 group-hover:duration-200"></div>
-                    <div className="relative rounded-xl bg-surface-dark border border-surface-border overflow-hidden shadow-2xl">
-                      <div className="flex items-center gap-2 px-4 py-2 border-b border-surface-border bg-[#050505]">
-                        <div className="flex gap-1.5">
-                          <div className="w-2.5 h-2.5 rounded-full bg-red-500/20 border border-red-500/50"></div>
-                          <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/20 border border-yellow-500/50"></div>
-                          <div className="w-2.5 h-2.5 rounded-full bg-green-500/20 border border-green-500/50"></div>
-                        </div>
-                        <div className="text-[10px] font-mono text-text-muted ml-2">TERMINAL // INVENTORY_LIST</div>
-                      </div>
-                      <div className="bg-[#0a0a0a] p-6 aspect-[16/10] flex flex-col gap-4 font-mono text-xs">
-                        <div className="flex justify-between items-center pb-4 border-b border-surface-border/30">
-                          <div>
-                            <h3 className="text-white text-xl font-bold font-sans uppercase tracking-widest">Full Asset List</h3>
-                            <p className="text-text-muted text-[10px] mt-1">TERMINAL / INVENTORY</p>
-                          </div>
-                          <button className="px-3 py-1.5 border border-primary text-primary text-[10px] hover:bg-primary hover:text-white transition-colors flex items-center gap-1">
-                            <span className="material-symbols-outlined text-xs">auto_awesome</span>
-                            Import Cepat (AI)
-                          </button>
-                        </div>
-                        <div className="border border-surface-border bg-surface-dark/30 flex-1 relative overflow-hidden">
-                          <div className="grid grid-cols-6 gap-2 text-[9px] text-text-muted border-b border-surface-border/30 p-3 bg-surface-dark/50">
-                            <span className="col-span-1">ID</span>
-                            <span className="col-span-2">PRODUCT NAME</span>
-                            <span className="text-center">STATUS</span>
-                            <span className="text-right">PRICE</span>
-                            <span className="text-right">STOCK</span>
-                          </div>
-                          <div className="p-3 space-y-4">
-                            {[
-                              { id: "#c7c4", name: "Kerupuk Tuna Rasa Bawang", price: "17.000", stock: "100" },
-                              { id: "#149a", name: "Kerupuk Tuna Pedas",       price: "20.000", stock: "100" },
-                              { id: "#052c", name: "Kerupuk Tuna Sayange",     price: "20.000", stock: "75"  },
-                              { id: "#a7e7", name: "Kerupuk Tuna Original",    price: "15.000", stock: "80"  },
-                            ].map((p) => (
-                              <div key={p.id} className="grid grid-cols-6 gap-2 items-center text-white text-[10px]">
-                                <span className="text-text-muted">{p.id}</span>
-                                <span className="col-span-2 font-bold">{p.name}</span>
-                                <div className="text-center"><span className="px-1.5 py-0.5 bg-green-900/30 text-green-500 text-[8px] border border-green-900/50">ACTIVE</span></div>
-                                <span className="text-right">{p.price}</span>
-                                <span className="text-right">{p.stock}</span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </motion.div>
-                </div>
-
-                {/* ── Module 3: Micro-POS ── */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                  <motion.div {...fadeRight(0.1)} className="order-2 lg:order-1 relative group">
-                    <div className="absolute -inset-1 bg-gradient-to-r from-primary to-red-900 rounded-xl blur opacity-10 group-hover:opacity-30 transition duration-1000 group-hover:duration-200"></div>
-                    <div className="relative rounded-xl bg-surface-dark border border-surface-border overflow-hidden shadow-2xl">
-                      <div className="flex items-center gap-2 px-4 py-2 border-b border-surface-border bg-[#050505]">
-                        <div className="flex gap-1.5">
-                          <div className="w-2.5 h-2.5 rounded-full bg-red-500/20 border border-red-500/50"></div>
-                          <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/20 border border-yellow-500/50"></div>
-                          <div className="w-2.5 h-2.5 rounded-full bg-green-500/20 border border-green-500/50"></div>
-                        </div>
-                        <div className="text-[10px] font-mono text-text-muted ml-2">TERMINAL // MICRO_POS</div>
-                      </div>
-                      <div className="bg-[#0a0a0a] p-6 aspect-[16/10] flex flex-col gap-4 font-mono text-xs">
-                        <div className="flex justify-between items-center pb-2">
-                          <div>
-                            <h3 className="text-white text-xl font-bold font-sans uppercase tracking-widest">Keranjang Pintar</h3>
-                            <p className="text-text-muted text-[10px] mt-1">TERMINAL // MICRO-POS</p>
-                          </div>
-                        </div>
-                        <div className="grid grid-cols-3 gap-2">
-                          {[
-                            { name: "Kerupuk Tuna Bawang", price: "Rp 17.000", stock: 100 },
-                            { name: "Kerupuk Tuna Pedas",  price: "Rp 20.000", stock: 100 },
-                            { name: "Kerupuk Tuna Sayange",price: "Rp 20.000", stock: 75  },
-                          ].map((p) => (
-                            <div key={p.name} className="border border-surface-border bg-surface-dark/30 p-2 relative group hover:border-primary/50 transition-colors cursor-pointer">
-                              <p className="text-[9px] text-white font-bold mb-1">{p.name}</p>
-                              <p className="text-lg text-cyan-400 font-bold">{p.price}</p>
-                              <div className="flex justify-between mt-2 text-[9px] text-text-muted">
-                                <span>Stok: {p.stock}</span>
-                                <span className="text-primary">+</span>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                        <div className="border border-surface-border border-dashed bg-surface-dark/10 flex-1 flex flex-col items-center justify-center text-text-muted py-6">
-                          <span className="material-symbols-outlined text-3xl mb-2 opacity-50">shopping_cart</span>
-                          <p className="text-[10px]">Keranjang kosong. Tap produk untuk menambah.</p>
-                        </div>
-                        <div className="mt-auto">
-                          <div className="flex justify-between items-center mb-2">
-                            <span className="text-[10px] uppercase">Grand Total</span>
-                            <span className="text-xl font-bold text-cyan-400">Rp 0</span>
-                          </div>
-                          <button className="w-full bg-cyan-900/50 hover:bg-cyan-800 text-cyan-100 border border-cyan-700 py-3 uppercase tracking-wider font-bold text-[10px]">
-                            Simpan Transaksi
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </motion.div>
-
-                  <motion.div {...fadeLeft(0.2)} className="order-1 lg:order-2">
-                    <div className="flex items-center gap-3 mb-4">
-                      <span className="material-symbols-outlined text-primary text-3xl">point_of_sale</span>
-                      <h3 className="text-2xl font-bold text-white tracking-tight">Micro-POS / Keranjang Pintar</h3>
-                    </div>
-                    <p className="text-text-muted leading-relaxed mb-6">Sistem kasir ringkas yang dirancang untuk kecepatan transaksi. Tambahkan produk ke keranjang dengan satu klik dan proses pembayaran instan.</p>
-                    <ul className="space-y-3 mb-8">
-                      {["Desain grid responsif", "Kalkulasi total otomatis", "Antarmuka kontras tinggi"].map((f) => (
-                        <li key={f} className="flex items-start gap-3">
-                          <span className="material-symbols-outlined text-primary text-sm mt-1">check_circle</span>
-                          <span className="text-sm text-text-muted">{f}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </motion.div>
-                </div>
-
-                {/* ── Module 4: Analytics ── */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                  <motion.div {...fadeLeft(0.1)} className="order-1">
-                    <div className="flex items-center gap-3 mb-4">
-                      <span className="material-symbols-outlined text-primary text-3xl">analytics</span>
-                      <h3 className="text-2xl font-bold text-white tracking-tight">Analytics &amp; Business Intelligence</h3>
-                    </div>
-                    <p className="text-text-muted leading-relaxed mb-6">Visualisasikan pertumbuhan bisnis Anda. Dari grafik pendapatan mingguan hingga analisis produk terlaris.</p>
-                    <ul className="space-y-3 mb-8">
-                      {["Export data ke CSV", "Grafik tren pendapatan", "Analisis kontribusi produk"].map((f) => (
-                        <li key={f} className="flex items-start gap-3">
-                          <span className="material-symbols-outlined text-primary text-sm mt-1">check_circle</span>
-                          <span className="text-sm text-text-muted">{f}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </motion.div>
-
-                  <motion.div {...fadeRight(0.2)} className="order-2 relative group">
-                    <div className="absolute -inset-1 bg-gradient-to-l from-primary to-red-900 rounded-xl blur opacity-10 group-hover:opacity-30 transition duration-1000 group-hover:duration-200"></div>
-                    <div className="relative rounded-xl bg-surface-dark border border-surface-border overflow-hidden shadow-2xl">
-                      <div className="flex items-center gap-2 px-4 py-2 border-b border-surface-border bg-[#050505]">
-                        <div className="flex gap-1.5">
-                          <div className="w-2.5 h-2.5 rounded-full bg-red-500/20 border border-red-500/50"></div>
-                          <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/20 border border-yellow-500/50"></div>
-                          <div className="w-2.5 h-2.5 rounded-full bg-green-500/20 border border-green-500/50"></div>
-                        </div>
-                        <div className="text-[10px] font-mono text-text-muted ml-2">TERMINAL // ANALYTICS_BI</div>
-                      </div>
-                      <div className="bg-[#0a0a0a] p-4 aspect-[16/10] flex flex-col gap-4 font-mono text-xs text-white">
-                        <div className="flex justify-between items-center pb-2 border-b border-surface-border/30">
-                          <div>
-                            <h3 className="text-white text-xl font-bold font-sans uppercase tracking-widest">Revenue Over Time</h3>
-                          </div>
-                          <div className="flex gap-2">
-                            <button className="px-2 py-1 border border-surface-border text-[9px] hover:text-white flex items-center gap-1 hover:bg-surface-dark/50">
-                              <span className="material-symbols-outlined text-[10px]">download</span> Export CSV
-                            </button>
-                            <div className="flex border border-surface-border rounded overflow-hidden">
-                              <span className="px-2 py-1 bg-surface-dark text-[9px] text-text-muted cursor-pointer hover:text-white border-r border-surface-border">Daily</span>
-                              <span className="px-2 py-1 bg-cyan-900/40 text-cyan-400 text-[9px] font-bold">Weekly</span>
-                              <span className="px-2 py-1 bg-surface-dark text-[9px] text-text-muted cursor-pointer hover:text-white border-l border-surface-border">Monthly</span>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="h-40 border border-surface-border bg-surface-dark/20 p-2 relative overflow-hidden">
-                          <div className="absolute top-2 left-2 text-[9px] text-text-muted z-10">750k</div>
-                          <div className="absolute bottom-6 left-2 text-[9px] text-text-muted z-10">0</div>
-                          <div className="w-full h-full relative flex items-end">
-                            <svg className="w-full h-[85%] overflow-visible" preserveAspectRatio="none" viewBox="0 0 100 100">
-                              <defs>
-                                <linearGradient id="revenueGradient" x1="0" x2="0" y1="0" y2="1">
-                                  <stop offset="0%" stopColor="#06b6d4" stopOpacity="0.6"></stop>
-                                  <stop offset="100%" stopColor="#06b6d4" stopOpacity="0"></stop>
-                                </linearGradient>
-                              </defs>
-                              <path d="M0,80 C15,60 30,10 50,20 S 75,50 100,80 L100,100 L0,100 Z" fill="url(#revenueGradient)"></path>
-                              <path d="M0,80 C15,60 30,10 50,20 S 75,50 100,80" fill="none" stroke="#22d3ee" strokeWidth="0.5" vectorEffect="non-scaling-stroke"></path>
-                            </svg>
-                            <div className="absolute bottom-0 w-full flex justify-between px-2 text-[8px] text-text-muted pt-2 border-t border-surface-border/30">
-                              {["Week 1","Week 2","Week 3","Week 4","Week 5","Week 6","Week 7","Week 8"].map((w) => (
-                                <span key={w}>{w}</span>
-                              ))}
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex-1 grid grid-cols-2 gap-4">
-                          <div className="border border-surface-border bg-surface-dark/20 p-3 flex flex-col">
-                            <h4 className="text-[9px] font-bold uppercase mb-2 tracking-wider text-white">Produk Terlaris (Unit)</h4>
-                            <div className="flex-1 flex flex-col justify-center gap-3">
-                              {[
-                                { name: "Kerupuk Tuna Rasa Bawang", val: 148, pct: "90%" },
-                                { name: "Kerupuk Tuna Pedas", val: 76, pct: "45%" },
-                              ].map((p) => (
-                                <div key={p.name} className="group relative">
-                                  <div className="flex items-center justify-between mb-1 text-[8px]">
-                                    <span className="text-white transform -rotate-12 origin-bottom-left block w-20 truncate">{p.name}</span>
-                                    <span className="text-text-muted">{p.val}</span>
-                                  </div>
-                                  <div className="w-full h-6 bg-surface-dark border border-surface-border relative">
-                                    <div className="absolute left-0 top-0 h-full bg-cyan-400" style={{ width: p.pct }}></div>
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                            <div className="flex justify-between text-[7px] text-text-muted mt-1 px-1 border-t border-surface-border/20 pt-1">
-                              {["0","40","80","120","160"].map((n) => <span key={n}>{n}</span>)}
-                            </div>
-                          </div>
-                          <div className="border border-surface-border bg-surface-dark/20 p-3 flex flex-col items-center">
-                            <h4 className="text-[9px] font-bold uppercase mb-1 tracking-wider text-white w-full text-left">Kontribusi Pendapatan</h4>
-                            <div className="relative w-24 h-24 my-auto">
-                              <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
-                                <circle cx="50" cy="50" fill="transparent" r="40" stroke="#164e63" strokeWidth="12"></circle>
-                                <circle cx="50" cy="50" fill="transparent" r="40" stroke="#22d3ee" strokeDasharray="251.2" strokeDashoffset="100" strokeWidth="12"></circle>
-                                <circle className="opacity-90" cx="50" cy="50" fill="transparent" r="40" stroke="#f20d0d" strokeDasharray="251.2" strokeDashoffset="220" strokeWidth="12"></circle>
-                              </svg>
-                              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                                <span className="text-[7px] text-text-muted uppercase">Total</span>
-                                <span className="text-[10px] font-bold text-white">Rp 4.0Jt</span>
-                              </div>
-                            </div>
-                            <div className="w-full mt-1 space-y-1">
-                              <div className="flex justify-between items-center text-[7px]">
-                                <div className="flex items-center gap-1"><div className="w-1.5 h-1.5 bg-cyan-400 rounded-full"></div><span className="text-text-muted truncate max-w-[60px]">Rasa Bawang</span></div>
-                                <span className="text-white">62%</span>
-                              </div>
-                              <div className="flex justify-between items-center text-[7px]">
-                                <div className="flex items-center gap-1"><div className="w-1.5 h-1.5 bg-primary rounded-full"></div><span className="text-text-muted truncate max-w-[60px]">Tuna Pedas</span></div>
-                                <span className="text-white">38%</span>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </motion.div>
-                </div>
-
-                {/* ── Module 5: AI Assistant ── */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                  <motion.div {...fadeRight(0.1)} className="order-2 lg:order-1 relative group">
-                    <div className="absolute -inset-1 bg-gradient-to-r from-primary to-red-900 rounded-xl blur opacity-10 group-hover:opacity-30 transition duration-1000 group-hover:duration-200"></div>
-                    <div className="relative rounded-xl bg-surface-dark border border-surface-border overflow-hidden shadow-2xl">
-                      <div className="flex items-center gap-2 px-4 py-2 border-b border-surface-border bg-[#050505]">
-                        <div className="flex gap-1.5">
-                          <div className="w-2.5 h-2.5 rounded-full bg-red-500/20 border border-red-500/50"></div>
-                          <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/20 border border-yellow-500/50"></div>
-                          <div className="w-2.5 h-2.5 rounded-full bg-green-500/20 border border-green-500/50"></div>
-                        </div>
-                        <div className="text-[10px] font-mono text-text-muted ml-2">TERMINAL // AI_ASSISTANT</div>
-                      </div>
-                      <div className="bg-[#0a0a0a] p-6 aspect-[16/10] flex flex-col gap-4 font-mono text-xs">
-                        <div className="flex justify-between items-center pb-2 border-b border-surface-border/30">
-                          <div>
-                            <h3 className="text-white text-xl font-bold font-sans uppercase tracking-widest">Communication // AI</h3>
-                            <p className="text-text-muted text-[10px] mt-1">TERMINAL / AI ASSISTANT</p>
-                          </div>
-                        </div>
-                        <div className="flex-1 overflow-y-auto space-y-4 pr-2 custom-scrollbar">
-                          <div className="bg-surface-dark/50 border border-surface-border p-3 rounded-lg rounded-tl-none max-w-[90%]">
-                            <p className="text-text-muted leading-relaxed">Halo! Kamu sedang berbicara dengan <strong className="text-white">ShikiPilot</strong>, asisten toko di sini. Ada yang bisa saya bantu terkait produk kami?</p>
-                          </div>
-                          <div className="bg-primary text-white p-3 rounded-lg rounded-tr-none ml-auto max-w-[90%] shadow-[0_0_15px_-5px_rgba(242,13,13,0.5)]">
-                            <p className="leading-relaxed">aku perlu analisis terkait produk tokoku, produk mana yang memberikan kontribusi paling besar ke total aset?</p>
-                          </div>
-                          <div className="bg-surface-dark/50 border border-surface-border p-3 rounded-lg rounded-tl-none max-w-[95%]">
-                            <p className="text-text-muted leading-relaxed mb-2">Tentu, sebagai ShikiPilot, saya akan membantu menganalisis data produk yang tersedia saat ini:</p>
-                            <p className="text-white font-bold mb-1">1. Kontribusi Aset Terbesar</p>
-                            <p className="text-text-muted leading-relaxed mb-2">Berdasarkan perhitungan nilai stok (Harga x Stok), berikut adalah rinciannya:</p>
-                            <div className="pl-2 border-l-2 border-primary/50 my-2 text-[10px]">
-                              <p className="text-white"><strong className="text-white">Kerupuk Tuna Pedas:</strong> Rp 20.000 x 100 = <span className="text-cyan-400">Rp 2.000.000</span></p>
-                              <p className="text-text-muted"><strong className="text-white">Kerupuk Tuna Rasa Bawang:</strong> Rp 17.000 x 100 = Rp 1.700.000</p>
-                            </div>
-                            <p className="text-text-muted leading-relaxed">Produk yang memberikan kontribusi paling besar ke total aset toko Anda saat ini adalah <strong className="text-white">Kerupuk Tuna Pedas</strong>.</p>
-                          </div>
-                        </div>
-                        <div className="mt-2 flex gap-2">
-                          <input
-                            className="flex-1 bg-transparent border border-surface-border rounded p-2 text-white focus:border-primary focus:ring-0 text-xs placeholder:text-text-muted/50"
-                            placeholder="Tanya tentang produk..."
-                            type="text"
-                            readOnly
-                          />
-                          <button className="bg-primary/90 hover:bg-primary text-white px-4 rounded font-bold text-xs uppercase tracking-wide transition-colors">Kirim</button>
-                        </div>
-                      </div>
-                    </div>
-                  </motion.div>
-
-                  <motion.div {...fadeLeft(0.2)} className="order-1 lg:order-2">
-                    <div className="flex items-center gap-3 mb-4">
-                      <span className="material-symbols-outlined text-primary text-3xl">smart_toy</span>
-                      <h3 className="text-2xl font-bold text-white tracking-tight">AI Assistant</h3>
-                    </div>
-                    <p className="text-text-muted leading-relaxed mb-6">Asisten cerdas yang memahami data toko Anda. Dapatkan rekomendasi stok, analisis performa, dan jawaban instan untuk pertanyaan bisnis Anda.</p>
-                    <ul className="space-y-3 mb-8">
-                      {["Analisis natural language", "Rekomendasi stok cerdas", "Integrasi data real-time"].map((f) => (
-                        <li key={f} className="flex items-start gap-3">
-                          <span className="material-symbols-outlined text-primary text-sm mt-1">check_circle</span>
-                          <span className="text-sm text-text-muted">{f}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </motion.div>
-                </div>
-
-              </div>
-            </div>
-          </section>
-
-          {/* ── Features Grid ── */}
-          <section className="px-6 py-24 bg-[#0a0a0a] border-t border-surface-border">
-            <div className="max-w-[1280px] mx-auto">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {[
-                  {
-                    icon: "inventory",
-                    title: "Manajemen Inventaris Real-time",
-                    desc: "Pantau pergerakan stok secara langsung dengan akurasi tinggi. Notifikasi otomatis saat stok menipis untuk menjaga ketersediaan barang.",
-                    delay: 0,
-                  },
-                  {
-                    icon: "analytics",
-                    title: "Analitik Penjualan Cerdas",
-                    desc: "Visualisasi data penjualan mendalam untuk pengambilan keputusan strategis. Pahami tren pasar dan perilaku pelanggan Anda.",
-                    delay: 0.12,
-                  },
-                  {
-                    icon: "shield_lock",
-                    title: "Keamanan Data Berlapis",
-                    desc: "Perlindungan data end-to-end dengan enkripsi standar industri. Pastikan data transaksi dan pelanggan Anda tetap aman.",
-                    delay: 0.24,
-                  },
-                ].map((card) => (
-                  <motion.div
-                    key={card.title}
-                    {...fadeUp(card.delay)}
-                    className="group flex flex-col items-start p-8 bg-transparent border border-red-900/30 hover:border-primary transition-colors duration-300 rounded-lg h-full"
-                  >
-                    <div className="mb-6 text-primary">
-                      <span className="material-symbols-outlined text-4xl font-light">{card.icon}</span>
-                    </div>
-                    <h3 className="text-xl font-bold text-white mb-3 tracking-tight">{card.title}</h3>
-                    <p className="text-text-muted text-sm leading-relaxed font-light">{card.desc}</p>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-          </section>
-
-        </main>
-
-        {/* ── Footer ── */}
-        <footer className="border-t border-surface-border bg-surface-dark py-12 px-6">
-          <div className="max-w-[1280px] mx-auto">
-
-            {/* Top row */}
-            <motion.div {...fadeUp()} className="flex flex-col md:flex-row items-start justify-between gap-10 pb-8 border-b border-surface-border/50">
-              {/* Brand */}
-              <div className="flex flex-col gap-3">
-                <div className="flex items-center gap-3">
-                  <ShikiLogo size={72} className="h-12 w-12" />
-                  <span className="text-white font-black text-2xl tracking-tight">ShikiPilot</span>
-                </div>
-                <p className="text-text-muted text-sm max-w-xs leading-relaxed">
-                  Sistem POS & manajemen inventaris cerdas untuk UMKM Indonesia.
-                </p>
-              </div>
-
-              {/* Contact / Social */}
-              <div className="flex flex-col gap-4">
-                <p className="text-white text-sm font-semibold uppercase tracking-widest font-mono">Ikuti Kami</p>
-                <div className="flex items-center gap-4">
-                  <a
-                    href="https://www.instagram.com/semaradana_kadek/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="Instagram"
-                    className="flex items-center justify-center w-9 h-9 rounded-md border border-surface-border text-text-muted hover:border-primary hover:text-primary transition-all duration-200 hover:scale-110"
-                  >
-                    <Instagram className="w-4 h-4" />
-                  </a>
-                  <a
-                    href="https://www.linkedin.com/in/kadek-semaradana-322b7128a/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="LinkedIn"
-                    className="flex items-center justify-center w-9 h-9 rounded-md border border-surface-border text-text-muted hover:border-primary hover:text-primary transition-all duration-200 hover:scale-110"
-                  >
-                    <Linkedin className="w-4 h-4" />
-                  </a>
-                  <a
-                    href="https://github.com/Semara-26"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="GitHub"
-                    className="flex items-center justify-center w-9 h-9 rounded-md border border-surface-border text-text-muted hover:border-primary hover:text-primary transition-all duration-200 hover:scale-110"
-                  >
-                    <Github className="w-4 h-4" />
-                  </a>
-                </div>
-              </div>
+            {/* Badge */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5 }}
+              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-primary/40 bg-primary/10 text-primary text-xs font-bold font-mono uppercase tracking-widest"
+            >
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-primary" />
+              </span>
+              ⚡ FAST & RELIABLE
             </motion.div>
 
-            {/* Bottom row */}
-            <div className="pt-6 flex justify-center">
-              <p className="text-text-muted text-xs font-mono">© 2026 ShikiPilot. All rights reserved.</p>
-            </div>
+            {/* Headline */}
+            <motion.h1
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.65, delay: 0.1 }}
+              className="text-5xl md:text-6xl lg:text-7xl font-black leading-[1.1] tracking-tight text-white"
+            >
+              Jualan Lebih Cepat.{" "}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-red-400 to-red-600">
+                Manajemen Lebih Cerdas.
+              </span>
+            </motion.h1>
+
+            {/* Sub-headline */}
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.22 }}
+              className="text-lg md:text-xl text-gray-400 max-w-2xl leading-relaxed"
+            >
+              Satu platform untuk kasir, gudang, dan analisis data. Dibangun untuk kecepatan,
+              didesain untuk pertumbuhan bisnismu.
+            </motion.p>
+
+            {/* CTA */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.35 }}
+            >
+              <Link
+                href="/dashboard"
+                className="group inline-flex items-center gap-2 rounded-lg bg-primary px-8 py-4 text-base font-bold text-white transition-all duration-300 hover:bg-primary/90 hover:scale-105 hover:shadow-[0_0_40px_-8px_rgba(242,13,13,0.8)]"
+              >
+                Buka Dashboard
+                <span className="transition-transform group-hover:translate-x-1">→</span>
+              </Link>
+            </motion.div>
 
           </div>
-        </footer>
+        </section>
 
-      </div>
+        {/* ══════════════════════════════════════
+            PROBLEM
+        ══════════════════════════════════════ */}
+        <section className="px-6 py-24 border-t border-surface-border bg-[#080808]">
+          <div className="max-w-[1100px] mx-auto">
+            <motion.div {...fadeUp()} className="text-center mb-14">
+              <p className="font-mono text-xs uppercase tracking-widest text-primary mb-3">Pain Points</p>
+              <h2 className="text-3xl md:text-5xl font-black text-white leading-tight">
+                Udah capek ngurusin toko manual terus?
+              </h2>
+            </motion.div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {PROBLEMS.map((p, i) => (
+                <motion.div
+                  key={p.title}
+                  {...fadeUp(i * 0.1)}
+                  className="group relative p-8 rounded-xl border border-white/5 bg-[#0d0d0d] hover:border-primary/30 hover:bg-[#110808] transition-all duration-300"
+                >
+                  <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <span className="text-4xl mb-5 block">{p.emoji}</span>
+                  <h3 className="text-lg font-bold text-white mb-2 tracking-tight">{p.title}</h3>
+                  <p className="text-sm text-gray-500 leading-relaxed">{p.desc}</p>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ══════════════════════════════════════
+            VALUE PROPOSITION
+        ══════════════════════════════════════ */}
+        <section className="px-6 py-24 border-t border-surface-border bg-[#050505]">
+          <div className="max-w-[1100px] mx-auto">
+            <motion.div {...fadeUp()} className="text-center mb-14">
+              <p className="font-mono text-xs uppercase tracking-widest text-primary mb-3">Solusi</p>
+              <h2 className="text-3xl md:text-5xl font-black text-white leading-tight">
+                Solusi Pintar Buat Bisnis yang Nggak Mau Ribet.
+              </h2>
+            </motion.div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {SOLUTIONS.map((s, i) => (
+                <motion.div
+                  key={s.title}
+                  {...fadeUp(i * 0.1)}
+                  className="group relative p-8 rounded-xl border border-primary/20 bg-gradient-to-br from-primary/5 to-transparent hover:border-primary/50 hover:shadow-[0_0_40px_-12px_rgba(242,13,13,0.4)] transition-all duration-300"
+                >
+                  <span className="text-4xl mb-5 block">{s.emoji}</span>
+                  <h3 className="text-lg font-bold text-white mb-2 tracking-tight">{s.title}</h3>
+                  <p className="text-sm text-gray-400 leading-relaxed">{s.desc}</p>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ══════════════════════════════════════
+            HOW IT WORKS
+        ══════════════════════════════════════ */}
+        <section className="px-6 py-24 border-t border-surface-border bg-[#080808]">
+          <div className="max-w-[1100px] mx-auto">
+            <motion.div {...fadeUp()} className="text-center mb-20">
+              <p className="font-mono text-xs uppercase tracking-widest text-primary mb-3">Cara Kerja</p>
+              <h2 className="text-3xl md:text-5xl font-black text-white leading-tight">
+                Cara Pakainya Gimana? Gampang Banget!
+              </h2>
+            </motion.div>
+
+            <div className="flex flex-col gap-24">
+              {STEPS.map((step) => (
+                <div
+                  key={step.num}
+                  className={`grid grid-cols-1 lg:grid-cols-2 gap-12 items-center ${step.flip ? "lg:[&>*:first-child]:order-2 lg:[&>*:last-child]:order-1" : ""}`}
+                >
+                  {/* Image(s) */}
+                  <motion.div {...(step.flip ? fadeRight(0.1) : fadeLeft(0.1))} className="relative group">
+                    <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-red-900/10 rounded-2xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                    <div className={`relative rounded-2xl overflow-hidden border border-white/5 bg-[#0d0d0d] shadow-2xl ${step.images.length > 1 ? "grid grid-cols-2 gap-2 p-2" : ""}`}>
+                      {step.images.map((src) => (
+                        <Image
+                          key={src}
+                          src={src}
+                          alt={step.title}
+                          width={600}
+                          height={400}
+                          className="w-full h-auto object-cover rounded-lg"
+                        />
+                      ))}
+                    </div>
+                  </motion.div>
+
+                  {/* Text */}
+                  <motion.div {...(step.flip ? fadeLeft(0.2) : fadeRight(0.2))} className="flex flex-col gap-5">
+                    <div className="inline-flex items-center gap-3">
+                      <span className="font-mono text-5xl font-black text-primary/20 leading-none">{step.num}</span>
+                      <span className="h-px flex-1 bg-primary/20" />
+                    </div>
+                    <h3 className="text-2xl md:text-3xl font-black text-white tracking-tight">
+                      {step.emoji} {step.title}
+                    </h3>
+                    <p className="text-base text-gray-400 leading-relaxed">{step.desc}</p>
+                  </motion.div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ══════════════════════════════════════
+            TECH STACK
+        ══════════════════════════════════════ */}
+        <section className="px-6 py-20 border-t border-surface-border bg-[#050505]">
+          <div className="max-w-[1100px] mx-auto">
+            <motion.div {...fadeUp()} className="text-center mb-12">
+              <p className="font-mono text-xs uppercase tracking-widest text-primary mb-3">Tech Stack</p>
+              <h2 className="text-2xl md:text-4xl font-black text-white">
+                Dibangun dengan Teknologi Modern & Scalable.
+              </h2>
+            </motion.div>
+
+            <motion.div {...fadeUp(0.15)} className="flex flex-wrap justify-center gap-4">
+              {TECH_STACK.map((tech) => (
+                <div
+                  key={tech.name}
+                  className="group flex items-center gap-2 px-5 py-3 rounded-lg border border-white/5 bg-[#0d0d0d] text-gray-600 hover:text-white hover:border-primary/50 hover:shadow-[0_0_20px_-8px_rgba(242,13,13,0.5)] transition-all duration-300 cursor-default"
+                >
+                  <span className="text-lg group-hover:text-primary transition-colors">{tech.icon}</span>
+                  <span className="font-mono text-sm font-semibold tracking-wide">{tech.name}</span>
+                </div>
+              ))}
+            </motion.div>
+          </div>
+        </section>
+
+        {/* ══════════════════════════════════════
+            PRICING
+        ══════════════════════════════════════ */}
+        <section className="px-6 py-24 border-t border-surface-border bg-[#080808]">
+          <div className="max-w-[560px] mx-auto">
+            <motion.div {...fadeUp()} className="text-center mb-12">
+              <p className="font-mono text-xs uppercase tracking-widest text-primary mb-3">Harga</p>
+              <h2 className="text-3xl md:text-5xl font-black text-white leading-tight">
+                Bebas Biaya Langganan. Selamanya.
+              </h2>
+            </motion.div>
+
+            <motion.div
+              {...fadeUp(0.15)}
+              className="relative rounded-2xl border border-primary/30 bg-gradient-to-b from-[#120505] to-[#0d0d0d] p-10 shadow-[0_0_60px_-15px_rgba(242,13,13,0.3)] overflow-hidden"
+            >
+              {/* Glow top */}
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-px bg-gradient-to-r from-transparent via-primary/60 to-transparent" />
+
+              <div className="text-center mb-8">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-primary/30 bg-primary/10 text-primary text-xs font-mono font-bold uppercase tracking-widest mb-6">
+                  ✦ PAKET KOMUNITAS
+                </div>
+                <div className="font-black text-6xl text-white mb-1">Rp 0</div>
+                <div className="text-gray-500 font-mono text-sm">/ Bulan</div>
+              </div>
+
+              <ul className="space-y-3 mb-8">
+                {PRICING_FEATURES.map((f) => (
+                  <li key={f} className="flex items-center gap-3 text-sm text-gray-300">
+                    <span className="text-primary shrink-0">✓</span>
+                    {f}
+                  </li>
+                ))}
+              </ul>
+
+              <a
+                href="https://github.com/Semara-26"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 w-full rounded-lg border border-white/10 bg-white/5 py-3.5 font-bold text-white text-sm hover:bg-white/10 hover:border-white/20 transition-all duration-200"
+              >
+                <Github className="w-4 h-4" />
+                📦 Fork di GitHub
+              </a>
+            </motion.div>
+          </div>
+        </section>
+
+        {/* ══════════════════════════════════════
+            FAQ
+        ══════════════════════════════════════ */}
+        <section className="px-6 py-24 border-t border-surface-border bg-[#050505]">
+          <div className="max-w-[720px] mx-auto">
+            <motion.div {...fadeUp()} className="text-center mb-14">
+              <p className="font-mono text-xs uppercase tracking-widest text-primary mb-3">FAQ</p>
+              <h2 className="text-3xl md:text-5xl font-black text-white">
+                Masih Punya Pertanyaan?
+              </h2>
+            </motion.div>
+
+            <motion.div {...fadeUp(0.1)} className="flex flex-col gap-3">
+              {FAQS.map((faq, idx) => (
+                <div
+                  key={idx}
+                  className={`rounded-xl border overflow-hidden transition-all duration-300 ${openFaq === idx ? "border-primary/40 bg-[#110808]" : "border-white/5 bg-[#0d0d0d] hover:border-white/10"}`}
+                >
+                  <button
+                    type="button"
+                    onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
+                    className="w-full flex items-center justify-between gap-4 px-6 py-5 text-left"
+                  >
+                    <span className="font-semibold text-white text-sm md:text-base">{faq.q}</span>
+                    <ChevronDown
+                      className={`shrink-0 w-5 h-5 text-gray-500 transition-transform duration-300 ${openFaq === idx ? "rotate-180 text-primary" : ""}`}
+                    />
+                  </button>
+                  <AnimatePresence initial={false}>
+                    {openFaq === idx && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.3, ease: "easeInOut" }}
+                        className="overflow-hidden"
+                      >
+                        <p className="px-6 pb-5 text-sm text-gray-400 leading-relaxed border-t border-white/5 pt-4">
+                          {faq.a}
+                        </p>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              ))}
+            </motion.div>
+          </div>
+        </section>
+
+        {/* ══════════════════════════════════════
+            FINAL CTA
+        ══════════════════════════════════════ */}
+        <section className="px-6 py-28 border-t border-surface-border bg-[#080808] relative overflow-hidden">
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_60%_at_50%_50%,rgba(242,13,13,0.08),transparent)] pointer-events-none" />
+          <div className="max-w-[720px] mx-auto text-center relative z-10">
+            <motion.div {...fadeUp()}>
+              <p className="font-mono text-xs uppercase tracking-widest text-primary mb-4">Mulai Sekarang</p>
+              <h2 className="text-3xl md:text-5xl font-black text-white leading-tight mb-4">
+                Siap Bikin Tokomu Makin Modern?
+              </h2>
+              <p className="text-gray-400 mb-10 max-w-md mx-auto">
+                Gratis selamanya. Setup dalam menit. Tidak perlu kartu kredit.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Link
+                  href="/dashboard"
+                  className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-8 py-4 font-bold text-white text-base transition-all hover:bg-primary/90 hover:scale-105 hover:shadow-[0_0_40px_-8px_rgba(242,13,13,0.8)]"
+                >
+                  Buka Dashboard →
+                </Link>
+                <a
+                  href="https://github.com/Semara-26"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-2 rounded-lg border border-white/20 bg-transparent px-8 py-4 font-bold text-white text-base transition-all hover:border-white/40 hover:bg-white/5"
+                >
+                  🌟 Star on GitHub
+                </a>
+              </div>
+            </motion.div>
+          </div>
+        </section>
+
+      </main>
+
+      {/* ── Footer ── */}
+      <footer className="border-t border-surface-border bg-surface-dark py-12 px-6">
+        <div className="max-w-[1280px] mx-auto">
+
+          {/* Top row */}
+          <motion.div {...fadeUp()} className="flex flex-col md:flex-row items-start justify-between gap-10 pb-8 border-b border-surface-border/50">
+            {/* Brand */}
+            <div className="flex flex-col gap-3">
+              <div className="flex items-center gap-3">
+                <ShikiLogo size={72} className="h-12 w-12" />
+                <span className="text-white font-black text-2xl tracking-tight">ShikiPilot</span>
+              </div>
+              <p className="text-text-muted text-sm max-w-xs leading-relaxed">
+                Sistem POS cerdas, dari komunitas untuk komunitas.
+              </p>
+            </div>
+
+            {/* Contact / Social */}
+            <div className="flex flex-col gap-4">
+              <p className="text-white text-sm font-semibold uppercase tracking-widest font-mono">Ikuti Kami</p>
+              <div className="flex items-center gap-4">
+                <a
+                  href="https://www.instagram.com/semaradana_kadek/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Instagram"
+                  className="flex items-center justify-center w-9 h-9 rounded-md border border-surface-border text-text-muted hover:border-primary hover:text-primary transition-all duration-200 hover:scale-110"
+                >
+                  <Instagram className="w-4 h-4" />
+                </a>
+                <a
+                  href="https://www.linkedin.com/in/kadek-semaradana-322b7128a/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="LinkedIn"
+                  className="flex items-center justify-center w-9 h-9 rounded-md border border-surface-border text-text-muted hover:border-primary hover:text-primary transition-all duration-200 hover:scale-110"
+                >
+                  <Linkedin className="w-4 h-4" />
+                </a>
+                <a
+                  href="https://github.com/Semara-26"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="GitHub"
+                  className="flex items-center justify-center w-9 h-9 rounded-md border border-surface-border text-text-muted hover:border-primary hover:text-primary transition-all duration-200 hover:scale-110"
+                >
+                  <Github className="w-4 h-4" />
+                </a>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Bottom row */}
+          <div className="pt-6 flex justify-center">
+            <p className="text-text-muted text-xs font-mono">© 2026 ShikiPilot. Dibangun dengan ☕</p>
+          </div>
+
+        </div>
+      </footer>
+
     </div>
   );
 }
