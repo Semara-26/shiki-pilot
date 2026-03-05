@@ -85,7 +85,9 @@ export function ProductDistributionDonut({
   return (
     <div
       className={cn(
-        "flex h-full flex-col overflow-hidden rounded-lg border-2 border-ink bg-white p-4 md:p-6 dark:border-white/20 dark:bg-[#0a0a0a]",
+        // Hapus h-full dan overflow-hidden: biarkan tinggi komponen tumbuh natural
+        // agar legend bisa muncul penuh dan container tidak memotong scroll area
+        "flex flex-col rounded-lg border-2 border-ink bg-white p-4 md:p-6 dark:border-white/20 dark:bg-[#0a0a0a]",
         className
       )}
     >
@@ -177,26 +179,30 @@ export function ProductDistributionDonut({
               </PieChart>
             </ResponsiveContainer>
           </div>
-          {/* Custom Legend: scrollable agar semua produk muat */}
+          {/* Custom Legend: dibungkus dalam container scrollable agar semua item muat
+              tanpa memaksa komponen naik / terpotong di layar kecil */}
           <div
-            className="flex max-h-48 flex-col gap-2 overflow-y-auto border-t border-gray-200 pt-2 pr-2 dark:border-white/10"
+            className="max-h-[150px] overflow-y-auto custom-scrollbar flex flex-col gap-2 border-t border-gray-200 pt-2 pr-1 dark:border-white/10"
             role="list"
             aria-label="Keterangan produk"
           >
             {chartData.map((item, i) => (
               <div
                 key={`${item.name}-${i}`}
-                className="flex items-center gap-2 font-mono text-xs"
+                className="flex items-start gap-2 font-mono text-xs"
                 role="listitem"
               >
+                {/* Dot warna produk */}
                 <span
-                  className="h-3 w-3 shrink-0 rounded-full border border-gray-300 dark:border-white/20"
+                  className="mt-0.5 h-3 w-3 shrink-0 rounded-full border border-gray-300 dark:border-white/20"
                   style={{ backgroundColor: NERV_COLORS[i % NERV_COLORS.length] }}
                   aria-hidden
                 />
-                <span className="min-w-0 flex-1 text-ink dark:text-gray-200 break-words">
+                {/* Nama produk: break-words agar tidak terpotong parah, cukup wrap */}
+                <span className="min-w-0 flex-1 text-ink dark:text-gray-200 break-words leading-snug">
                   {item.name}
                 </span>
+                {/* Persentase kontribusi */}
                 <span className="shrink-0 tabular-nums text-gray-600 dark:text-gray-400">
                   {(item.percentage ?? 0).toFixed(0)}%
                 </span>

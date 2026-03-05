@@ -437,11 +437,11 @@ export function AnalyticsClient({ rawTransactions, hasStore, businessName }: Ana
             className="h-full"
           />
         </div>
-        <div className="w-full min-h-[450px] h-[450px]">
+        {/* Tidak ada height constraint agar legend bisa tampil penuh dan scroll */}
+        <div className="w-full">
           <ProductDistributionDonut
             data={distributionData}
             title="KONTRIBUSI PENDAPATAN"
-            className="h-full"
           />
         </div>
       </div>

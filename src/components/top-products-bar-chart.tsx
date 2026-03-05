@@ -14,6 +14,62 @@ import { useTheme } from "next-themes";
 import { motion } from "framer-motion";
 import { cn } from "@/src/lib/utils";
 
+// --- Custom XAxis tick: teks nama produk dibungkus ke baris baru (multiline) ---
+// Mencegah label saling tumpang-tindih saat nama produk panjang
+const MAX_CHARS_PER_LINE = 10;
+const TICK_LINE_HEIGHT = 12;
+
+function MultilineXTick({
+  x,
+  y,
+  payload,
+  fill,
+}: {
+  // recharts bisa memberikan x/y sebagai string atau number — terima keduanya
+  x?: string | number;
+  y?: string | number;
+  payload?: { value?: string };
+  fill?: string;
+}) {
+  // Normalkan ke number untuk dipakai di transform SVG
+  const nx = Number(x ?? 0);
+  const ny = Number(y ?? 0);
+  const name = payload?.value ?? "";
+  const words = name.split(" ");
+
+  // Bangun baris berdasarkan batas karakter per baris
+  const lines: string[] = [];
+  let current = "";
+  for (const word of words) {
+    const candidate = current ? `${current} ${word}` : word;
+    if (candidate.length > MAX_CHARS_PER_LINE && current) {
+      lines.push(current);
+      current = word;
+    } else {
+      current = candidate;
+    }
+  }
+  if (current) lines.push(current);
+
+  return (
+    <g transform={`translate(${nx},${ny})`}>
+      {lines.map((line, i) => (
+        <text
+          key={i}
+          x={0}
+          y={i * TICK_LINE_HEIGHT}
+          dy={6}
+          textAnchor="middle"
+          fill={fill ?? "#9ca3af"}
+          fontSize={10}
+        >
+          {line}
+        </text>
+      ))}
+    </g>
+  );
+}
+
 export interface TopProductsDataPoint {
   name: string;
   value: number;
@@ -75,50 +131,55 @@ export function TopProductsBarChart({ data, title, className }: TopProductsBarCh
           {title}
         </p>
       )}
-      <div className="mt-4 w-full min-h-[300px] h-[300px]">
+      {/* Tambahan bottom margin besar agar ruang multiline label tidak terpotong */}
+      <div className="mt-4 w-full flex-1 min-h-0">
         <ResponsiveContainer width="100%" height="100%" minWidth={0}>
+          {/* Layout default (vertikal bar) agar XAxis menjadi sumbu nama produk */}
           <BarChart
             data={data}
-            layout="vertical"
-            margin={{ top: 20, right: 42, left: 10, bottom: 60 }}
+            margin={{ top: 16, right: 24, left: 0, bottom: 72 }}
           >
             <CartesianGrid
               strokeDasharray="3 3"
               stroke={isDark ? GRID_DARK : GRID_LIGHT}
               strokeOpacity={0.5}
-              horizontal={false}
+              vertical={false}
             />
+            {/* XAxis = nama produk, menggunakan custom tick multiline agar tidak tumpang-tindih */}
             <XAxis
-              type="number"
-              tick={{ fill: isDark ? TICK_DARK : TICK_LIGHT, fontSize: 11 }}
-              tickLine={false}
-              axisLine={{ stroke: isDark ? GRID_DARK : GRID_LIGHT }}
-              tickFormatter={(v) => String(Math.round(Number(v)))}
-            />
-            <YAxis
-              type="category"
               dataKey="name"
               interval={0}
-              angle={-45}
-              textAnchor="end"
-              tick={{ fill: isDark ? TICK_DARK : TICK_LIGHT, fontSize: 11 }}
               tickLine={false}
               axisLine={{ stroke: isDark ? GRID_DARK : GRID_LIGHT }}
-              width={120}
+              // Custom tick render: bungkus teks panjang ke baris baru (angle: 0, horizontal)
+              tick={(props) => (
+                <MultilineXTick
+                  {...props}
+                  fill={isDark ? TICK_DARK : TICK_LIGHT}
+                />
+              )}
+            />
+            {/* YAxis = nilai numerik (unit terjual) */}
+            <YAxis
+              tick={{ fill: isDark ? TICK_DARK : TICK_LIGHT, fontSize: 11 }}
+              tickLine={false}
+              axisLine={false}
+              tickFormatter={(v) => String(Math.round(Number(v)))}
             />
             <Tooltip content={<ChartTooltip />} cursor={{ fill: "rgba(0,0,0,0.03)" }} />
             <Bar
               dataKey="value"
               fill={barColor}
-              radius={[0, 4, 4, 0]}
+              radius={[4, 4, 0, 0]}
               name="Qty"
               animationDuration={1000}
             >
+              {/* Label value di atas bar */}
               <LabelList
                 dataKey="value"
-                position="right"
+                position="top"
                 fill="#888888"
-                fontSize={12}
+                fontSize={11}
               />
             </Bar>
           </BarChart>
