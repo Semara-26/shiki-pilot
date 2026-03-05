@@ -47,12 +47,15 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json().catch(() => ({}));
-    const { chartData, timeFilter, businessName } = body;
+    const { chartData, timeFilter, businessName, productNames: clientProductNames } = body;
 
     const timeFilterStr = String(timeFilter ?? "weekly");
     const businessNameStr = typeof businessName === "string" && businessName.trim() ? businessName.trim() : "Toko User";
     const chartDataJson = typeof chartData === "string" ? chartData : JSON.stringify(chartData ?? {});
-    const productNames = extractProductNames(chartData);
+    const productNames =
+      typeof clientProductNames === "string" && clientProductNames.trim()
+        ? clientProductNames.trim()
+        : extractProductNames(chartData);
 
     const userPrompt = PROMPT_TEMPLATE
       .replace("{businessName}", businessNameStr)
