@@ -79,6 +79,15 @@ export async function createStore(
       return { error: 'Anda harus login untuk membuat toko.' };
     }
 
+    const existingUserStore = await db.query.stores.findFirst({
+      where: eq(stores.userId, userId),
+      columns: { id: true },
+    });
+
+    if (existingUserStore) {
+      return { error: 'Anda sudah memiliki toko. Satu akun hanya dapat memiliki satu toko.' };
+    }
+
     const raw = {
       name: formData.get('name') ?? '',
       whatsapp_number: formData.get('whatsapp_number') ?? '',
