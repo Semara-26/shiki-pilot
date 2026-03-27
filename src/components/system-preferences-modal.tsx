@@ -47,6 +47,7 @@ const INITIAL_FORM_DATA = {
   businessType: "",
   contactEmail: "",
   phone: "",
+  whatsappNumber: "",
   address: "",
   currentPassword: "",
   newPassword: "",
@@ -78,6 +79,7 @@ export function SystemPreferencesModal({
           businessType: store.businessType ?? "",
           contactEmail: store.contactEmail ?? "",
           phone: store.phone ?? "",
+          whatsappNumber: store.whatsappNumber ?? "",
           address: store.address ?? "",
         }));
       }
@@ -136,7 +138,8 @@ export function SystemPreferencesModal({
         businessType: formData.businessType || null,
         contactEmail: formData.contactEmail || null,
         phone: formData.phone || null,
-        address: formData.address || null,
+        whatsappNumber: formData.whatsappNumber || undefined,
+        address: formData.address || undefined,
       });
 
       if (storeResult.error) {
@@ -357,6 +360,19 @@ export function SystemPreferencesModal({
                 onChange={handleInputChange}
                 className={inputClass}
                 placeholder="+62 812-3456-7890"
+              />
+            </div>
+            <div className="sm:col-span-2">
+              <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                WHATSAPP NUMBER
+              </label>
+              <input
+                id="whatsappNumber"
+                type="text"
+                value={formData.whatsappNumber}
+                onChange={handleInputChange}
+                className={inputClass}
+                placeholder="08123456789"
               />
             </div>
             <div className="sm:col-span-2">

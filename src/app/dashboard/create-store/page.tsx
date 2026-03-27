@@ -94,6 +94,60 @@ export default function CreateStorePage() {
               </div>
 
               <div>
+                <label htmlFor="whatsapp_number" className={labelClass}>
+                  Nomor WhatsApp <span className="text-primary">*</span>
+                </label>
+                <input
+                  id="whatsapp_number"
+                  name="whatsapp_number"
+                  type="tel"
+                  required
+                  placeholder="Contoh: 08123456789"
+                  className={inputClass}
+                  aria-invalid={!!state?.fieldErrors?.whatsapp_number}
+                  aria-describedby={
+                    state?.fieldErrors?.whatsapp_number ? 'whatsapp-error' : undefined
+                  }
+                />
+                {state?.fieldErrors?.whatsapp_number && (
+                  <p
+                    id="whatsapp-error"
+                    className="mt-1.5 font-mono text-sm text-destructive"
+                  >
+                    {state.fieldErrors.whatsapp_number[0]}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label htmlFor="address" className={labelClass}>
+                  Alamat Lengkap <span className="text-primary">*</span>
+                </label>
+                <textarea
+                  id="address"
+                  name="address"
+                  required
+                  rows={3}
+                  placeholder="Masukkan alamat lengkap toko"
+                  className={`${inputClass} resize-none`}
+                  aria-invalid={!!state?.fieldErrors?.address}
+                  aria-describedby={
+                    state?.fieldErrors?.address
+                      ? 'address-error'
+                      : undefined
+                  }
+                />
+                {state?.fieldErrors?.address && (
+                  <p
+                    id="address-error"
+                    className="mt-1.5 font-mono text-sm text-destructive"
+                  >
+                    {state.fieldErrors.address[0]}
+                  </p>
+                )}
+              </div>
+
+              <div>
                 <label htmlFor="description" className={labelClass}>
                   Deskripsi <span className="text-muted-foreground/80">(opsional)</span>
                 </label>

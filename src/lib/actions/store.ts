@@ -15,7 +15,8 @@ export type StoreInfoForPrefs = {
   businessType: string | null;
   contactEmail: string | null;
   phone: string | null;
-  address: string | null;
+  whatsappNumber: string;
+  address: string;
 };
 
 const updateStoreInfoSchema = z.object({
@@ -23,7 +24,8 @@ const updateStoreInfoSchema = z.object({
   businessType: z.string().max(50).optional().nullable(),
   contactEmail: z.union([z.string().email(), z.literal('')]).optional(),
   phone: z.string().max(30).optional().nullable(),
-  address: z.string().max(500).optional().nullable(),
+  whatsappNumber: z.string().min(10).max(15).regex(/^(08|62)\d+$/).optional(),
+  address: z.string().min(10).max(500).optional(),
 });
 
 const createStoreSchema = z.object({
@@ -31,6 +33,12 @@ const createStoreSchema = z.object({
     .string()
     .min(1, 'Nama toko wajib diisi')
     .max(100, 'Nama toko maksimal 100 karakter'),
+  whatsapp_number: z.string()
+    .min(10, 'Nomor WhatsApp minimal 10 digit')
+    .max(15, 'Nomor WhatsApp maksimal 15 digit')
+    .regex(/^(08|62)\d+$/, 'Nomor WhatsApp hanya boleh berisi angka dan wajib diawali 08 atau 62'),
+  address: z.string()
+    .min(10, 'Alamat minimal 10 karakter'),
   description: z
     .string()
     .max(500, 'Deskripsi maksimal 500 karakter')
@@ -43,6 +51,8 @@ export type CreateStoreState = {
   error?: string;
   fieldErrors?: {
     name?: string[];
+    whatsapp_number?: string[];
+    address?: string[];
     description?: string[];
   };
 };
@@ -71,25 +81,29 @@ export async function createStore(
 
     const raw = {
       name: formData.get('name') ?? '',
+      whatsapp_number: formData.get('whatsapp_number') ?? '',
+      address: formData.get('address') ?? '',
       description: formData.get('description') ?? '',
     };
 
     const parsed = createStoreSchema.safeParse({
       name: raw.name,
+      whatsapp_number: raw.whatsapp_number,
+      address: raw.address,
       description: raw.description === '' ? undefined : raw.description,
     });
 
     if (!parsed.success) {
       const fieldErrors: CreateStoreState['fieldErrors'] = {};
       for (const issue of parsed.error.issues) {
-        const path = issue.path[0] as 'name' | 'description';
+        const path = issue.path[0] as 'name' | 'description' | 'whatsapp_number' | 'address';
         if (!fieldErrors[path]) fieldErrors[path] = [];
         fieldErrors[path]!.push(issue.message);
       }
       return { fieldErrors };
     }
 
-    const { name, description } = parsed.data;
+    const { name, whatsapp_number, address, description } = parsed.data;
     let slug = generateSlug(name);
 
     const existing = await db.query.stores.findFirst({
@@ -105,6 +119,8 @@ export async function createStore(
       userId,
       name,
       slug,
+      whatsappNumber: whatsapp_number,
+      address,
       description: description || null,
     });
 
@@ -136,6 +152,7 @@ export async function getStoreByUserId(): Promise<StoreInfoForPrefs | null> {
         businessType: true,
         contactEmail: true,
         phone: true,
+        whatsappNumber: true,
         address: true,
       },
     });
@@ -157,7 +174,8 @@ export async function updateStoreInfo(
     businessType?: string | null;
     contactEmail?: string | null;
     phone?: string | null;
-    address?: string | null;
+    whatsappNumber?: string;
+    address?: string;
   }
 ): Promise<UpdateStoreInfoState> {
   try {
@@ -185,13 +203,15 @@ export async function updateStoreInfo(
       businessType: string | null;
       contactEmail: string | null;
       phone: string | null;
-      address: string | null;
+      whatsappNumber: string;
+      address: string;
     }> = {};
 
     if (parsed.data.name !== undefined) updates.name = parsed.data.name;
     if (parsed.data.businessType !== undefined) updates.businessType = parsed.data.businessType === '' ? null : parsed.data.businessType;
     if (parsed.data.contactEmail !== undefined) updates.contactEmail = parsed.data.contactEmail === '' ? null : parsed.data.contactEmail;
     if (parsed.data.phone !== undefined) updates.phone = parsed.data.phone;
+    if (parsed.data.whatsappNumber !== undefined) updates.whatsappNumber = parsed.data.whatsappNumber;
     if (parsed.data.address !== undefined) updates.address = parsed.data.address;
 
     if (Object.keys(updates).length === 0) {
