@@ -9,7 +9,7 @@ import { stores, transactions, products } from "@/src/db/schema";
 export type BulkTransactionItem = {
   productId: string;
   quantity: number;
-  totalPrice: number;
+  paymentType: 'cash' | 'qris_statis';
 };
 
 export type BulkTransactionResult =
@@ -38,11 +38,10 @@ export async function createBulkTransactions(
       return { success: false, error: "Keranjang kosong. Tambah produk terlebih dahulu." };
     }
 
-    // --- Validasi stok sebelum memulai transaksi DB ---
-    // Ambil stok terkini untuk semua produk yang ada di keranjang
+    // --- Validasi stok & ambil harga terkini dari DB sebelum memulai transaksi ---
     const productIds = items.map((item) => item.productId);
     const currentStocks = await db
-      .select({ id: products.id, name: products.name, stock: products.stock })
+      .select({ id: products.id, name: products.name, stock: products.stock, price: products.price })
       .from(products)
       .where(inArray(products.id, productIds));
 
@@ -59,16 +58,20 @@ export async function createBulkTransactions(
       }
     }
 
-    const records = items.map((item) => ({
-      storeId,
-      productId: item.productId,
-      quantity: item.quantity,
-      totalPrice: item.totalPrice,
-      type: "out" as const,
-    }));
+    // SECURITY F-04: totalPrice dihitung dari harga DB — tidak mempercayai nilai yang dikirim client
+    const records = items.map((item) => {
+      const product = currentStocks.find((p) => p.id === item.productId)!;
+      return {
+        storeId,
+        productId: item.productId,
+        quantity: item.quantity,
+        totalPrice: product.price * item.quantity,
+        type: "out" as const,
+        paymentType: item.paymentType,
+      };
+    });
 
     // --- Gunakan db.transaction() agar insert transaksi + update stok bersifat atomik ---
-    // Jika salah satu step gagal, seluruh operasi akan di-rollback otomatis
     await db.transaction(async (tx) => {
       // Step 1: Catat semua transaksi penjualan
       await tx.insert(transactions).values(records);
@@ -104,10 +107,11 @@ export async function createBulkTransactions(
     revalidatePath("/dashboard/analytics");
     return { success: true, count: records.length };
   } catch (err) {
+    // SECURITY F-07: Log detail error di server, kembalikan pesan generik ke client
     console.error("createBulkTransactions error:", err);
     return {
       success: false,
-      error: err instanceof Error ? err.message : "Gagal menyimpan transaksi.",
+      error: "Gagal menyimpan transaksi. Silakan coba lagi.",
     };
   }
 }

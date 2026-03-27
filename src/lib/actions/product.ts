@@ -150,11 +150,9 @@ export async function createProduct(
     revalidatePath('/dashboard');
     return { success: true };
   } catch (err) {
+    // SECURITY F-07: Log detail error di server, kembalikan pesan generik ke client
     console.error('createProduct error:', err);
-    return {
-      error:
-        err instanceof Error ? err.message : 'Gagal menyimpan produk. Coba lagi.',
-    };
+    return { error: 'Gagal menyimpan produk. Coba lagi.' };
   }
 }
 
@@ -276,11 +274,9 @@ export async function updateProduct(
     revalidatePath('/dashboard/inventory');
     revalidatePath('/dashboard');
   } catch (err) {
+    // SECURITY F-07: Log detail error di server, kembalikan pesan generik ke client
     console.error('updateProduct error:', err);
-    return {
-      error:
-        err instanceof Error ? err.message : 'Gagal menyimpan perubahan. Coba lagi.',
-    };
+    return { error: 'Gagal menyimpan perubahan. Coba lagi.' };
   }
   redirect('/dashboard/inventory');
 }
@@ -349,8 +345,8 @@ export async function processAiImport(rawText: string): Promise<ProcessAiImportR
     revalidatePath('/dashboard');
     return { success: true, count: validItems.length };
   } catch (err) {
+    // SECURITY F-07: Log detail error di server, kembalikan pesan generik ke client
     console.error('processAiImport error:', err);
-    const message = err instanceof Error ? err.message : 'Gagal memproses import. Coba lagi.';
-    return { success: false, error: message };
+    return { success: false, error: 'Gagal memproses import. Coba lagi.' };
   }
 }

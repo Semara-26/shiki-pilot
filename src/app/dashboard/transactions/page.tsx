@@ -23,6 +23,7 @@ export default async function TransactionsPage() {
             quantity: transactions.quantity,
             totalPrice: transactions.totalPrice,
             type: transactions.type,
+            paymentType: transactions.paymentType,
             createdAt: transactions.createdAt,
             productId: transactions.productId,
             productName: products.name,

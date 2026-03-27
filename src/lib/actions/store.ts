@@ -111,11 +111,12 @@ export async function createStore(
     revalidatePath('/dashboard');
     return { success: true };
   } catch (err) {
+    // SECURITY F-07: Log detail error di server, kembalikan pesan generik ke client
     console.error('createStore error:', err);
-    return {
-      error:
-        err instanceof Error ? err.message : 'Gagal membuat toko. Coba lagi.',
-    };
+    if (err instanceof Error && err.message.includes('unique')) {
+      return { error: 'Nama toko sudah digunakan, coba nama lain.' };
+    }
+    return { error: 'Gagal membuat toko. Coba lagi.' };
   }
 }
 
@@ -202,9 +203,8 @@ export async function updateStoreInfo(
     revalidatePath('/dashboard');
     return { success: true };
   } catch (err) {
+    // SECURITY F-07: Log detail error di server, kembalikan pesan generik ke client
     console.error('updateStoreInfo error:', err);
-    return {
-      error: err instanceof Error ? err.message : 'Gagal menyimpan. Coba lagi.',
-    };
+    return { error: 'Gagal menyimpan perubahan. Coba lagi.' };
   }
 }

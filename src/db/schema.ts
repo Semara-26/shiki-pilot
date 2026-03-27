@@ -67,6 +67,7 @@ export const transactions = pgTable('transactions', {
   quantity: integer('quantity').notNull(),
   totalPrice: integer('total_price').notNull(),
   type: text('type').notNull().default('out'),
+  paymentType: text('payment_type', { enum: ['cash', 'qris_statis'] }).notNull().default('cash'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 }, (table) => ({
   storeIdx: index('transaction_store_idx').on(table.storeId),

@@ -40,10 +40,9 @@ export async function getOrCreateChat(): Promise<{ chatId: string } | { error: s
 
     return { chatId: inserted.id };
   } catch (err) {
+    // SECURITY F-07: Log detail error di server, kembalikan pesan generik ke client
     console.error('getOrCreateChat error:', err);
-    return {
-      error: err instanceof Error ? err.message : 'Gagal membuat atau mengambil chat.',
-    };
+    return { error: 'Gagal membuat atau mengambil sesi chat.' };
   }
 }
 
@@ -87,10 +86,9 @@ export async function getChatHistory(
 
     return { messages: rows };
   } catch (err) {
+    // SECURITY F-07: Log detail error di server, kembalikan pesan generik ke client
     console.error('getChatHistory error:', err);
-    return {
-      error: err instanceof Error ? err.message : 'Gagal mengambil riwayat chat.',
-    };
+    return { error: 'Gagal mengambil riwayat chat.' };
   }
 }
 
@@ -132,9 +130,8 @@ export async function saveMessage(
 
     return { success: true };
   } catch (err) {
+    // SECURITY F-07: Log detail error di server, kembalikan pesan generik ke client
     console.error('saveMessage error:', err);
-    return {
-      error: err instanceof Error ? err.message : 'Gagal menyimpan pesan.',
-    };
+    return { error: 'Gagal menyimpan pesan.' };
   }
 }

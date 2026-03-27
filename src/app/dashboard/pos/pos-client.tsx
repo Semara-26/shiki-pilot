@@ -15,6 +15,7 @@ function formatRupiah(value: number) {
 }
 
 type CartItem = POSProduct & { quantity: number };
+type PaymentType = "cash" | "qris_statis";
 
 interface POSClientProps {
   products: POSProduct[];
@@ -26,6 +27,7 @@ export function POSClient({ products, storeId }: POSClientProps) {
   const [cashReceived, setCashReceived] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [activePayment, setActivePayment] = useState<PaymentType>("cash");
 
   const filteredProducts = products.filter((p) =>
     p.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -33,7 +35,8 @@ export function POSClient({ products, storeId }: POSClientProps) {
 
   const grandTotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const cashNum = parseInt(cashReceived.replace(/\D/g, ""), 10) || 0;
-  const change = Math.max(0, cashNum - grandTotal);
+  const difference = cashNum - grandTotal; // bisa negatif untuk QRIS
+  const change = Math.max(0, difference);   // untuk cash (tidak boleh negatif di tampilan)
 
   const addToCart = (product: POSProduct) => {
     const existing = cart.find((c) => c.id === product.id);
@@ -81,17 +84,21 @@ export function POSClient({ products, storeId }: POSClientProps) {
     }
   };
 
-  const removeFromCart = (productId: string) => {
-    setCart(cart.filter((c) => c.id !== productId));
-  };
-
-  const handleSubmit = async () => {
+  const handleSubmit = async (paymentType: PaymentType) => {
     if (cart.length === 0) {
       toast.error("Keranjang kosong", { description: "Tambah produk terlebih dahulu." });
       return;
     }
     if (grandTotal === 0) {
       toast.error("Total tidak valid");
+      return;
+    }
+
+    // Untuk QRIS: jumlah yang ditransfer harus >= total harga
+    if (paymentType === "qris_statis" && cashNum < grandTotal) {
+      toast.error("Transfer kurang", {
+        description: `Jumlah transfer Rp ${cashNum.toLocaleString("id-ID")} kurang dari total Rp ${grandTotal.toLocaleString("id-ID")}.`,
+      });
       return;
     }
 
@@ -102,14 +109,15 @@ export function POSClient({ products, storeId }: POSClientProps) {
         .map((item) => ({
           productId: item.id,
           quantity: item.quantity,
-          totalPrice: item.price * item.quantity,
+          paymentType,
         }));
 
       const result = await createBulkTransactions(storeId, items);
 
       if (result.success) {
+        const methodLabel = paymentType === "cash" ? "Cash" : "QRIS";
         toast.success("Transaksi berhasil disimpan", {
-          description: `${result.count} item telah dicatat.`,
+          description: `${result.count} item dicatat via ${methodLabel}.`,
         });
         setCart([]);
         setCashReceived("");
@@ -127,6 +135,11 @@ export function POSClient({ products, storeId }: POSClientProps) {
     const raw = e.target.value.replace(/\D/g, "");
     setCashReceived(raw);
   };
+
+  // Label dan warna bawah dinamis berdasarkan metode aktif
+  const differenceLabel = activePayment === "cash" ? "Kembalian" : "Selisih Transfer";
+  const isQrisDeficit = activePayment === "qris_statis" && difference < 0;
+  const differenceDisplay = activePayment === "cash" ? change : difference;
 
   return (
     <div className="flex flex-col">
@@ -257,6 +270,7 @@ export function POSClient({ products, storeId }: POSClientProps) {
       {/* Panel Kalkulator - mengikuti scroll alami halaman */}
       <div className="border-t-2 border-ink dark:border-white/20 bg-white dark:bg-[#0a0a0a] p-4">
         <div className="space-y-3">
+          {/* Grand Total */}
           <div className="flex items-center justify-between">
             <span className="font-mono text-sm uppercase tracking-wider text-ink dark:text-gray-300">
               Grand Total
@@ -266,9 +280,10 @@ export function POSClient({ products, storeId }: POSClientProps) {
             </span>
           </div>
 
+          {/* Input Uang Diterima — aktif untuk semua metode */}
           <div>
             <label className="mb-1 block font-mono text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">
-              Uang Diterima
+              {activePayment === "cash" ? "Uang Diterima" : "Nominal Transfer"}
             </label>
             <div className="flex rounded-lg border-2 border-ink dark:border-white/20 bg-white dark:bg-white/5 overflow-hidden focus-within:ring-2 focus-within:ring-primary dark:focus-within:ring-[#22d3ee]">
               <span className="flex items-center px-3 font-mono text-lg text-gray-500 dark:text-gray-400">
@@ -285,23 +300,61 @@ export function POSClient({ products, storeId }: POSClientProps) {
             </div>
           </div>
 
-          <div className="flex items-center justify-between rounded-lg border-2 border-ink/50 dark:border-white/20 bg-gray-50 dark:bg-white/5 px-4 py-2">
+          {/* Kembalian / Selisih Transfer */}
+          <div
+            className={`flex items-center justify-between rounded-lg border-2 px-4 py-2 transition-colors ${
+              isQrisDeficit
+                ? "border-red-500/50 bg-red-500/10"
+                : "border-ink/50 dark:border-white/20 bg-gray-50 dark:bg-white/5"
+            }`}
+          >
             <span className="font-mono text-sm uppercase tracking-wider text-gray-600 dark:text-gray-400">
-              Kembalian
+              {differenceLabel}
             </span>
-            <span className="font-mono text-xl font-bold tabular-nums text-ink dark:text-white">
-              {formatRupiah(change)}
+            <span
+              className={`font-mono text-xl font-bold tabular-nums ${
+                isQrisDeficit ? "text-red-400" : "text-ink dark:text-white"
+              }`}
+            >
+              {isQrisDeficit ? `- ${formatRupiah(Math.abs(differenceDisplay))}` : formatRupiah(differenceDisplay)}
             </span>
           </div>
 
-          <button
-            type="button"
-            onClick={handleSubmit}
-            disabled={cart.length === 0 || isSubmitting}
-            className="w-full rounded-lg border-2 border-primary bg-primary py-4 font-mono text-lg font-bold uppercase tracking-wider text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed dark:border-[#22d3ee] dark:bg-[#22d3ee] dark:text-[#0a0a0a] dark:hover:bg-[#22d3ee]/90"
-          >
-            {isSubmitting ? "Menyimpan..." : "SIMPAN TRANSAKSI"}
-          </button>
+          {/* Tombol Pembayaran — 2 tombol berdampingan */}
+          <div className="grid grid-cols-2 gap-3 pt-1">
+            {/* CASH */}
+            <button
+              type="button"
+              onClick={() => {
+                setActivePayment("cash");
+                handleSubmit("cash");
+              }}
+              disabled={cart.length === 0 || isSubmitting}
+              className="flex items-center justify-center gap-2 rounded-lg border-2 border-ink bg-ink py-4 font-mono text-base font-bold uppercase tracking-wider text-white transition-colors hover:bg-ink/80 disabled:opacity-50 disabled:cursor-not-allowed dark:border-white/30 dark:bg-white/10 dark:text-white dark:hover:bg-white/20"
+            >
+              💵 {isSubmitting && activePayment === "cash" ? "Menyimpan..." : "CASH"}
+            </button>
+
+            {/* QRIS */}
+            <button
+              type="button"
+              onClick={() => {
+                setActivePayment("qris_statis");
+                handleSubmit("qris_statis");
+              }}
+              disabled={cart.length === 0 || isSubmitting}
+              className="flex items-center justify-center gap-2 rounded-lg border-2 border-primary bg-primary py-4 font-mono text-base font-bold uppercase tracking-wider text-white transition-colors hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed dark:border-[#22d3ee] dark:bg-[#22d3ee] dark:text-[#0a0a0a] dark:hover:bg-[#22d3ee]/90"
+            >
+              📱 {isSubmitting && activePayment === "qris_statis" ? "Menyimpan..." : "QRIS"}
+            </button>
+          </div>
+
+          {/* Hint untuk QRIS jika nominal kurang */}
+          {isQrisDeficit && (
+            <p className="text-center font-mono text-xs text-red-400">
+              ⚠ Nominal transfer kurang dari total. Transaksi QRIS tidak dapat disimpan.
+            </p>
+          )}
         </div>
       </div>
     </div>

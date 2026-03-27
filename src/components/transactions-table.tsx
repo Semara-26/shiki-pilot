@@ -22,6 +22,7 @@ export interface TransactionRow {
   quantity: number;
   totalPrice: number;
   type: string;
+  paymentType: string;
   createdAt: Date;
   productId: string;
   productName: string | null;
@@ -88,6 +89,9 @@ export function TransactionsTable({ transactions, className }: TransactionsTable
                 <th className="px-4 py-4 text-right text-sm font-bold tracking-wider text-gray-500 dark:text-gray-400">
                   Jumlah Item
                 </th>
+                <th className="px-4 py-4 text-left text-sm font-bold tracking-wider text-gray-500 dark:text-gray-400">
+                  Metode
+                </th>
                 <th className="px-4 py-4 text-right text-sm font-bold tracking-wider text-gray-500 dark:text-gray-400">
                   Total Pembayaran
                 </th>
@@ -101,7 +105,7 @@ export function TransactionsTable({ transactions, className }: TransactionsTable
               {transactions.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={5}
+                    colSpan={6}
                     className="px-4 py-10 text-center text-gray-500 dark:text-gray-400"
                   >
                     Belum ada transaksi yang tercatat.
@@ -142,6 +146,17 @@ export function TransactionsTable({ transactions, className }: TransactionsTable
                     </td>
                     <td className="px-4 py-4 text-right tabular-nums font-semibold text-ink dark:text-white">
                       {tx.quantity}
+                    </td>
+                    <td className="px-4 py-4">
+                      {tx.paymentType === 'qris_statis' ? (
+                        <span className="inline-flex items-center gap-1 rounded-full border border-cyan-500/40 bg-cyan-500/10 px-2.5 py-0.5 font-mono text-xs font-semibold text-cyan-400">
+                          📱 QRIS
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 rounded-full border border-gray-500/40 bg-gray-500/10 px-2.5 py-0.5 font-mono text-xs font-semibold text-gray-400">
+                          💵 Cash
+                        </span>
+                      )}
                     </td>
                     <td className="px-4 py-4 text-right tabular-nums font-semibold text-primary">
                       {formatRupiah(tx.totalPrice)}
@@ -255,6 +270,22 @@ export function TransactionsTable({ transactions, className }: TransactionsTable
 
               {/* Dashed divider */}
               <div className="mb-4 border-t border-dashed border-primary/30" />
+
+              {/* Metode Pembayaran */}
+              <div className="mb-4 flex items-center justify-between">
+                <span className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
+                  Metode Pembayaran
+                </span>
+                {selectedTx.paymentType === 'qris_statis' ? (
+                  <span className="inline-flex items-center gap-1 rounded-full border border-cyan-500/40 bg-cyan-500/10 px-2.5 py-0.5 font-mono text-xs font-semibold text-cyan-400">
+                    📱 QRIS Statis
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 rounded-full border border-gray-500/40 bg-gray-500/10 px-2.5 py-0.5 font-mono text-xs font-semibold text-gray-400">
+                    💵 Cash
+                  </span>
+                )}
+              </div>
 
               {/* Total */}
               <div className="flex items-center justify-between">
