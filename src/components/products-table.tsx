@@ -9,17 +9,7 @@ import Link from "next/link";
 import { deleteProduct } from "@/src/actions/product-actions";
 import { ConfirmDeleteModal } from "@/src/components/confirm-delete-modal";
 
-const tableContainerVariants = {
-  initial: {},
-  animate: {
-    transition: { staggerChildren: 0.05 },
-  },
-};
 
-const tableRowVariants = {
-  initial: { opacity: 0, y: 8 },
-  animate: { opacity: 1, y: 0 },
-};
 
 export interface ProductRow {
   id: string;
@@ -114,25 +104,31 @@ export function ProductsTable({ products, className, showActions }: ProductsTabl
                 )}
               </tr>
             </thead>
-            <motion.tbody
-              variants={tableContainerVariants}
-              initial="initial"
-              animate="animate"
-            >
-              {products.length === 0 ? (
-                <tr>
-                  <td
-                    colSpan={colCount}
-                    className="px-4 py-10 text-center text-gray-500 dark:text-gray-400"
+            <tbody className="relative">
+              <AnimatePresence mode="popLayout" initial={false}>
+                {products.length === 0 ? (
+                  <motion.tr
+                    key="empty"
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    transition={{ duration: 0.2 }}
                   >
-                    No products yet.
-                  </td>
-                </tr>
-              ) : (
+                    <td
+                      colSpan={colCount}
+                      className="px-4 py-10 text-center text-gray-500 dark:text-gray-400"
+                    >
+                      No products yet.
+                    </td>
+                  </motion.tr>
+                ) : (
                 products.map((product) => (
                   <motion.tr
                     key={product.id}
-                    variants={tableRowVariants}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    transition={{ duration: 0.15 }}
                     role="button"
                     tabIndex={0}
                     onClick={() => {
@@ -224,7 +220,8 @@ export function ProductsTable({ products, className, showActions }: ProductsTabl
                   </motion.tr>
                 ))
               )}
-            </motion.tbody>
+              </AnimatePresence>
+            </tbody>
           </table>
         </div>
       </div>

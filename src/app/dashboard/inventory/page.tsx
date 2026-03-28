@@ -44,16 +44,16 @@ export default async function InventoryPage(props: {
 
   if (!userStore) {
     return (
-      <PageContainer className="h-full w-full">
-        <div className="flex h-full flex-col overflow-hidden">
+      <PageContainer className="w-full">
+        <div className="flex flex-col">
           <div className="flex-none">
             <DashboardHeader
               breadcrumbs="TERMINAL / INVENTORY"
               title="FULL ASSET LIST"
             />
           </div>
-          <div className="flex flex-1 items-center justify-center p-6">
-            <div className="rounded-md border border-border bg-card p-8 text-center max-w-md">
+          <div className="p-6">
+            <div className="flex min-h-[400px] items-center justify-center">
               <p className="text-muted-foreground text-sm">
                 Buat toko terlebih dahulu untuk mengelola inventori.
               </p>
@@ -71,15 +71,15 @@ export default async function InventoryPage(props: {
   }
 
   return (
-    <PageContainer className="h-full w-full">
-      <div className="flex h-full flex-col overflow-hidden">
+    <PageContainer className="w-full">
+      <div className="flex flex-col">
         <div className="flex-none">
           <DashboardHeader
             breadcrumbs="TERMINAL / INVENTORY"
             title="FULL ASSET LIST"
           />
         </div>
-        <div className="flex-1 overflow-y-auto p-6">
+        <div className="p-6">
           <div className="mb-6 flex w-full justify-between items-center gap-4">
             <SearchInput className="flex-1" />
             <AiImportButton />
