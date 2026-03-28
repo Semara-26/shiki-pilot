@@ -6,6 +6,7 @@ import { stores, products, eventLogs } from "@/src/db/schema";
 import { DashboardHeader } from "@/src/components/dashboard-header";
 import { MetricsRow, type MetricProduct } from "@/src/components/metrics-row";
 import { ProductsTable } from "@/src/components/products-table";
+import { LowStockAlert } from "@/src/components/low-stock-alert";
 import { GrowthChart } from "@/src/components/growth-chart";
 import { AssetDonutChart } from "@/src/components/asset-donut-chart";
 import { EventLog } from "@/src/components/event-log";
@@ -128,6 +129,7 @@ export default async function DashboardPage() {
               lowStock={metrics.lowStock}
               products={productsList as MetricProduct[]}
             />
+            <LowStockAlert products={productsList.filter((p) => p.stock <= 5)} />
             <div>
               <div className="mb-3 flex items-center justify-between">
                 <p className="font-mono text-xs uppercase tracking-widest text-gray-500 dark:text-gray-400">
