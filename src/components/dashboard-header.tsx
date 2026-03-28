@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Search, Bell } from "lucide-react";
+import { Bell } from "lucide-react";
 import { SidebarTrigger } from "@/src/components/sidebar";
 import { AnimatePresence, motion } from "framer-motion";
 import { cn } from "@/src/lib/utils";
@@ -68,15 +68,6 @@ export function DashboardHeader({
 
         <div className="flex items-center gap-2">
           {actions}
-          {/* Search */}
-          <div className="relative hidden md:block">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500 dark:text-gray-400" />
-            <input
-              type="search"
-              placeholder="Search..."
-              className="h-9 w-48 rounded-md border border-ink/20 bg-white pl-9 pr-3 text-sm text-ink placeholder:text-gray-500 focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring dark:border-white/10 dark:bg-surface-dark dark:text-white dark:placeholder:text-gray-400"
-            />
-          </div>
 
           {/* Notifications */}
           <div className="relative" ref={notifRef}>

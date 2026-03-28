@@ -1,14 +1,22 @@
 import { auth } from "@clerk/nextjs/server";
 import Link from "next/link";
-import { eq } from "drizzle-orm";
+import { eq, ilike, and } from "drizzle-orm";
 import { db } from "@/src/db";
 import { stores, products } from "@/src/db/schema";
 import { DashboardHeader } from "@/src/components/dashboard-header";
 import { ProductsTable } from "@/src/components/products-table";
 import { PageContainer } from "@/src/components/page-animation";
 import { AiImportButton } from "./ai-import-button";
+import { SearchInput } from "@/src/components/search-input";
 
-export default async function InventoryPage() {
+export const dynamic = 'force-dynamic';
+
+export default async function InventoryPage(props: {
+  searchParams?: Promise<{ q?: string }>;
+}) {
+  const searchParams = await props.searchParams;
+  const q = searchParams?.q;
+  const safeQ = q ? q.slice(0, 100) : undefined; // SECURITY: Batasi max 100 karakter untuk mencegah Query DoS
   const { userId } = await auth();
   const userStore = userId
     ? await db.query.stores.findFirst({
@@ -19,7 +27,10 @@ export default async function InventoryPage() {
   const productsList =
     userStore?.id != null
       ? await db.query.products.findMany({
-          where: eq(products.storeId, userStore.id),
+          where: and(
+            eq(products.storeId, userStore.id),
+            safeQ ? ilike(products.name, `%${safeQ}%`) : undefined
+          ),
           columns: {
             id: true,
             name: true,
@@ -69,10 +80,16 @@ export default async function InventoryPage() {
           />
         </div>
         <div className="flex-1 overflow-y-auto p-6">
-          <div className="mb-6 flex w-full justify-end">
+          <div className="mb-6 flex w-full justify-between items-center gap-4">
+            <SearchInput className="flex-1" />
             <AiImportButton />
           </div>
           <ProductsTable products={productsList} showActions />
+          {productsList.length === 0 && q && (
+            <div className="mt-8 text-center text-sm text-muted-foreground">
+              Tidak ada produk yang cocok dengan pencarian &quot;{q}&quot;
+            </div>
+          )}
         </div>
       </div>
     </PageContainer>
