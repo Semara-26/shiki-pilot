@@ -196,21 +196,26 @@ export function ChatClient({ chatId, initialMessages }: ChatClientProps) {
 
           {isLoading && (lastMessage?.role === 'user' || showOptimisticUser) && (
             <div className="flex justify-start">
-              <div className="max-w-[85%] rounded-md border border-border bg-secondary px-4 py-2.5 text-foreground">
-                <span className="inline-flex items-center gap-1.5 font-mono text-sm text-muted-foreground">
-                  <span
-                    className="h-2 w-2 rounded-full bg-current opacity-70 animate-pulse"
-                    style={{ animationDelay: '0ms' }}
-                  />
-                  <span
-                    className="h-2 w-2 rounded-full bg-current opacity-70 animate-pulse"
-                    style={{ animationDelay: '200ms' }}
-                  />
-                  <span
-                    className="h-2 w-2 rounded-full bg-current opacity-70 animate-pulse"
-                    style={{ animationDelay: '400ms' }}
-                  />
-                </span>
+              <div className="max-w-[85%] rounded-md border border-border bg-secondary px-4 py-2.5 text-foreground shadow-sm">
+                <div className="flex items-center gap-3">
+                  <span className="inline-flex items-center gap-1.5 overflow-hidden">
+                    <span
+                      className="h-2 w-2 rounded-full bg-primary animate-pulse"
+                      style={{ animationDelay: '0ms' }}
+                    />
+                    <span
+                      className="h-2 w-2 rounded-full bg-primary animate-pulse"
+                      style={{ animationDelay: '200ms' }}
+                    />
+                    <span
+                      className="h-2 w-2 rounded-full bg-primary animate-pulse"
+                      style={{ animationDelay: '400ms' }}
+                    />
+                  </span>
+                  <span className="font-mono text-xs font-medium text-muted-foreground animate-in fade-in slide-in-from-left-1 duration-300">
+                    ShikiPilot AI sedang memproses...
+                  </span>
+                </div>
               </div>
             </div>
           )}

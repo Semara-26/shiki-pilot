@@ -1,26 +1,19 @@
-import { createClient, type RedisClientType } from "redis";
+import { Redis } from "@upstash/redis";
+import { Ratelimit } from "@upstash/ratelimit";
 
-let client: RedisClientType | null = null;
+// Inisialisasi Upstash Redis Client
+export const redis = new Redis({
+  url: process.env.UPSTASH_REDIS_REST_URL!,
+  token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+});
 
-function getRedisClient(): RedisClientType {
-  const url = process.env.REDIS_URL;
-  if (!url) {
-    throw new Error("REDIS_URL is not defined in environment variables");
-  }
-  if (!client) {
-    client = createClient({ url });
-    client.on("error", (err) => console.error("Redis Client Error:", err));
-  }
-  return client;
-}
-
-/** Memastikan koneksi Redis siap sebelum digunakan (penting untuk serverless) */
-export async function ensureRedisConnected(): Promise<RedisClientType> {
-  const redis = getRedisClient();
-  if (!redis.isReady) {
-    await redis.connect();
-  }
-  return redis;
-}
-
-export { getRedisClient };
+/**
+ * Konfigurasi Rate Limiter.
+ * Batas: 25 request per 60 detik (1 menit).
+ * Menggunakan sliding window untuk akurasi lebih baik.
+ */
+export const ratelimit = new Ratelimit({
+  redis: redis,
+  limiter: Ratelimit.slidingWindow(25, '60 s'),
+  analytics: true,
+});

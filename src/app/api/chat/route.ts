@@ -4,7 +4,7 @@ import { google } from '@ai-sdk/google';
 import { streamText, convertToModelMessages } from 'ai';
 import { db } from '../../../db';
 import { stores, products, transactions } from '../../../db/schema';
-import { checkRateLimit } from '@/src/lib/rate-limit';
+import { ratelimit } from '@/src/lib/redis';
 
 function formatRp(value: number): string {
   return `Rp ${value.toLocaleString('id-ID')}`;
@@ -17,11 +17,19 @@ export async function POST(req: Request) {
       return new Response('Unauthorized', { status: 401 });
     }
 
-    const { allowed } = await checkRateLimit(userId);
-    if (!allowed) {
+    const { success, limit, reset, remaining } = await ratelimit.limit(userId);
+    if (!success) {
       return new Response(
         JSON.stringify({ error: 'Asisten AI sedang memproses banyak data, mohon tunggu sekitar satu menit.' }),
-        { status: 429, headers: { 'Content-Type': 'application/json' } }
+        { 
+          status: 429, 
+          headers: { 
+            'Content-Type': 'application/json',
+            'X-RateLimit-Limit': limit.toString(),
+            'X-RateLimit-Remaining': remaining.toString(),
+            'X-RateLimit-Reset': reset.toString(),
+          } 
+        }
       );
     }
 
