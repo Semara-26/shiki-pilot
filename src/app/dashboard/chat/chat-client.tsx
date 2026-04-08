@@ -62,13 +62,14 @@ export function ChatClient({ chatId, initialMessages }: ChatClientProps) {
     });
   }, [messages, pendingUserMessage]);
 
-  useEffect(() => {
-    if (pendingUserMessage == null) return;
+  if (pendingUserMessage != null) {
     const last = messages[messages.length - 1];
     if (last?.role === 'user' && getMessageText(last.parts) === pendingUserMessage) {
+      // Adjusting state during render is a valid React pattern to prevent cascading effects.
+      // React will safely bail out of the current render and retry with the new state instantly.
       setPendingUserMessage(null);
     }
-  }, [messages, pendingUserMessage]);
+  }
 
   useEffect(() => {
     if (error) {

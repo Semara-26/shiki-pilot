@@ -71,7 +71,7 @@ function processRevenueOverTime(
     return Array.from(buckets.entries())
       .sort(([a], [b]) => a.localeCompare(b))
       .map(([dateStr, value]) => {
-        const [y, m, day] = dateStr.split("-").map(Number);
+        const [, m, day] = dateStr.split("-").map(Number);
         const short = `${String(day).padStart(2, "0")} ${MONTH_LABELS[m - 1]}`;
         return { name: short, value };
       });

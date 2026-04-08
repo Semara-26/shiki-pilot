@@ -135,7 +135,7 @@ export function OperatorIdPanel({ isOpen, onClose }: OperatorIdPanelProps) {
                       <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
                     </span>
                     <span className="text-ink/90 dark:text-foreground/90">ONLINE</span>
-                    <span>// SECURE</span>
+                    <span>{"// SECURE"}</span>
                   </div>
                 </div>
               </div>
