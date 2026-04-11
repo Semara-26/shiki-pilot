@@ -20,6 +20,7 @@ export interface ProductEditInitialData {
   name: string;
   price: number;
   stock: number;
+  stockCritical: number;
   description: string;
   imageUrl: string | null;
 }
@@ -194,6 +195,34 @@ export function ProductEditForm({ initialData }: ProductEditFormProps) {
             </p>
           )}
         </div>
+      </div>
+
+      <div>
+        <label htmlFor="stockCritical" className={labelClass}>
+          Batas Stok Kritis (Minimum)
+        </label>
+        <input
+          id="stockCritical"
+          name="stockCritical"
+          type="number"
+          min={0}
+          step={1}
+          defaultValue={initialData.stockCritical}
+          placeholder="10"
+          className={inputClass}
+          aria-invalid={!!state?.fieldErrors?.stockCritical}
+          aria-describedby={
+            state?.fieldErrors?.stockCritical ? 'stockCritical-error' : undefined
+          }
+        />
+        <p className="mt-1.5 font-mono text-xs text-muted-foreground/70">
+          AI dan WhatsApp akan mengingatkan Anda jika stok menyentuh angka ini. Default: 10.
+        </p>
+        {state?.fieldErrors?.stockCritical && (
+          <p id="stockCritical-error" className="mt-1.5 font-mono text-sm text-destructive">
+            {state.fieldErrors.stockCritical[0]}
+          </p>
+        )}
       </div>
 
       <div>

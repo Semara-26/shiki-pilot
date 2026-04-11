@@ -28,7 +28,7 @@ export async function createBulkTransactions(
 
     const userStore = await db.query.stores.findFirst({
       where: eq(stores.userId, userId),
-      columns: { id: true },
+      columns: { id: true, name: true, whatsappNumber: true },
     });
     if (!userStore || userStore.id !== storeId) {
       return { success: false, error: "Toko tidak ditemukan atau tidak memiliki akses." };
@@ -41,7 +41,13 @@ export async function createBulkTransactions(
     // --- Validasi stok & ambil harga terkini dari DB sebelum memulai transaksi ---
     const productIds = items.map((item) => item.productId);
     const currentStocks = await db
-      .select({ id: products.id, name: products.name, stock: products.stock, price: products.price })
+      .select({ 
+        id: products.id, 
+        name: products.name, 
+        stock: products.stock, 
+        price: products.price,
+        stockCritical: products.stockCritical 
+      })
       .from(products)
       .where(inArray(products.id, productIds));
 
@@ -99,6 +105,47 @@ export async function createBulkTransactions(
         }
       }
     });
+
+    // Step 3: Trigger Alert WA secara Asynchronous jika stok mencapai kritis
+    // Semua produk kritis dikumpulkan dalam satu request (items array) sesuai format WA Gateway.
+    const WA_GATEWAY_URL = process.env.WA_GATEWAY_URL;
+    const WA_API_KEY = process.env.WA_API_KEY;
+
+    if (WA_GATEWAY_URL && WA_API_KEY && userStore.whatsappNumber) {
+      const criticalItems = items
+        .map((item) => {
+          const product = currentStocks.find((p) => p.id === item.productId)!;
+          const newStock = product.stock - item.quantity;
+          if (newStock <= product.stockCritical) {
+            return {
+              product_name: product.name,
+              current_stock: newStock,
+              threshold: product.stockCritical,
+            };
+          }
+          return null;
+        })
+        .filter(Boolean);
+
+      if (criticalItems.length > 0) {
+        // Kirim satu POST untuk semua produk kritis sekaligus (format array `items`)
+        fetch(`${WA_GATEWAY_URL}/send-alert`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-api-key": WA_API_KEY,
+          },
+          body: JSON.stringify({
+            store_name: userStore.name,
+            owner_phone: userStore.whatsappNumber,
+            alert_type: "critical",
+            items: criticalItems,
+          }),
+        }).catch((err) => {
+          console.error("Gagal trigger alert WA (critical stock):", err);
+        });
+      }
+    }
 
     // Revalidasi semua halaman yang menampilkan data stok atau transaksi
     revalidatePath("/dashboard");

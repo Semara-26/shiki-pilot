@@ -3,9 +3,9 @@
 import { auth } from '@clerk/nextjs/server';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, ilike } from 'drizzle-orm';
 import { z } from 'zod';
-import { embed, generateText } from 'ai';
+import { embed, generateObject } from 'ai';
 import { google } from '@ai-sdk/google';
 import { createSupabaseClient } from '../supabase/server';
 import { db } from '../../db';
@@ -29,6 +29,11 @@ const createProductSchema = z.object({
     .number({ error: 'Stok harus berupa angka' })
     .int({ error: 'Stok harus bilangan bulat' })
     .min(0, { error: 'Stok tidak boleh negatif' }),
+  stockCritical: z.coerce
+    .number({ error: 'Batas stok kritis harus berupa angka' })
+    .int({ error: 'Batas stok kritis harus bilangan bulat' })
+    .min(0, { error: 'Batas stok kritis tidak boleh negatif' })
+    .default(10),
   description: z
     .string()
     .min(1, 'Deskripsi produk wajib diisi')
@@ -42,6 +47,7 @@ export type CreateProductState = {
     name?: string[];
     price?: string[];
     stock?: string[];
+    stockCritical?: string[];
     description?: string[];
     image?: string[];
   };
@@ -69,6 +75,7 @@ export async function createProduct(
       name: formData.get('name') ?? '',
       price: formData.get('price') ?? '',
       stock: formData.get('stock') ?? '',
+      stockCritical: formData.get('stockCritical') ?? '10',
       description: formData.get('description') ?? '',
     };
 
@@ -83,7 +90,7 @@ export async function createProduct(
       return { fieldErrors };
     }
 
-    const { name, price, stock, description } = parsed.data;
+    const { name, price, stock, stockCritical, description } = parsed.data;
 
     let imageUrl: string | null = null;
     const imageFile = formData.get('image');
@@ -136,6 +143,7 @@ export async function createProduct(
       name,
       price,
       stock,
+      stockCritical,
       description,
       imageUrl,
       embedding,
@@ -191,6 +199,7 @@ export async function updateProduct(
       name: formData.get('name') ?? '',
       price: formData.get('price') ?? '',
       stock: formData.get('stock') ?? '',
+      stockCritical: formData.get('stockCritical') ?? '10',
       description: formData.get('description') ?? '',
     };
 
@@ -205,7 +214,7 @@ export async function updateProduct(
       return { fieldErrors };
     }
 
-    const { name, price, stock, description } = parsed.data;
+    const { name, price, stock, stockCritical, description } = parsed.data;
 
     let imageUrl: string | null = existing.imageUrl;
     const imageFile = formData.get('image');
@@ -259,6 +268,7 @@ export async function updateProduct(
         name,
         price,
         stock,
+        stockCritical,
         description,
         imageUrl,
         embedding,
@@ -280,8 +290,6 @@ export async function updateProduct(
   }
   redirect('/dashboard/inventory');
 }
-
-const AI_IMPORT_SYSTEM_PROMPT = `Kamu adalah API ekstraksi data. Ubah teks mentah berikut yang berisi daftar produk menjadi format JSON Array murni (tanpa block code markdown \`\`\`json). Setiap objek harus memiliki key: 'name' (string), 'price' (number integer, hilangkan Rp/titik/koma), dan 'stock' (number, berikan nilai 0 jika tidak disebutkan di teks). Contoh output wajib: [{"name": "Kopi Susu", "price": 5000, "stock": 0}]`;
 
 export type ProcessAiImportResult = { success: true; count: number } | { success: false; error: string };
 
@@ -305,24 +313,28 @@ export async function processAiImport(rawText: string): Promise<ProcessAiImportR
       return { success: false, error: 'Teks kosong. Ketik atau paste daftar produk.' };
     }
 
-    const { text } = await generateText({
+    const { object } = await generateObject({
       model: google('gemini-flash-latest'),
-      system: AI_IMPORT_SYSTEM_PROMPT,
+      system: 'Kamu adalah asisten ekstraksi data produk. Ekstrak data produk dari teks mentah yang diberikan.',
       prompt: trimmed,
+      schema: z.object({
+        items: z.array(
+          z.object({
+            name: z.string().describe("Nama produk"),
+            price: z.number().describe("Harga produk dalam angka bulat"),
+            stock: z.number().describe("Stok awal produk. Berikan nilai 0 jika tidak disebutkan."),
+            stock_critical: z.number().optional().describe("Batas stok minimum/kritis produk. Jika tidak disebutkan di teks, biarkan kosong/undefined.")
+          })
+        )
+      })
     });
 
-    const cleaned = text.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
-    const parsed = JSON.parse(cleaned) as Array<{ name: string; price: number; stock: number }>;
-
-    if (!Array.isArray(parsed) || parsed.length === 0) {
-      return { success: false, error: 'AI tidak menemukan produk valid. Coba format teks yang lebih jelas.' };
-    }
-
-    const validItems = parsed.filter(
+    const validItems = object.items.filter(
       (p) => p && typeof p.name === 'string' && typeof p.price === 'number' && typeof p.stock === 'number'
     );
+
     if (validItems.length === 0) {
-      return { success: false, error: 'Tidak ada produk valid untuk disimpan.' };
+      return { success: false, error: 'Tidak ada produk valid untuk disimpan. Coba format teks yang lebih jelas.' };
     }
 
     await db.insert(products).values(
@@ -331,6 +343,7 @@ export async function processAiImport(rawText: string): Promise<ProcessAiImportR
         name: String(p.name).trim().slice(0, 200),
         price: Math.max(0, Math.floor(p.price)),
         stock: Math.max(0, Math.floor(p.stock)),
+        stockCritical: p.stock_critical === undefined || p.stock_critical === null ? 10 : Math.max(0, Math.floor(p.stock_critical)),
         description: String(p.name).trim().slice(0, 5000) || 'Imported via AI',
       }))
     );
@@ -348,5 +361,51 @@ export async function processAiImport(rawText: string): Promise<ProcessAiImportR
     // SECURITY F-07: Log detail error di server, kembalikan pesan generik ke client
     console.error('processAiImport error:', err);
     return { success: false, error: 'Gagal memproses import. Coba lagi.' };
+  }
+}
+
+/**
+ * Helper untuk AI Tool: update stockCritical suatu produk berdasarkan nama.
+ * Pencarian case-insensitive via ilike.
+ */
+export async function updateProductStockThreshold(
+  storeId: string,
+  productName: string,
+  newThreshold: number
+): Promise<{ success: boolean; message: string }> {
+  try {
+    const target = await db.query.products.findFirst({
+      where: and(
+        eq(products.storeId, storeId),
+        ilike(products.name, `%${productName.trim()}%`)
+      ),
+      columns: { id: true, name: true },
+    });
+
+    if (!target) {
+      return {
+        success: false,
+        message: `Produk dengan nama "${productName}" tidak ditemukan di inventaris.`,
+      };
+    }
+
+    await db
+      .update(products)
+      .set({ stockCritical: Math.max(0, Math.floor(newThreshold)) })
+      .where(eq(products.id, target.id));
+
+    revalidatePath('/dashboard/inventory');
+    revalidatePath('/dashboard');
+
+    return {
+      success: true,
+      message: `Batas stok kritis untuk "${target.name}" berhasil diperbarui menjadi ${Math.max(0, Math.floor(newThreshold))} unit.`,
+    };
+  } catch (err) {
+    console.error('updateProductStockThreshold error:', err);
+    return {
+      success: false,
+      message: 'Gagal memperbarui batas stok kritis. Terjadi kesalahan pada server.',
+    };
   }
 }

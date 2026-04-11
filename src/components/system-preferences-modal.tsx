@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { toast } from "sonner";
 import { getStoreByUserId, updateStoreInfo } from "@/src/lib/actions/store";
+import { getWaStatus } from "@/src/lib/actions/wa";
 import {
   User,
   Store,
@@ -66,6 +67,8 @@ export function SystemPreferencesModal({
   const [isLoadingStore, setIsLoadingStore] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string>("");
   const [showPassword, setShowPassword] = useState(false);
+  const [waStatus, setWaStatus] = useState<{ connected: boolean; qr?: string; error?: string } | null>(null);
+  const [isWaLoading, setIsWaLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const loadStoreData = useCallback(async () => {
@@ -101,11 +104,24 @@ export function SystemPreferencesModal({
     }
   }, [isOpen, currentProfile]);
 
+  const loadWaData = useCallback(async () => {
+    setIsWaLoading(true);
+    try {
+      const result = await getWaStatus();
+      setWaStatus(result);
+    } catch {
+      setWaStatus({ connected: false, error: "Gagal memuat status WhatsApp." });
+    } finally {
+      setIsWaLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     if (isOpen) {
       loadStoreData();
+      loadWaData();
     }
-  }, [isOpen, loadStoreData]);
+  }, [isOpen, loadStoreData, loadWaData]);
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -388,6 +404,75 @@ export function SystemPreferencesModal({
                 placeholder="Full address"
               />
             </div>
+          </div>
+        </section>
+
+        {/* WhatsApp Gateway Status Section */}
+        <section className="rounded-md border border-gray-200 bg-gray-50/50 p-4 dark:border-white/10 dark:bg-background/80">
+          <div className="flex items-center justify-between mb-4">
+            <h4 className="flex items-center gap-2 text-sm font-bold text-ink dark:text-white">
+              Status WhatsApp
+            </h4>
+            <button
+              type="button"
+              onClick={loadWaData}
+              disabled={isWaLoading}
+              className="flex items-center justify-center gap-1.5 rounded bg-white px-2.5 py-1.5 border border-ink/20 font-mono text-[10px] font-bold text-ink dark:bg-surface-darker dark:border-white/10 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 transition-colors disabled:opacity-50"
+            >
+              <RefreshCw className={cn("h-3 w-3", isWaLoading && "animate-spin")} />
+              REFRESH
+            </button>
+          </div>
+          <div className="flex flex-col gap-4">
+            {isWaLoading && !waStatus ? (
+              <div className="flex items-center gap-3">
+                <span className="h-2 w-2 animate-pulse rounded-full bg-yellow-500" />
+                <p className="font-mono text-[10px] uppercase text-gray-500 dark:text-gray-400">
+                  Memeriksa Gateway...
+                </p>
+              </div>
+            ) : waStatus?.connected ? (
+              <div className="flex items-center gap-3">
+                 <span className="relative flex h-2 w-2">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-75" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+                </span>
+                <p className="font-mono text-xs font-bold text-emerald-600 dark:text-emerald-400">
+                  TERHUBUNG KE GATEWAY
+                </p>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-3">
+                <div className="flex items-center gap-3">
+                  <span className="h-2 w-2 rounded-full bg-red-500" />
+                  <p className="font-mono text-xs font-bold text-red-600 dark:text-red-400">
+                    TERPUTUS
+                  </p>
+                  {waStatus?.error && (
+                    <span className="font-mono text-[10px] text-gray-500 dark:text-gray-400 border-l border-ink/20 dark:border-white/20 pl-3">
+                      {waStatus.error}
+                    </span>
+                  )}
+                </div>
+                
+                {waStatus?.qr && (
+                  <div className="mt-2 flex max-w-[200px] flex-col items-center rounded-md border-2 border-red-200 bg-white p-4 dark:border-red-900/50 dark:bg-black/50">
+                    <p className="mb-3 text-center text-xs font-bold text-ink dark:text-white">
+                      Scan QR WhatsApp
+                    </p>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img 
+                      src={waStatus.qr} 
+                      alt="WhatsApp QR Code"
+                      className="aspect-square h-auto w-full rounded-sm"
+                    />
+                    <p className="mt-3 text-center text-[10px] text-gray-500 dark:text-gray-400">
+                      Buka WA di HP Anda, tautkan perangkat.
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </section>
       </div>

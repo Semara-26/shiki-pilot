@@ -22,6 +22,8 @@ export const products = pgTable('products', {
   name: text('name').notNull(),
   price: integer('price').notNull(),
   stock: integer('stock').notNull(),
+  stockWarning: integer('stock_warning').notNull().default(10),
+  stockCritical: integer('stock_critical').notNull().default(5),
   description: text('description').notNull(),
   imageUrl: text('image_url'),
   // Vector Embedding (768 dimensi adalah standar model OpenAI/Google)

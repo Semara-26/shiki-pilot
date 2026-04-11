@@ -33,6 +33,7 @@ export default async function EditProductPage({ params }: EditProductPageProps) 
       name: true,
       price: true,
       stock: true,
+      stockCritical: true,
       description: true,
       imageUrl: true,
     },
@@ -47,6 +48,7 @@ export default async function EditProductPage({ params }: EditProductPageProps) 
     name: product.name,
     price: product.price,
     stock: product.stock,
+    stockCritical: product.stockCritical,
     description: product.description,
     imageUrl: product.imageUrl,
   };
