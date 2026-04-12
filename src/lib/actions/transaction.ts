@@ -142,7 +142,7 @@ export async function createBulkTransactions(
             items: criticalItems,
           }),
         }).catch((err) => {
-          console.error("Gagal trigger alert WA (critical stock):", err);
+          console.error("Gagal kirim WA Alert:", err);
         });
       }
     }

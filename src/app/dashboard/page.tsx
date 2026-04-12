@@ -29,6 +29,7 @@ export default async function DashboardPage() {
             name: true,
             price: true,
             stock: true,
+            stockCritical: true,
             imageUrl: true,
             description: true,
             createdAt: true,
@@ -43,7 +44,7 @@ export default async function DashboardPage() {
     (acc, product) => acc + product.price * product.stock,
     0
   );
-  const lowStock = productsList.filter((product) => product.stock < 10).length;
+  const lowStock = productsList.filter((product) => product.stock <= product.stockCritical).length;
 
   // 2. Format Rupiah
   const formatRupiah = (value: number) => {
@@ -129,7 +130,7 @@ export default async function DashboardPage() {
               lowStock={metrics.lowStock}
               products={productsList as MetricProduct[]}
             />
-            <LowStockAlert products={productsList.filter((p) => p.stock <= 5)} />
+            <LowStockAlert products={productsList.filter((p) => p.stock <= p.stockCritical)} />
             <div>
               <div className="mb-3 flex items-center justify-between">
                 <p className="font-mono text-xs uppercase tracking-widest text-gray-500 dark:text-gray-400">

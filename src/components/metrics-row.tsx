@@ -9,6 +9,7 @@ export interface MetricProduct {
   name: string;
   price: number;
   stock: number;
+  stockCritical: number;
 }
 
 export interface MetricsRowProps {
@@ -54,7 +55,7 @@ export function MetricsRow({
 
   const values = { totalValue, totalProducts, totalStock, lowStock };
 
-  const lowStockProducts = products.filter((p) => p.stock < 10);
+  const lowStockProducts = products.filter((p) => p.stock <= p.stockCritical);
 
   const totalAssetValue = products.reduce(
     (acc, p) => acc + p.price * p.stock,
