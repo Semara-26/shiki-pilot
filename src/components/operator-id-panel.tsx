@@ -16,6 +16,8 @@ import {
 import { cn } from "@/src/lib/utils";
 import { SystemPreferencesModal } from "@/src/components/system-preferences-modal";
 import { DocumentationModal } from "@/src/components/documentation-modal";
+import { useSearchParams, usePathname, useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 const ROLE_LABEL = "ROLE // SYSTEM_OPERATOR";
 const MAX_NAME_LENGTH = 24;
@@ -34,7 +36,14 @@ export function OperatorIdPanel({ isOpen, onClose }: OperatorIdPanelProps) {
   const { theme, setTheme } = useTheme();
   const { user, isLoaded } = useUser();
   const { signOut } = useClerk();
-  const [isPrefsOpen, setIsPrefsOpen] = useState(false);
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const [isPrefsOpen, setIsPrefsOpen] = useState(searchParams.get("setup") === "wa");
+  const [initialPrefTab, setInitialPrefTab] = useState<"ACCOUNT" | "STORE INFO">(
+    searchParams.get("setup") === "wa" ? "STORE INFO" : "ACCOUNT"
+  );
   const [isDocOpen, setIsDocOpen] = useState(false);
   const [localOverrides, setLocalOverrides] = useState<Partial<{
     name: string;
@@ -55,6 +64,13 @@ export function OperatorIdPanel({ isOpen, onClose }: OperatorIdPanelProps) {
       storeName: localOverrides.storeName ?? "",
     };
   }, [user?.fullName, user?.primaryEmailAddress?.emailAddress, user?.imageUrl, localOverrides]);
+
+  useEffect(() => {
+    if (searchParams.get("setup") === "wa") {
+      // Clean up the URL to prevent re-opening on refresh
+      router.replace(pathname, { scroll: false });
+    }
+  }, [searchParams, pathname, router]);
 
   const isDark = theme !== "light";
   const toggleTheme = () => setTheme(isDark ? "light" : "dark");
@@ -260,6 +276,7 @@ export function OperatorIdPanel({ isOpen, onClose }: OperatorIdPanelProps) {
       <SystemPreferencesModal
         isOpen={isPrefsOpen}
         onClose={() => setIsPrefsOpen(false)}
+        initialTab={initialPrefTab}
         currentProfile={userProfile}
         onSave={(newData) =>
           setLocalOverrides((prev) => ({ ...prev, ...newData }))

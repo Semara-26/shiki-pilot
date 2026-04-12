@@ -32,7 +32,7 @@ export function CreateStoreClient() {
       toast.success('Store created successfully', {
         description: 'Data has been synced to database.',
       });
-      router.push('/dashboard');
+      router.push('/dashboard?setup=wa');
     }
   }, [state?.success, router]);
 

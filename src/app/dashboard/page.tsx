@@ -1,5 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import Link from "next/link";
+import { getWaStatus } from "@/src/lib/actions/wa";
+import { AlertTriangle, Settings2 } from "lucide-react";
 import { eq, desc } from "drizzle-orm";
 import { db } from "@/src/db";
 import { stores, products, eventLogs } from "@/src/db/schema";
@@ -14,6 +16,7 @@ import { PageContainer } from "@/src/components/page-animation";
 
 export default async function DashboardPage() {
   const { userId } = await auth();
+  const waStatus = await getWaStatus();
   const userStore = userId
     ? await db.query.stores.findFirst({
         where: eq(stores.userId, userId),
@@ -131,6 +134,27 @@ export default async function DashboardPage() {
               products={productsList as MetricProduct[]}
             />
             <LowStockAlert products={productsList.filter((p) => p.stock <= p.stockCritical)} />
+            
+            {!waStatus.connected && (
+              <div className="flex items-center justify-between rounded-lg border border-red-500/50 bg-red-500/10 p-4 text-red-500 dark:bg-red-500/5">
+                <div className="flex items-center gap-3">
+                  <div className="rounded-full bg-red-500/20 p-2">
+                    <AlertTriangle className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h4 className="font-mono text-sm font-bold uppercase tracking-tight">System Alert: WhatsApp Disconnected</h4>
+                    <p className="font-mono text-xs opacity-80">WhatsApp alerts for low stock will not be sent until reconnected.</p>
+                  </div>
+                </div>
+                <Link 
+                  href="/dashboard?setup=wa"
+                  className="flex items-center gap-2 rounded border border-red-500/50 bg-red-500 px-3 py-1.5 font-mono text-xs font-bold text-white transition-colors hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                >
+                  <Settings2 className="h-4 w-4" />
+                  RECONNECT NOW
+                </Link>
+              </div>
+            )}
             <div>
               <div className="mb-3 flex items-center justify-between">
                 <p className="font-mono text-xs uppercase tracking-widest text-gray-500 dark:text-gray-400">

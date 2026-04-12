@@ -29,6 +29,7 @@ export interface UserProfileForPrefs {
 interface SystemPreferencesModalProps {
   isOpen: boolean;
   onClose: () => void;
+  initialTab?: "ACCOUNT" | "STORE INFO" | "SECURITY";
   currentProfile?: UserProfileForPrefs;
   onSave?: (data: Partial<UserProfileForPrefs>) => void;
 }
@@ -58,10 +59,11 @@ const INITIAL_FORM_DATA = {
 export function SystemPreferencesModal({
   isOpen,
   onClose,
+  initialTab = "ACCOUNT",
   currentProfile,
   onSave,
 }: SystemPreferencesModalProps) {
-  const [activeTab, setActiveTab] = useState<TabLabel>("ACCOUNT");
+  const [activeTab, setActiveTab] = useState<TabLabel>(initialTab as TabLabel);
   const [formData, setFormData] = useState(INITIAL_FORM_DATA);
   const [isSyncing, setIsSyncing] = useState(false);
   const [isLoadingStore, setIsLoadingStore] = useState(false);
@@ -122,6 +124,12 @@ export function SystemPreferencesModal({
       loadWaData();
     }
   }, [isOpen, loadStoreData, loadWaData]);
+
+  useEffect(() => {
+    if (isOpen && activeTab !== initialTab) {
+      setActiveTab(initialTab as TabLabel);
+    }
+  }, [isOpen, initialTab, activeTab]);
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

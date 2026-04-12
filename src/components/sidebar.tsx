@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -171,10 +171,12 @@ export function Sidebar() {
             </p>
           </div>
         </button>
-        <OperatorIdPanel
-          isOpen={isProfileOpen}
-          onClose={() => setIsProfileOpen(false)}
-        />
+        <Suspense fallback={null}>
+          <OperatorIdPanel
+            isOpen={isProfileOpen}
+            onClose={() => setIsProfileOpen(false)}
+          />
+        </Suspense>
       </div>
     </>
   );
