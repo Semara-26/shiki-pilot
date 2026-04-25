@@ -126,10 +126,10 @@ export function SystemPreferencesModal({
   }, [isOpen, loadStoreData, loadWaData]);
 
   useEffect(() => {
-    if (isOpen && activeTab !== initialTab) {
+    if (isOpen) {
       setActiveTab(initialTab as TabLabel);
     }
-  }, [isOpen, initialTab, activeTab]);
+  }, [isOpen, initialTab]);
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

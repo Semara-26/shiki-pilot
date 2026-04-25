@@ -1,17 +1,16 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
-// Definisikan rute yang WAJIB login
-// Artinya: Halaman dashboard dan semua API route tertutup untuk umum
-// Pengecualian: /api/wa-webhook diakses oleh WA Gateway (bukan user browser)
-const isProtectedRoute = createRouteMatcher([
-  '/dashboard(.*)',
-  '/api/((?!wa-webhook).*)',
-]);
+// 1. Definisikan route yang boleh diakses tanpa login (termasuk Webhook kita)
+const isPublicRoute = createRouteMatcher(["/api/wa-webhook", "/"]);
 
+// 2. Terapkan proteksi untuk route yang bukan publik
 export default clerkMiddleware(async (auth, req) => {
-  if (isProtectedRoute(req)) await auth.protect();
+  if (!isPublicRoute(req)) {
+    await auth.protect();
+  }
 });
 
+// 3. Konfigurasi Matcher bawaan Clerk (jangan diubah)
 export const config = {
   matcher: [
     // Skip Next.js internals and all static files
