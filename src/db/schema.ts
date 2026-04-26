@@ -10,7 +10,7 @@ export const stores = pgTable('stores', {
   businessType: text('business_type'),
   contactEmail: text('contact_email'),
   phone: text('phone'),
-  whatsappNumber: text('whatsapp_number').notNull().default('-'),
+  whatsappNumber: text('whatsapp_number').notNull().default('-').unique(),
   address: text('address').notNull().default('-'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });

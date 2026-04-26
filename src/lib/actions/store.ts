@@ -139,6 +139,9 @@ export async function createStore(
     // SECURITY F-07: Log detail error di server, kembalikan pesan generik ke client
     console.error('createStore error:', err);
     if (err instanceof Error && err.message.includes('unique')) {
+      if (err.message.includes('whatsapp_number') || err.message.includes('whatsappNumber')) {
+        return { error: 'Nomor WhatsApp sudah digunakan oleh toko lain.' };
+      }
       return { error: 'Nama toko sudah digunakan, coba nama lain.' };
     }
     return { error: 'Gagal membuat toko. Coba lagi.' };
@@ -234,6 +237,11 @@ export async function updateStoreInfo(
   } catch (err) {
     // SECURITY F-07: Log detail error di server, kembalikan pesan generik ke client
     console.error('updateStoreInfo error:', err);
+    if (err instanceof Error && err.message.includes('unique')) {
+      if (err.message.includes('whatsapp_number') || err.message.includes('whatsappNumber')) {
+        return { error: 'Nomor WhatsApp sudah digunakan oleh toko lain.' };
+      }
+    }
     return { error: 'Gagal menyimpan perubahan. Coba lagi.' };
   }
 }
