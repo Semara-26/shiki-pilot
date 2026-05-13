@@ -5,6 +5,7 @@ import { z } from "zod";
 import { eq, ilike, and, gte } from "drizzle-orm";
 import { db } from "../../../db";
 import { stores, products, transactions } from "../../../db/schema";
+import { checkWaRateLimit } from "../../../lib/rate-limit";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Helper: Normalize nomor WA (strip non-digit, 0xxx → 62xxx)
@@ -94,6 +95,32 @@ export async function POST(req: NextRequest) {
   // 3. Normalize nomor pengirim & cari toko
   const rawSender = senderNumber || senderJid || "";
   const normalizedSender = normalizePhone(rawSender);
+
+  // ── Rate Limit: Opsi D (berlapis: per menit + per hari) ──────────────────
+  // Gunakan rawJid sebagai identifier agar unik per perangkat WA
+  const rlResult = await checkWaRateLimit(rawJid);
+  if (!rlResult.allowed) {
+    const isDaily = rlResult.blockedBy === 'daily';
+    const resetMs = isDaily ? rlResult.resetDaily : rlResult.resetMinute;
+    const resetDate = new Date(resetMs);
+    // Format jam reset dalam WIB (UTC+7)
+    const resetWib = resetDate.toLocaleTimeString('id-ID', {
+      hour: '2-digit',
+      minute: '2-digit',
+      timeZone: 'Asia/Jakarta',
+    });
+
+    const rlMessage = isDaily
+      ? `⛔ Wah, Bos udah kirim terlalu banyak pesan hari ini (lebih dari 100 pesan). Kuota harian sudah habis.\n\nSilakan coba lagi besok ya! 😊`
+      : `⏳ Sabar dulu Bos, ShikiPilot lagi kebanyakan permintaan nih.\n\nCoba lagi dalam 1 menit ya (sekitar pukul ${resetWib} WIB). 😄`;
+
+    await sendWaReply(rawJid, rlMessage);
+    return NextResponse.json(
+      { status: 'rate_limited', blockedBy: rlResult.blockedBy },
+      { status: 429 },
+    );
+  }
+  // ─────────────────────────────────────────────────────────────────────────
 
   console.log(
     `[WA Webhook] Mencari toko... Raw: ${rawSender} | Normalized: ${normalizedSender}`,

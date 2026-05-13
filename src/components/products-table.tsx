@@ -1,15 +1,37 @@
 "use client";
 
+/**
+ * ProductsTable — Refactored for Performance
+ *
+ * Optimisasi:
+ * 1. State modal (selectedProduct + isOpen) DIPINDAH ke komponen
+ *    ProductRow terpisah, sehingga membuka modal hanya me-re-render
+ *    satu baris, bukan seluruh tabel.
+ * 2. Modal di-lazy-load via next/dynamic + conditional render
+ *    {isOpen && <Modal />} agar tidak ada DOM cost saat tertutup.
+ * 3. useTransition dipakai pada operasi delete agar UI tidak freeze.
+ * 4. Animasi hanya pakai transform + opacity (GPU-composited).
+ */
+
 import Image from "next/image";
+import dynamic from "next/dynamic";
 import { AnimatePresence, motion } from "framer-motion";
 import { Pencil, Trash2, Loader2 } from "lucide-react";
 import { cn } from "@/src/lib/utils";
-import { useState, useTransition } from "react";
+import { useState, useTransition, memo, useCallback } from "react";
 import Link from "next/link";
 import { deleteProduct } from "@/src/actions/product-actions";
-import { ConfirmDeleteModal } from "@/src/components/confirm-delete-modal";
 
+// ── Lazy-load modals — tidak masuk DOM saat tidak diperlukan ──────────────────
+const ConfirmDeleteModal = dynamic(
+  () =>
+    import("@/src/components/confirm-delete-modal").then(
+      (m) => m.ConfirmDeleteModal
+    ),
+  { ssr: false }
+);
 
+// ─── Types ────────────────────────────────────────────────────────────────────
 
 export interface ProductRow {
   id: string;
@@ -19,6 +41,8 @@ export interface ProductRow {
   imageUrl: string | null;
   description?: string | null;
 }
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function formatRupiah(value: number): string {
   return new Intl.NumberFormat("id-ID", {
@@ -38,6 +62,253 @@ function getInitials(name: string): string {
     .slice(0, 2);
 }
 
+// ─── Asset Inspection Modal ───────────────────────────────────────────────────
+// Terpisah dari row agar re-render-nya terisolasi
+
+interface AssetModalProps {
+  product: ProductRow;
+  onClose: () => void;
+}
+
+const AssetModal = memo(function AssetModal({
+  product,
+  onClose,
+}: AssetModalProps) {
+  return (
+    <motion.div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="asset-inspection-title"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.2 }}
+      style={{ willChange: "opacity" }}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm p-4"
+      onClick={onClose}
+    >
+      <motion.div
+        initial={{ opacity: 0, scale: 0.92, y: 16 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95, y: 8 }}
+        transition={{ type: "spring", stiffness: 320, damping: 26, mass: 0.7 }}
+        style={{ willChange: "transform, opacity" }}
+        className="w-full max-w-lg overflow-hidden rounded-md border border-primary/50 bg-secondary/90 p-6 shadow-[0_0_30px_rgba(242,13,13,0.3)] relative"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="mb-6 flex items-start justify-between gap-4">
+          <h2
+            id="asset-inspection-title"
+            className="font-mono text-sm font-medium uppercase tracking-widest text-muted-foreground"
+          >
+            ASSET INSPECTION // #{product.id.substring(0, 8)}
+          </h2>
+          <button
+            type="button"
+            onClick={onClose}
+            className="shrink-0 rounded p-1.5 font-mono text-primary hover:bg-primary/20 transition-colors focus:outline-none focus:ring-2 focus:ring-primary/50"
+            aria-label="Close"
+          >
+            <span className="text-lg leading-none">×</span>
+          </button>
+        </div>
+
+        {/* Content */}
+        <div className="grid gap-6">
+          <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-start">
+            <div className="shrink-0 overflow-hidden rounded border-2 border-primary/60 bg-muted w-32 h-32">
+              {product.imageUrl ? (
+                <Image
+                  src={product.imageUrl}
+                  alt={product.name}
+                  width={128}
+                  height={128}
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center font-mono text-2xl font-medium text-muted-foreground">
+                  {getInitials(product.name)}
+                </div>
+              )}
+            </div>
+            <div className="min-w-0 flex-1">
+              <h3 className="font-mono text-xl font-semibold tracking-tight text-foreground">
+                {product.name}
+              </h3>
+              <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 font-mono text-sm">
+                <dt className="text-muted-foreground uppercase tracking-wider">
+                  Status
+                </dt>
+                <dd>
+                  <span
+                    className={cn(
+                      "inline-block rounded px-2 py-0.5 text-xs font-medium uppercase",
+                      product.stock > 0
+                        ? "bg-chart-2/20 text-chart-2"
+                        : "bg-destructive/20 text-destructive"
+                    )}
+                  >
+                    {product.stock > 0 ? "ACTIVE" : "OUT_OF_STOCK"}
+                  </span>
+                </dd>
+                <dt className="text-muted-foreground uppercase tracking-wider">
+                  Price
+                </dt>
+                <dd className="tabular-nums text-foreground">
+                  {formatRupiah(product.price)}
+                </dd>
+                <dt className="text-muted-foreground uppercase tracking-wider">
+                  Stock
+                </dt>
+                <dd className="tabular-nums text-foreground">{product.stock}</dd>
+              </dl>
+            </div>
+          </div>
+
+          {product.description != null && product.description !== "" ? (
+            <div className="border-t border-border/60 pt-4">
+              <dt className="font-mono text-xs font-medium uppercase tracking-widest text-muted-foreground mb-2">
+                Description
+              </dt>
+              <p className="font-mono text-sm text-foreground leading-relaxed">
+                {product.description}
+              </p>
+            </div>
+          ) : null}
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+});
+
+// ─── Single Row — state modal TERISOLASI di sini ──────────────────────────────
+// Membuka modal hanya me-re-render baris ini, bukan seluruh tabel.
+
+interface RowProps {
+  product: ProductRow;
+  showActions: boolean;
+  onDeleteRequest: (id: string) => void;
+  isDeletingThis: boolean;
+}
+
+const ProductTableRow = memo(function ProductTableRow({
+  product,
+  showActions,
+  onDeleteRequest,
+  isDeletingThis,
+}: RowProps) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const open = useCallback(() => setIsOpen(true), []);
+  const close = useCallback(() => setIsOpen(false), []);
+
+  return (
+    <>
+      <motion.tr
+        key={product.id}
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -8 }}
+        transition={{ duration: 0.15 }}
+        style={{ willChange: "transform, opacity" }}
+        role="button"
+        tabIndex={0}
+        onClick={open}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            open();
+          }
+        }}
+        className="cursor-pointer border-b border-gray-200 transition-colors duration-150 hover:bg-gray-50 dark:border-white/5 dark:hover:bg-primary/10"
+      >
+        <td className="px-4 py-4 font-semibold text-ink dark:text-white">
+          #{product.id.substring(0, 4)}
+        </td>
+        <td className="px-4 py-4 font-semibold text-ink dark:text-white">
+          {product.name}
+        </td>
+        <td className="w-[120px] px-4 py-4 align-middle">
+          <span
+            className={cn(
+              "inline-block rounded-md px-2 py-1 text-xs font-medium uppercase tracking-wider",
+              product.stock > 0
+                ? "bg-chart-2/20 text-chart-2"
+                : "bg-destructive/20 text-destructive"
+            )}
+          >
+            {product.stock > 0 ? "ACTIVE" : "OUT_OF_STOCK"}
+          </span>
+        </td>
+        <td className="w-[72px] px-4 py-4 align-middle">
+          {product.imageUrl ? (
+            <div className="relative inline-block h-10 w-10 shrink-0 overflow-hidden rounded-full border border-gray-200 bg-paper dark:border-white/10 dark:bg-black/40">
+              <Image
+                src={product.imageUrl}
+                alt={product.name}
+                width={40}
+                height={40}
+                className="h-full w-full object-cover"
+              />
+            </div>
+          ) : (
+            <div className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-gray-200 bg-paper text-xs font-medium text-gray-500 avatar-mono dark:border-white/10 dark:bg-black/40 dark:text-gray-400">
+              {getInitials(product.name)}
+            </div>
+          )}
+        </td>
+        <td className="px-4 py-4 text-right tabular-nums font-semibold text-ink dark:text-white">
+          {formatRupiah(product.price)}
+        </td>
+        <td className="px-4 py-4 text-right tabular-nums font-semibold text-ink dark:text-white">
+          {product.stock}
+        </td>
+        {showActions && (
+          <td
+            className="px-4 py-4 text-right"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-end gap-2">
+              <Link
+                href={`/dashboard/products/${product.id}/edit`}
+                className="rounded-md p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-primary dark:hover:bg-white/10 dark:hover:text-primary"
+                aria-label="Edit"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <Pencil className="h-4 w-4" />
+              </Link>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDeleteRequest(product.id);
+                }}
+                disabled={isDeletingThis}
+                className="rounded-md p-2 text-gray-500 transition-colors hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/30 dark:hover:text-red-400 disabled:opacity-50 disabled:pointer-events-none"
+                aria-label="Delete"
+              >
+                {isDeletingThis ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Trash2 className="h-4 w-4" />
+                )}
+              </button>
+            </div>
+          </td>
+        )}
+      </motion.tr>
+
+      {/* Modal hanya di-mount saat isOpen === true */}
+      <AnimatePresence>
+        {isOpen && <AssetModal product={product} onClose={close} />}
+      </AnimatePresence>
+    </>
+  );
+});
+
+// ─── ProductsTable (parent — hanya kelola delete state) ───────────────────────
+
 interface ProductsTableProps {
   products: ProductRow[];
   className?: string;
@@ -45,17 +316,18 @@ interface ProductsTableProps {
   showActions?: boolean;
 }
 
-export function ProductsTable({ products, className, showActions }: ProductsTableProps) {
+export function ProductsTable({
+  products,
+  className,
+  showActions = false,
+}: ProductsTableProps) {
   const colCount = showActions ? 7 : 6;
-  const [selectedProduct, setSelectedProduct] = useState<ProductRow | null>(null);
-  const [isOpen, setIsOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  function handleDeleteClick(product: ProductRow, e: React.MouseEvent) {
-    e.stopPropagation();
-    setDeletingId(product.id);
-  }
+  const handleDeleteRequest = useCallback((id: string) => {
+    setDeletingId(id);
+  }, []);
 
   function handleConfirmDelete() {
     if (!deletingId) return;
@@ -109,10 +381,10 @@ export function ProductsTable({ products, className, showActions }: ProductsTabl
                 {products.length === 0 ? (
                   <motion.tr
                     key="empty"
-                    initial={{ opacity: 0, scale: 0.95 }}
+                    initial={{ opacity: 0, scale: 0.97 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    transition={{ duration: 0.2 }}
+                    exit={{ opacity: 0, scale: 0.97 }}
+                    transition={{ duration: 0.15 }}
                   >
                     <td
                       colSpan={colCount}
@@ -122,231 +394,31 @@ export function ProductsTable({ products, className, showActions }: ProductsTabl
                     </td>
                   </motion.tr>
                 ) : (
-                products.map((product) => (
-                  <motion.tr
-                    key={product.id}
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -8 }}
-                    transition={{ duration: 0.15 }}
-                    role="button"
-                    tabIndex={0}
-                    onClick={() => {
-                      setSelectedProduct(product);
-                      setIsOpen(true);
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" || e.key === " ") {
-                        e.preventDefault();
-                        setSelectedProduct(product);
-                        setIsOpen(true);
-                      }
-                    }}
-                    className="cursor-pointer border-b border-gray-200 transition-all duration-200 hover:bg-gray-50 dark:border-white/5 dark:hover:bg-primary/10"
-                  >
-                    <td className="px-4 py-4 font-semibold text-ink dark:text-white">
-                      #{product.id.substring(0, 4)}
-                    </td>
-                    <td className="px-4 py-4 font-semibold text-ink dark:text-white">
-                      {product.name}
-                    </td>
-                    <td className="w-[120px] px-4 py-4 align-middle">
-                      <span
-                        className={cn(
-                          "inline-block rounded-md px-2 py-1 text-xs font-medium uppercase tracking-wider",
-                          product.stock > 0
-                            ? "bg-chart-2/20 text-chart-2"
-                            : "bg-destructive/20 text-destructive"
-                        )}
-                      >
-                        {product.stock > 0 ? "ACTIVE" : "OUT_OF_STOCK"}
-                      </span>
-                    </td>
-                    <td className="w-[72px] px-4 py-4 align-middle">
-                      {product.imageUrl ? (
-                        <div className="relative inline-block h-10 w-10 shrink-0 overflow-hidden rounded-full border border-gray-200 bg-paper dark:border-white/10 dark:bg-black/40">
-                          <Image
-                            src={product.imageUrl}
-                            alt={product.name}
-                            width={40}
-                            height={40}
-                            className="h-full w-full object-cover"
-                          />
-                        </div>
-                      ) : (
-                        <div className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-gray-200 bg-paper text-xs font-medium text-gray-500 avatar-mono dark:border-white/10 dark:bg-black/40 dark:text-gray-400">
-                          {getInitials(product.name)}
-                        </div>
-                      )}
-                    </td>
-                    <td className="px-4 py-4 text-right tabular-nums font-semibold text-ink dark:text-white">
-                      {formatRupiah(product.price)}
-                    </td>
-                    <td className="px-4 py-4 text-right tabular-nums font-semibold text-ink dark:text-white">
-                      {product.stock}
-                    </td>
-                    {showActions && (
-                      <td
-                        className="px-4 py-4 text-right"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <div className="flex items-center justify-end gap-2">
-                          <Link
-                            href={`/dashboard/products/${product.id}/edit`}
-                            className="rounded-md p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-primary dark:hover:bg-white/10 dark:hover:text-primary"
-                            aria-label="Edit"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </Link>
-                          <button
-                            type="button"
-                            onClick={(e) => handleDeleteClick(product, e)}
-                            disabled={isPending && deletingId === product.id}
-                            className={cn(
-                              "rounded-md p-2 text-gray-500 transition-colors hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/30 dark:hover:text-red-400 disabled:opacity-50 disabled:pointer-events-none"
-                            )}
-                            aria-label="Delete"
-                          >
-                            {deletingId === product.id ? (
-                              <Loader2 className="h-4 w-4 animate-spin" />
-                            ) : (
-                              <Trash2 className="h-4 w-4" />
-                            )}
-                          </button>
-                        </div>
-                      </td>
-                    )}
-                  </motion.tr>
-                ))
-              )}
+                  products.map((product) => (
+                    <ProductTableRow
+                      key={product.id}
+                      product={product}
+                      showActions={showActions}
+                      onDeleteRequest={handleDeleteRequest}
+                      isDeletingThis={isPending && deletingId === product.id}
+                    />
+                  ))
+                )}
               </AnimatePresence>
             </tbody>
           </table>
         </div>
       </div>
 
-      <AnimatePresence>
-        {isOpen && selectedProduct && (
-          <motion.div
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="asset-inspection-title"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.25 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm p-4"
-            onClick={() => setIsOpen(false)}
-          >
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 10 }}
-              transition={{
-                type: "spring",
-                stiffness: 300,
-                damping: 24,
-                mass: 0.8,
-              }}
-              className="w-full max-w-lg overflow-hidden rounded-md border border-primary/50 bg-secondary/90 p-6 shadow-[0_0_30px_rgba(242,13,13,0.3)] relative"
-              onClick={(e) => e.stopPropagation()}
-            >
-              {/* Header */}
-              <div className="mb-6 flex items-start justify-between gap-4">
-                <h2
-                  id="asset-inspection-title"
-                  className="font-mono text-sm font-medium uppercase tracking-widest text-muted-foreground"
-                >
-                  ASSET INSPECTION // #{selectedProduct.id.substring(0, 8)}
-                </h2>
-                <button
-                  type="button"
-                  onClick={() => setIsOpen(false)}
-                  className="shrink-0 rounded p-1.5 font-mono text-primary hover:bg-primary/20 transition-colors focus:outline-none focus:ring-2 focus:ring-primary/50"
-                  aria-label="Close"
-                >
-                  <span className="text-lg leading-none">×</span>
-                </button>
-              </div>
-
-              {/* Content */}
-              <div className="grid gap-6">
-                <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-start">
-                  <div className="shrink-0 overflow-hidden rounded border-2 border-primary/60 bg-muted w-32 h-32">
-                    {selectedProduct.imageUrl ? (
-                      <Image
-                        src={selectedProduct.imageUrl}
-                        alt={selectedProduct.name}
-                        width={128}
-                        height={128}
-                        className="h-full w-full object-cover"
-                      />
-                    ) : (
-                      <div className="flex h-full w-full items-center justify-center font-mono text-2xl font-medium text-muted-foreground">
-                        {getInitials(selectedProduct.name)}
-                      </div>
-                    )}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <h3 className="font-mono text-xl font-semibold tracking-tight text-foreground">
-                      {selectedProduct.name}
-                    </h3>
-                    <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 font-mono text-sm">
-                      <dt className="text-muted-foreground uppercase tracking-wider">
-                        Status
-                      </dt>
-                      <dd>
-                        <span
-                          className={cn(
-                            "inline-block rounded px-2 py-0.5 text-xs font-medium uppercase",
-                            selectedProduct.stock > 0
-                              ? "bg-chart-2/20 text-chart-2"
-                              : "bg-destructive/20 text-destructive"
-                          )}
-                        >
-                          {selectedProduct.stock > 0 ? "ACTIVE" : "OUT_OF_STOCK"}
-                        </span>
-                      </dd>
-                      <dt className="text-muted-foreground uppercase tracking-wider">
-                        Price
-                      </dt>
-                      <dd className="tabular-nums text-foreground">
-                        {formatRupiah(selectedProduct.price)}
-                      </dd>
-                      <dt className="text-muted-foreground uppercase tracking-wider">
-                        Stock
-                      </dt>
-                      <dd className="tabular-nums text-foreground">
-                        {selectedProduct.stock}
-                      </dd>
-                    </dl>
-                  </div>
-                </div>
-
-                {selectedProduct.description != null &&
-                selectedProduct.description !== "" ? (
-                  <div className="border-t border-border/60 pt-4">
-                    <dt className="font-mono text-xs font-medium uppercase tracking-widest text-muted-foreground mb-2">
-                      Description
-                    </dt>
-                    <p className="font-mono text-sm text-foreground leading-relaxed">
-                      {selectedProduct.description}
-                    </p>
-                  </div>
-                ) : null}
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      <ConfirmDeleteModal
-        isOpen={deletingId !== null}
-        onClose={() => setDeletingId(null)}
-        onConfirm={handleConfirmDelete}
-        isPending={isPending}
-      />
+      {/* ConfirmDeleteModal lazy-loaded, hanya mount saat deletingId ada */}
+      {deletingId !== null && (
+        <ConfirmDeleteModal
+          isOpen={true}
+          onClose={() => setDeletingId(null)}
+          onConfirm={handleConfirmDelete}
+          isPending={isPending}
+        />
+      )}
     </>
   );
 }

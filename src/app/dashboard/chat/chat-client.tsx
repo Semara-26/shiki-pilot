@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, memo } from 'react';
 import { useChat } from '@ai-sdk/react';
 import { DefaultChatTransport } from 'ai';
 import ReactMarkdown from 'react-markdown';
 import { toast } from 'sonner';
+import { Loader2 } from 'lucide-react';
 import { DashboardHeader } from '@/src/components/dashboard-header';
 import { saveMessage } from '@/src/lib/actions/chat';
 
@@ -30,6 +31,192 @@ function getMessageText(parts: unknown[] | undefined): string {
     .map((p) => (p.text ?? '') as string)
     .join('');
 }
+
+// ─── SDK AI v5 Part Types ─────────────────────────────────────────────────────
+// Vercel AI SDK v5 menyimpan tool invocations di message.parts, BUKAN di
+// message.toolInvocations. State-nya juga berbeda:
+//   'input-streaming'  → AI sedang menggenerate argumen (partial-call)
+//   'input-available'  → Argumen sudah lengkap, tool belum dieksekusi
+//   'output-available' → Tool sudah selesai, hasil tersedia
+// Data args ada di part.input, BUKAN part.args.
+
+type ToolPartState = 'input-streaming' | 'input-available' | 'output-available' | 'approval-requested' | 'approval-responded';
+
+interface ToolPart {
+  type: string; // 'tool-updateStockThreshold' atau 'dynamic-tool'
+  toolCallId: string;
+  toolName?: string;  // di dynamic-tool
+  state: ToolPartState;
+  input?: Record<string, unknown>; // args ada di sini, bukan .args
+  output?: unknown;
+}
+
+// ─── Helpers ───────────────────────────────────────────────────────────────────────────
+
+// ─── ToolThinkingBubble ───────────────────────────────────────────────────────
+// memo dipulihkan untuk stabilitas.
+
+const ToolThinkingBubble = memo(function ToolThinkingBubble({ parts }: { parts: unknown[] }) {
+  const [textIndex, setTextIndex] = useState(0);
+
+  const loadingTexts = [
+    "Menyiapkan asisten AI...",
+    "Membuka catatan gudang...",
+    "Mencocokkan data produk...",
+    "Menghitung kalkulasi angka...",
+    "Menyusun jawaban untukmu...",
+    "Tunggu sebentar, mengamankan data..."
+  ];
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTextIndex((prev) => (prev + 1) % loadingTexts.length);
+    }, 4000);
+
+    return () => clearInterval(interval);
+  }, [loadingTexts.length]);
+
+  // Filter hanya tool-call untuk menghindari duplicate key
+  const toolCalls = parts.filter((p): p is Record<string, unknown> => {
+    if (typeof p !== 'object' || p === null) return false;
+    const type = typeof (p as Record<string, unknown>).type === 'string' ? (p as Record<string, unknown>).type : '';
+    return type === 'tool-call' || type === 'dynamic-tool';
+  });
+
+  // Ambil tool-result jika ada
+  const toolResults = parts.filter((p): p is Record<string, unknown> => {
+    if (typeof p !== 'object' || p === null) return false;
+    return (p as Record<string, unknown>).type === 'tool-result';
+  });
+
+  if (toolCalls.length === 0) return null;
+
+  return (
+    <div className="flex justify-start mt-1">
+      <div className="max-w-[85%] space-y-1.5">
+        {toolCalls.map((part, index) => {
+          const resultPart = toolResults.find(r => r.toolCallId === part.toolCallId);
+          const isFinished = !!resultPart || part.state === 'output-available';
+          const dynamicText = isFinished ? 'Berhasil' : 'Berinteraksi dengan sistem...';
+
+          let resultText = '';
+          if (resultPart && typeof resultPart.result === 'string') {
+            resultText = resultPart.result;
+          }
+
+          return (
+            <div
+              key={typeof part.toolCallId === 'string' ? `${part.toolCallId}-${index}` : `tool-${index}`}
+              className="flex flex-col gap-1.5 rounded-md border border-primary/30 bg-secondary/60 px-3 py-2 backdrop-blur-sm"
+            >
+              <div className="flex items-center gap-2.5">
+                {isFinished ? (
+                  <svg className="h-4 w-4 text-green-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                  </svg>
+                ) : (
+                  <Loader2 className="h-4 w-4 text-primary animate-spin shrink-0" />
+                )}
+
+                <span key={isFinished ? 'finished' : textIndex} className={`font-mono text-xs font-medium ${isFinished ? 'text-green-600/90 dark:text-green-400/90' : 'text-muted-foreground'} animate-in fade-in slide-in-from-left-1 duration-500`}>
+                  {isFinished ? `Selesai: Berhasil` : loadingTexts[textIndex]}
+                </span>
+              </div>
+              
+              {/* Tampilkan result teks jika ada untuk respon kilat tanpa LLM */}
+              {resultText && (
+                <div className="mt-1 ml-6 text-sm text-foreground/90 font-medium">
+                  {resultText}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+});
+
+// ─── AssistantBubble ──────────────────────────────────────────────────────────
+// Menangani satu pesan assistant: tool thinking + teks jawaban.
+// memo dipulihkan untuk stabilitas UI.
+
+const markdownComponents = {
+  p: ({ children }: { children?: React.ReactNode }) => (
+    <p className="mb-3 last:mb-0 leading-relaxed">{children}</p>
+  ),
+  ul: ({ children }: { children?: React.ReactNode }) => (
+    <ul className="mb-3 ml-5 list-disc space-y-1 last:mb-0">{children}</ul>
+  ),
+  ol: ({ children }: { children?: React.ReactNode }) => (
+    <ol className="mb-3 ml-5 list-decimal space-y-1 last:mb-0">{children}</ol>
+  ),
+  li: ({ children }: { children?: React.ReactNode }) => (
+    <li className="leading-relaxed">{children}</li>
+  ),
+  strong: ({ children }: { children?: React.ReactNode }) => (
+    <strong className="font-semibold text-white">{children}</strong>
+  ),
+  em: ({ children }: { children?: React.ReactNode }) => (
+    <em className="italic text-gray-300">{children}</em>
+  ),
+  code: ({ children }: { children?: React.ReactNode }) => (
+    <code className="rounded bg-white/10 px-1.5 py-0.5 font-mono text-sm text-gray-100">
+      {children}
+    </code>
+  ),
+  h1: ({ children }: { children?: React.ReactNode }) => (
+    <h1 className="mb-2 mt-4 text-lg font-semibold text-white first:mt-0">{children}</h1>
+  ),
+  h2: ({ children }: { children?: React.ReactNode }) => (
+    <h2 className="mb-2 mt-3 text-base font-semibold text-white first:mt-0">{children}</h2>
+  ),
+  h3: ({ children }: { children?: React.ReactNode }) => (
+    <h3 className="mb-1 mt-2 text-sm font-semibold text-white first:mt-0">{children}</h3>
+  ),
+};
+
+interface AssistantBubbleProps {
+  message: {
+    id: string;
+    parts?: unknown[];
+  };
+}
+
+const AssistantBubble = memo(function AssistantBubble({ message }: AssistantBubbleProps) {
+
+  const parts = message.parts ?? [];
+  const text = getMessageText(parts);
+
+  // Cek apakah ada tool parts (aktif ATAU sudah selesai)
+  const hasToolParts = parts.some((p) => {
+    if (typeof p !== 'object' || p === null) return false;
+    const type = typeof (p as Record<string, unknown>).type === 'string' ? (p as Record<string, unknown>).type : '';
+    return type === 'tool-call' || type === 'dynamic-tool';
+  });
+
+  return (
+    <div className="flex flex-col gap-1">
+      {/* 1. Tool indicators — selalu tampil selama ada tool parts (aktif maupun selesai) */}
+      {hasToolParts && <ToolThinkingBubble parts={parts} />}
+
+      {/* 2. Teks jawaban (hanya tampil jika ada konten) */}
+      {text.length > 0 && (
+        <div className="flex justify-start">
+          <div className="max-w-[85%] rounded-md border border-border bg-secondary px-4 py-2.5 text-foreground">
+            <div className="font-sans text-base leading-relaxed text-gray-200">
+              <ReactMarkdown components={markdownComponents}>
+                {text}
+              </ReactMarkdown>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+});
+
+// ─── ChatClient ───────────────────────────────────────────────────────────────
 
 interface ChatClientProps {
   chatId: string;
@@ -71,12 +258,11 @@ export function ChatClient({ chatId, initialMessages }: ChatClientProps) {
     }
   }
 
+  const [persistentError, setPersistentError] = useState<Error | null>(null);
+
   useEffect(() => {
-    if (error) {
-      toast.error(error.message || AI_ERROR_MESSAGE, {
-        duration: 5000,
-      });
-    }
+    if (error) setPersistentError(error);
+    // Custom error UI renders at the bottom, so no toast.error here to prevent double notification.
   }, [error]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -84,18 +270,51 @@ export function ChatClient({ chatId, initialMessages }: ChatClientProps) {
     const text = input.trim();
     if (!text || isLoading) return;
     setInput('');
+    setPersistentError(null);
     setPendingUserMessage(text);
-
     await saveMessage(chatId, 'user', text);
     sendMessage({ text });
   };
 
+  // Text Cycling untuk Global Loading
+  const [loadingTextIndex, setLoadingTextIndex] = useState(0);
+  const loadingTexts = [
+    "Menyiapkan asisten AI...",
+    "Membuka catatan gudang...",
+    "Mencocokkan data produk...",
+    "Menghitung kalkulasi angka...",
+    "Menyusun jawaban untukmu...",
+    "Tunggu sebentar, mengamankan data..."
+  ];
+
+  useEffect(() => {
+    if (!isLoading) return;
+    const interval = setInterval(() => {
+      setLoadingTextIndex((prev) => (prev + 1) % loadingTexts.length);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, [isLoading, loadingTexts.length]);
+
+  // Build display list — termasuk optimistic user message
   const lastMessage = messages[messages.length - 1];
+  const isLastAssistant = lastMessage?.role === 'assistant';
+  const lastMessageText = getMessageText(lastMessage?.parts);
+  
   const showOptimisticUser =
     pendingUserMessage != null &&
     (messages.length === 0 ||
-      lastMessage?.role !== 'user' ||
-      getMessageText(lastMessage.parts) !== pendingUserMessage);
+      !isLastAssistant ||
+      lastMessageText !== pendingUserMessage);
+
+  // Deteksi Fase Optimistic UI
+  // Kita berada di fase optimistik jika ini pesan asisten, belum ada teks, TAPI sudah ada tool-result.
+  const hasToolResult = isLastAssistant && Array.isArray(lastMessage.parts) && lastMessage.parts.some(
+    (p) => typeof p === 'object' && p !== null && (p as Record<string, unknown>).type === 'tool-result'
+  );
+  
+  const isOptimisticPhase = isLoading && isLastAssistant && lastMessageText.length === 0 && hasToolResult;
+  const showGlobalLoading = isLoading && (lastMessage?.role === 'user' || showOptimisticUser || (isLastAssistant && lastMessageText.length === 0 && !hasToolResult));
+
   const displayMessages = [...messages];
   if (showOptimisticUser) {
     displayMessages.push({
@@ -115,10 +334,9 @@ export function ChatClient({ chatId, initialMessages }: ChatClientProps) {
       </div>
 
       <div className="flex flex-1 flex-col min-h-0 bg-white dark:bg-[#0a0a0a]">
-        <div
-          ref={scrollRef}
-          className="flex-1 overflow-y-auto p-4 space-y-4"
-        >
+        <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4">
+
+          {/* Empty state */}
           {messages.length === 0 && (
             <div className="flex flex-col items-center justify-center py-12 text-center">
               <p className="font-mono text-lg font-black text-ink dark:text-white">
@@ -131,97 +349,81 @@ export function ChatClient({ chatId, initialMessages }: ChatClientProps) {
             </div>
           )}
 
+          {/* Message list */}
           {displayMessages.map((message) => {
-            const text = getMessageText(message.parts);
             const isUser = message.role === 'user';
-            return (
-              <div
-                key={message.id}
-                className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}
-              >
-                <div
-                  className={`max-w-[85%] rounded-md px-4 py-2.5 ${
-                    isUser
-                      ? 'bg-primary text-primary-foreground'
-                      : 'bg-secondary border border-border text-foreground'
-                  }`}
-                >
-                  {isUser ? (
+
+            if (isUser) {
+              const text = getMessageText(message.parts);
+              return (
+                <div key={message.id} className="flex justify-end">
+                  <div className="max-w-[85%] rounded-md px-4 py-2.5 bg-primary text-primary-foreground">
                     <p className="font-mono text-sm whitespace-pre-wrap">{text}</p>
-                  ) : (
-                    <div className="font-sans text-base leading-relaxed text-gray-200">
-                      <ReactMarkdown
-                        components={{
-                          p: ({ children }) => (
-                            <p className="mb-3 last:mb-0 leading-relaxed">{children}</p>
-                          ),
-                          ul: ({ children }) => (
-                            <ul className="mb-3 ml-5 list-disc space-y-1 last:mb-0">{children}</ul>
-                          ),
-                          ol: ({ children }) => (
-                            <ol className="mb-3 ml-5 list-decimal space-y-1 last:mb-0">{children}</ol>
-                          ),
-                          li: ({ children }) => (
-                            <li className="leading-relaxed">{children}</li>
-                          ),
-                          strong: ({ children }) => (
-                            <strong className="font-semibold text-white">{children}</strong>
-                          ),
-                          em: ({ children }) => (
-                            <em className="italic text-gray-300">{children}</em>
-                          ),
-                          code: ({ children }) => (
-                            <code className="rounded bg-white/10 px-1.5 py-0.5 font-mono text-sm text-gray-100">
-                              {children}
-                            </code>
-                          ),
-                          h1: ({ children }) => (
-                            <h1 className="mb-2 mt-4 text-lg font-semibold text-white first:mt-0">{children}</h1>
-                          ),
-                          h2: ({ children }) => (
-                            <h2 className="mb-2 mt-3 text-base font-semibold text-white first:mt-0">{children}</h2>
-                          ),
-                          h3: ({ children }) => (
-                            <h3 className="mb-1 mt-2 text-sm font-semibold text-white first:mt-0">{children}</h3>
-                          ),
-                        }}
-                      >
-                        {text}
-                      </ReactMarkdown>
-                    </div>
-                  )}
+                  </div>
                 </div>
-              </div>
+              );
+            }
+
+            // Assistant — delegate ke AssistantBubble (handle toolInvocations + text)
+            return (
+              <AssistantBubble
+                key={message.id}
+                message={message as AssistantBubbleProps['message']}
+              />
             );
           })}
 
-          {isLoading && (lastMessage?.role === 'user' || showOptimisticUser) && (
+          {/* Global loading dots & Optimistic UI */}
+          {(showGlobalLoading || isOptimisticPhase) && (
             <div className="flex justify-start">
               <div className="max-w-[85%] rounded-md border border-border bg-secondary px-4 py-2.5 text-foreground shadow-sm">
-                <div className="flex items-center gap-3">
-                  <span className="inline-flex items-center gap-1.5 overflow-hidden">
-                    <span
-                      className="h-2 w-2 rounded-full bg-primary animate-pulse"
-                      style={{ animationDelay: '0ms' }}
-                    />
-                    <span
-                      className="h-2 w-2 rounded-full bg-primary animate-pulse"
-                      style={{ animationDelay: '200ms' }}
-                    />
-                    <span
-                      className="h-2 w-2 rounded-full bg-primary animate-pulse"
-                      style={{ animationDelay: '400ms' }}
-                    />
-                  </span>
-                  <span className="font-mono text-xs font-medium text-muted-foreground animate-in fade-in slide-in-from-left-1 duration-300">
-                    ShikiPilot AI sedang memproses...
-                  </span>
+                <div className="flex items-center gap-2.5">
+                  {isOptimisticPhase ? (
+                    <>
+                      <svg className="h-4 w-4 text-green-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                      </svg>
+                      <span className="font-mono text-xs font-medium text-green-600/90 dark:text-green-400/90 animate-in fade-in duration-500">
+                        ✅ Data gudang berhasil diperbarui! Sedang merapikan laporan untukmu...
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <Loader2 className="h-4 w-4 text-primary animate-spin shrink-0" />
+                      <span key={loadingTextIndex} className="font-mono text-xs font-medium text-muted-foreground animate-in fade-in duration-500">
+                        {loadingTexts[loadingTextIndex]}
+                      </span>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
           )}
+
+          {/* Custom Error State */}
+          {persistentError && (() => {
+            const msg = persistentError.message?.toLowerCase() || '';
+            const isTraffic = msg.includes('503') || msg.includes('429') || msg.includes('high demand') || msg.includes('quota');
+            
+            const title = isTraffic ? '🚦 Jalur AI Sedang Padat!' : '🔌 Ups, Ada Gangguan Koneksi!';
+            const content = isTraffic 
+              ? <>&quot;Otak AI ShikiPilot lagi melayani banyak antrean nih. Tapi tenang aja, datamu aman! Kalau kamu tadi minta ubah stok, sistem kemungkinan besar sudah mencatatnya di gudang. Boleh tunggu 1 menitan, lalu coba cek stoknya lagi ya?&quot;</>
+              : <>&quot;Sistem kesulitan memproses permintaanmu. Pastikan koneksi internet stabil atau coba refresh halaman ini ya.&quot;</>;
+
+            return (
+              <div className="flex justify-start">
+                <div className="max-w-[85%] rounded-lg border border-orange-200 bg-orange-50 px-4 py-3 text-orange-800 shadow-sm mb-4">
+                  <h4 className="font-semibold text-sm mb-1">{title}</h4>
+                  <p className="text-sm leading-relaxed">
+                    {content}
+                  </p>
+                </div>
+              </div>
+            );
+          })()}
         </div>
 
+        {/* Input form */}
         <form
           onSubmit={handleSubmit}
           className="border-t-2 border-ink dark:border-white/10 bg-white dark:bg-surface-dark p-4"

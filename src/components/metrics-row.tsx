@@ -1,8 +1,25 @@
 "use client";
 
-import { useState } from "react";
+/**
+ * MetricsRow — Refactored for Performance
+ *
+ * Optimisasi:
+ * 1. Drawer/panel sekarang di-lazy-load via next/dynamic.
+ * 2. State activeDrawer hanya mempengaruhi komponen MetricsDrawer
+ *    yang terpisah — 4 kartu grid TIDAK re-render saat drawer buka/tutup
+ *    berkat pemisahan komponen + memo.
+ * 3. onClick kartu menggunakan useTransition agar klik tetap responsif
+ *    meski React sedang mem-prerender konten drawer di background.
+ * 4. Animasi: transform (translateX) + opacity saja — 100% GPU-composited.
+ *    Ditambahkan will-change: transform, opacity.
+ */
+
+import { useState, useTransition, memo, useCallback } from "react";
+import dynamic from "next/dynamic";
 import { AnimatePresence, motion } from "framer-motion";
 import { cn } from "@/src/lib/utils";
+
+// ─── Types ────────────────────────────────────────────────────────────────────
 
 export interface MetricProduct {
   id: string;
@@ -21,10 +38,12 @@ export interface MetricsRowProps {
   className?: string;
 }
 
+type DrawerKey = "VALUE" | "TYPES" | "ITEMS" | "LOW_STOCK";
+
 const cards: {
   key: "totalValue" | "totalProducts" | "totalStock" | "lowStock";
   label: string;
-  drawerKey: "VALUE" | "TYPES" | "ITEMS" | "LOW_STOCK";
+  drawerKey: DrawerKey;
 }[] = [
   { key: "totalValue", label: "ESTIMATED ASSET VALUE", drawerKey: "VALUE" },
   { key: "totalProducts", label: "PRODUCT TYPES", drawerKey: "TYPES" },
@@ -41,22 +60,52 @@ function formatRupiah(value: number): string {
   }).format(value);
 }
 
-export function MetricsRow({
-  totalValue,
-  totalProducts,
-  totalStock,
-  lowStock,
-  products = [],
-  className,
-}: MetricsRowProps) {
-  const [activeDrawer, setActiveDrawer] = useState<
-    "VALUE" | "TYPES" | "ITEMS" | "LOW_STOCK" | null
-  >(null);
+// ─── Metric Card — memo agar tidak re-render saat drawer buka/tutup ───────────
 
-  const values = { totalValue, totalProducts, totalStock, lowStock };
+interface MetricCardProps {
+  label: string;
+  value: string | number;
+  onClick: () => void;
+}
 
+const MetricCard = memo(function MetricCard({
+  label,
+  value,
+  onClick,
+}: MetricCardProps) {
+  return (
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={onClick}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onClick();
+        }
+      }}
+      className="cursor-pointer rounded-md border-2 border-ink bg-white p-4 text-ink transition-colors duration-150 hover:shadow-neo dark:border-white/10 dark:bg-surface-dark dark:text-white dark:hover:border-primary dark:hover:shadow-[0_0_15px_rgba(242,13,13,0.15)]"
+    >
+      <p className="text-xs font-medium uppercase tracking-widest text-gray-500 dark:text-gray-400">
+        {label}
+      </p>
+      <p className="mt-2 font-mono text-2xl font-semibold tracking-tight text-ink md:text-3xl dark:text-white">
+        {value}
+      </p>
+    </div>
+  );
+});
+
+// ─── Drawer content — lazy-loaded ─────────────────────────────────────────────
+
+interface DrawerProps {
+  activeDrawer: DrawerKey;
+  products: MetricProduct[];
+  onClose: () => void;
+}
+
+function DrawerContent({ activeDrawer, products, onClose }: DrawerProps) {
   const lowStockProducts = products.filter((p) => p.stock <= p.stockCritical);
-
   const totalAssetValue = products.reduce(
     (acc, p) => acc + p.price * p.stock,
     0
@@ -67,6 +116,201 @@ export function MetricsRow({
 
   return (
     <>
+      {/* Backdrop — opacity only, GPU-composited */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.18 }}
+        style={{ willChange: "opacity" }}
+        className="fixed inset-0 z-40 bg-background/60 backdrop-blur-sm"
+        onClick={onClose}
+        aria-hidden
+      />
+
+      {/* Drawer panel — translateX only, GPU-composited */}
+      <motion.div
+        initial={{ x: "100%", opacity: 0 }}
+        animate={{ x: 0, opacity: 1 }}
+        exit={{ x: "100%", opacity: 0 }}
+        transition={{ duration: 0.26, ease: [0.32, 0.72, 0, 1] }}
+        style={{ willChange: "transform, opacity" }}
+        className="fixed top-0 right-0 z-50 flex h-full w-full max-w-md flex-col border-l border-primary/50 bg-secondary/95 shadow-[-10px_0_30px_rgba(242,13,13,0.2)]"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="drawer-title"
+      >
+        {/* Header */}
+        <div className="shrink-0 border-b border-border/60 px-6 py-4 flex items-center justify-between">
+          <h2
+            id="drawer-title"
+            className="font-mono text-sm font-medium uppercase tracking-widest text-foreground"
+          >
+            {activeDrawer === "VALUE" && "ESTIMATED ASSET VALUE // BREAKDOWN"}
+            {activeDrawer === "TYPES" && "PRODUCT TYPES // REGISTER"}
+            {activeDrawer === "ITEMS" && "TOTAL ITEMS // STOCK LOG"}
+            {activeDrawer === "LOW_STOCK" && "LOW STOCK ALERT // REPORT"}
+          </h2>
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded p-1.5 font-mono text-primary hover:bg-primary/20 transition-colors focus:outline-none focus:ring-2 focus:ring-primary/50"
+            aria-label="Close"
+          >
+            <span className="text-lg leading-none">×</span>
+          </button>
+        </div>
+
+        {/* Body */}
+        <div className="flex flex-1 flex-col overflow-hidden font-mono text-sm">
+          {activeDrawer === "VALUE" && (
+            <>
+              <div className="flex-1 overflow-y-auto pr-2 space-y-2 p-6">
+                {products.length === 0 ? (
+                  <p className="text-muted-foreground">No assets on record.</p>
+                ) : (
+                  sortedProducts.map((p) => {
+                    const subtotal = p.price * p.stock;
+                    const percentage =
+                      totalAssetValue > 0
+                        ? (subtotal / totalAssetValue) * 100
+                        : 0;
+                    return (
+                      <div
+                        key={p.id}
+                        className="relative overflow-hidden rounded-md border border-border/50 bg-background/50 p-3"
+                      >
+                        <div
+                          className="absolute top-0 left-0 h-full bg-primary/10"
+                          style={{ width: `${percentage}%` }}
+                          aria-hidden
+                        />
+                        <div className="relative z-10 flex flex-col gap-1 font-mono text-sm">
+                          <div className="leading-snug text-foreground">
+                            {p.name}
+                          </div>
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="whitespace-nowrap text-xs text-muted-foreground">
+                              {p.stock} × {formatRupiah(p.price)}
+                            </div>
+                            <div className="shrink-0 whitespace-nowrap text-right text-primary">
+                              {formatRupiah(subtotal)}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+              {products.length > 0 && (
+                <div className="shrink-0 mt-4 pt-4 border-t border-primary/50 flex justify-between items-center px-6 pb-6">
+                  <span className="font-mono text-muted-foreground uppercase tracking-wider text-sm">
+                    TOTAL ESTIMATED ASSET
+                  </span>
+                  <span className="font-mono text-lg font-bold text-primary drop-shadow-[0_0_8px_rgba(242,13,13,0.6)]">
+                    {formatRupiah(totalAssetValue)}
+                  </span>
+                </div>
+              )}
+            </>
+          )}
+
+          {activeDrawer === "LOW_STOCK" && (
+            <div className="flex-1 overflow-y-auto p-6">
+              <div className="space-y-2">
+                {lowStockProducts.length === 0 ? (
+                  <p className="text-emerald-500/90 font-medium">
+                    ALL SYSTEMS NOMINAL. No low stock detected.
+                  </p>
+                ) : (
+                  lowStockProducts.map((p) => (
+                    <div
+                      key={p.id}
+                      className="flex justify-between gap-4 border-b border-border/40 py-2 text-foreground"
+                    >
+                      <span className="text-muted-foreground truncate">
+                        {p.name}
+                      </span>
+                      <span className="tabular-nums text-destructive shrink-0">
+                        {p.stock} units
+                      </span>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          )}
+
+          {(activeDrawer === "TYPES" || activeDrawer === "ITEMS") && (
+            <div className="flex-1 overflow-y-auto p-6">
+              <div className="space-y-2">
+                {products.length === 0 ? (
+                  <p className="text-muted-foreground">No products on record.</p>
+                ) : (
+                  products.map((p) => (
+                    <div
+                      key={p.id}
+                      className="flex justify-between gap-4 border-b border-border/40 py-2 text-foreground"
+                    >
+                      <span className="text-muted-foreground truncate">
+                        {p.name}
+                      </span>
+                      <span className="tabular-nums shrink-0">
+                        {p.stock} stok
+                      </span>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      </motion.div>
+    </>
+  );
+}
+
+// Lazy-load DrawerContent supaya tidak ikut bundle awal
+const LazyDrawerContent = dynamic(
+  () => Promise.resolve(DrawerContent),
+  { ssr: false }
+);
+
+// ─── MetricsRow ───────────────────────────────────────────────────────────────
+
+export function MetricsRow({
+  totalValue,
+  totalProducts,
+  totalStock,
+  lowStock,
+  products = [],
+  className,
+}: MetricsRowProps) {
+  const [activeDrawer, setActiveDrawer] = useState<DrawerKey | null>(null);
+  const [, startTransition] = useTransition();
+
+  const values: Record<string, string | number> = {
+    totalValue,
+    totalProducts,
+    totalStock,
+    lowStock,
+  };
+
+  const openDrawer = useCallback((key: DrawerKey) => {
+    // startTransition agar klik terasa instant, React render drawer di bg
+    startTransition(() => {
+      setActiveDrawer(key);
+    });
+  }, []);
+
+  const closeDrawer = useCallback(() => {
+    setActiveDrawer(null);
+  }, []);
+
+  return (
+    <>
+      {/* Grid 4 kartu — tidak akan re-render saat drawer buka/tutup */}
       <div
         className={cn(
           "grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4",
@@ -74,171 +318,23 @@ export function MetricsRow({
         )}
       >
         {cards.map(({ key, label, drawerKey }) => (
-          <div
+          <MetricCard
             key={key}
-            role="button"
-            tabIndex={0}
-            onClick={() => setActiveDrawer(drawerKey)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault();
-                setActiveDrawer(drawerKey);
-              }
-            }}
-            className="cursor-pointer rounded-md border-2 border-ink bg-white p-4 text-ink transition-all duration-200 hover:shadow-neo dark:border-white/10 dark:bg-surface-dark dark:text-white dark:hover:border-primary dark:hover:shadow-[0_0_15px_rgba(242,13,13,0.15)]"
-          >
-            <p className="text-xs font-medium uppercase tracking-widest text-gray-500 dark:text-gray-400">
-              {label}
-            </p>
-            <p className="mt-2 font-mono text-2xl font-semibold tracking-tight text-ink md:text-3xl dark:text-white">
-              {values[key]}
-            </p>
-          </div>
+            label={label}
+            value={values[key]}
+            onClick={() => openDrawer(drawerKey)}
+          />
         ))}
       </div>
 
+      {/* Drawer hanya di-mount saat activeDrawer !== null */}
       <AnimatePresence>
-        {activeDrawer != null && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="fixed inset-0 z-40 bg-background/60 backdrop-blur-sm"
-              onClick={() => setActiveDrawer(null)}
-              aria-hidden
-            />
-            <motion.div
-              initial={{ x: "100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "100%" }}
-              transition={{ duration: 0.3, ease: "easeOut" }}
-              className="fixed top-0 right-0 z-50 flex h-full w-full max-w-md flex-col border-l border-primary/50 bg-secondary/95 shadow-[-10px_0_30px_rgba(242,13,13,0.2)]"
-              role="dialog"
-              aria-modal="true"
-              aria-labelledby="drawer-title"
-            >
-              <div className="shrink-0 border-b border-border/60 px-6 py-4 flex items-center justify-between">
-                <h2
-                  id="drawer-title"
-                  className="font-mono text-sm font-medium uppercase tracking-widest text-foreground"
-                >
-                  {activeDrawer === "VALUE" && "ESTIMATED ASSET VALUE // BREAKDOWN"}
-                  {activeDrawer === "TYPES" && "PRODUCT TYPES // REGISTER"}
-                  {activeDrawer === "ITEMS" && "TOTAL ITEMS // STOCK LOG"}
-                  {activeDrawer === "LOW_STOCK" && "LOW STOCK ALERT // REPORT"}
-                </h2>
-                <button
-                  type="button"
-                  onClick={() => setActiveDrawer(null)}
-                  className="rounded p-1.5 font-mono text-primary hover:bg-primary/20 transition-colors focus:outline-none focus:ring-2 focus:ring-primary/50"
-                  aria-label="Close"
-                >
-                  <span className="text-lg leading-none">×</span>
-                </button>
-              </div>
-
-              <div className="flex flex-1 flex-col overflow-hidden font-mono text-sm">
-                {activeDrawer === "VALUE" && (
-                  <>
-                    <div className="flex-1 overflow-y-auto pr-2 space-y-2 p-6">
-                      {products.length === 0 ? (
-                        <p className="text-muted-foreground">No assets on record.</p>
-                      ) : (
-                        sortedProducts.map((p) => {
-                          const subtotal = p.price * p.stock;
-                          const percentage =
-                            totalAssetValue > 0
-                              ? (subtotal / totalAssetValue) * 100
-                              : 0;
-                          return (
-                            <div
-                              key={p.id}
-                              className="relative overflow-hidden rounded-md border border-border/50 bg-background/50 p-3"
-                            >
-                              <div
-                                className="absolute top-0 left-0 h-full bg-primary/10"
-                                style={{ width: `${percentage}%` }}
-                                aria-hidden
-                              />
-                              <div className="relative z-10 flex flex-col gap-1 font-mono text-sm">
-                                <div className="leading-snug text-foreground">
-                                  {p.name}
-                                </div>
-                                <div className="flex items-center justify-between gap-2">
-                                  <div className="whitespace-nowrap text-xs text-muted-foreground">
-                                    {p.stock} × {formatRupiah(p.price)}
-                                  </div>
-                                  <div className="shrink-0 whitespace-nowrap text-right text-primary">
-                                    {formatRupiah(subtotal)}
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          );
-                        })
-                      )}
-                    </div>
-                    {products.length > 0 && (
-                      <div className="shrink-0 mt-4 pt-4 border-t border-primary/50 flex justify-between items-center px-6 pb-6">
-                        <span className="font-mono text-muted-foreground uppercase tracking-wider text-sm">
-                          TOTAL ESTIMATED ASSET
-                        </span>
-                        <span className="font-mono text-lg font-bold text-primary drop-shadow-[0_0_8px_rgba(242,13,13,0.6)]">
-                          {formatRupiah(totalAssetValue)}
-                        </span>
-                      </div>
-                    )}
-                  </>
-                )}
-
-                {activeDrawer === "LOW_STOCK" && (
-                  <div className="flex-1 overflow-y-auto p-6">
-                  <div className="space-y-2">
-                    {lowStockProducts.length === 0 ? (
-                      <p className="text-emerald-500/90 font-medium">
-                        ALL SYSTEMS NOMINAL. No low stock detected.
-                      </p>
-                    ) : (
-                      lowStockProducts.map((p) => (
-                        <div
-                          key={p.id}
-                          className="flex justify-between gap-4 border-b border-border/40 py-2 text-foreground"
-                        >
-                          <span className="text-muted-foreground truncate">{p.name}</span>
-                          <span className="tabular-nums text-destructive shrink-0">
-                            {p.stock} units
-                          </span>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                  </div>
-                )}
-
-                {(activeDrawer === "TYPES" || activeDrawer === "ITEMS") && (
-                  <div className="flex-1 overflow-y-auto p-6">
-                  <div className="space-y-2">
-                    {products.length === 0 ? (
-                      <p className="text-muted-foreground">No products on record.</p>
-                    ) : (
-                      products.map((p) => (
-                        <div
-                          key={p.id}
-                          className="flex justify-between gap-4 border-b border-border/40 py-2 text-foreground"
-                        >
-                          <span className="text-muted-foreground truncate">{p.name}</span>
-                          <span className="tabular-nums shrink-0">{p.stock} stok</span>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                  </div>
-                )}
-              </div>
-            </motion.div>
-          </>
+        {activeDrawer !== null && (
+          <LazyDrawerContent
+            activeDrawer={activeDrawer}
+            products={products}
+            onClose={closeDrawer}
+          />
         )}
       </AnimatePresence>
     </>

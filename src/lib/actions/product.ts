@@ -3,7 +3,7 @@
 import { auth } from '@clerk/nextjs/server';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
-import { eq, and, ilike } from 'drizzle-orm';
+import { eq, and, ilike, sql, gte } from 'drizzle-orm';
 import { z } from 'zod';
 import { embed, generateObject } from 'ai';
 import { google } from '@ai-sdk/google';
@@ -406,6 +406,154 @@ export async function updateProductStockThreshold(
     return {
       success: false,
       message: 'Gagal memperbarui batas stok kritis. Terjadi kesalahan pada server.',
+    };
+  }
+}
+
+/**
+ * Helper untuk AI Tool: update stok fisik suatu produk berdasarkan nama.
+ * Pencarian case-insensitive via ilike.
+ */
+export async function updateProductStock(
+  storeId: string,
+  productName: string,
+  operation: 'add' | 'subtract' | 'set',
+  quantity: number
+): Promise<{ success: boolean; message: string }> {
+  try {
+    const target = await db.query.products.findFirst({
+      where: and(
+        eq(products.storeId, storeId),
+        ilike(products.name, `%${productName.trim()}%`)
+      ),
+      columns: { id: true, name: true, stock: true, stockCritical: true },
+    });
+
+    const userStore = await db.query.stores.findFirst({
+      where: eq(stores.id, storeId),
+      columns: { name: true, whatsappNumber: true },
+    });
+
+    if (!target) {
+      return {
+        success: false,
+        message: `Produk dengan nama "${productName}" tidak ditemukan di inventaris.`,
+      };
+    }
+
+    let sqlUpdate;
+    const updateConditions = [eq(products.id, target.id)];
+
+    if (operation === 'add') {
+      sqlUpdate = sql`${products.stock} + ${quantity}`;
+    } else if (operation === 'subtract') {
+      sqlUpdate = sql`${products.stock} - ${quantity}`;
+      // Syarat mutlak: stok di DB saat detik eksekusi HARUS lebih besar/sama dengan quantity
+      updateConditions.push(gte(products.stock, quantity));
+    } else if (operation === 'set') {
+      sqlUpdate = quantity;
+    }
+
+    const updated = await db
+      .update(products)
+      .set({ stock: sqlUpdate })
+      .where(and(...updateConditions))
+      .returning({ stock: products.stock });
+
+    if (updated.length === 0) {
+      if (operation === 'subtract') {
+         return {
+          success: false,
+          message: `Gagal: Stok "${target.name}" berubah atau tidak mencukupi untuk dikurangi ${quantity} unit saat transaksi.`,
+        };
+      }
+      return {
+        success: false,
+        message: `Gagal memperbarui stok. Terjadi konflik data.`,
+      };
+    }
+
+    const newStock = updated[0].stock;
+
+    // Trigger Alert WA secara Asynchronous jika stok mencapai kritis
+    if (newStock <= target.stockCritical && userStore?.whatsappNumber) {
+      const WA_GATEWAY_URL = process.env.WA_GATEWAY_URL;
+      const WA_API_KEY = process.env.WA_API_KEY;
+
+      if (WA_GATEWAY_URL && WA_API_KEY) {
+        fetch(`${WA_GATEWAY_URL}/send-alert`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-api-key": WA_API_KEY,
+          },
+          body: JSON.stringify({
+            store_name: userStore.name,
+            owner_phone: userStore.whatsappNumber,
+            alert_type: "critical",
+            items: [
+              {
+                product_name: target.name,
+                current_stock: newStock,
+                threshold: target.stockCritical,
+              }
+            ],
+          }),
+        }).catch((err) => {
+          console.error("Gagal kirim WA Alert dari AI Tool:", err);
+        });
+      }
+    }
+
+    revalidatePath('/dashboard/inventory');
+    revalidatePath('/dashboard');
+
+    return {
+      success: true,
+      message: `Stok fisik untuk "${target.name}" berhasil diperbarui menjadi ${newStock} unit.`,
+    };
+  } catch (err) {
+    console.error('updateProductStock error:', err);
+    return {
+      success: false,
+      message: 'Gagal memperbarui stok fisik. Terjadi kesalahan pada server.',
+    };
+  }
+}
+
+/**
+ * Helper untuk AI Tool: mengecek stok produk saat ini.
+ * Pencarian case-insensitive via ilike.
+ */
+export async function checkProductStock(
+  storeId: string,
+  productName: string
+): Promise<{ success: boolean; message: string }> {
+  try {
+    const target = await db.query.products.findFirst({
+      where: and(
+        eq(products.storeId, storeId),
+        ilike(products.name, `%${productName.trim()}%`)
+      ),
+      columns: { name: true, stock: true, stockCritical: true },
+    });
+
+    if (!target) {
+      return {
+        success: false,
+        message: `Produk dengan nama "${productName}" tidak ditemukan di inventaris.`,
+      };
+    }
+
+    return {
+      success: true,
+      message: `Stok produk "${target.name}" saat ini adalah ${target.stock} unit. Batas kritis diatur pada ${target.stockCritical} unit.`,
+    };
+  } catch (err) {
+    console.error('checkProductStock error:', err);
+    return {
+      success: false,
+      message: 'Gagal mengecek stok. Terjadi kesalahan pada server.',
     };
   }
 }

@@ -1,93 +1,30 @@
 import { auth } from "@clerk/nextjs/server";
 import Link from "next/link";
-import { getWaStatus } from "@/src/lib/actions/wa";
-import { AlertTriangle, Settings2 } from "lucide-react";
-import { eq, desc } from "drizzle-orm";
-import { db } from "@/src/db";
-import { stores, products, eventLogs } from "@/src/db/schema";
+import { Suspense } from "react";
+
+import { getStoreForDashboard } from "@/src/lib/dashboard-data";
 import { DashboardHeader } from "@/src/components/dashboard-header";
-import { MetricsRow, type MetricProduct } from "@/src/components/metrics-row";
-import { ProductsTable } from "@/src/components/products-table";
-import { LowStockAlert } from "@/src/components/low-stock-alert";
-import { GrowthChart } from "@/src/components/growth-chart";
-import { AssetDonutChart } from "@/src/components/asset-donut-chart";
-import { EventLog } from "@/src/components/event-log";
 import { PageContainer } from "@/src/components/page-animation";
+import {
+  DashboardSections,
+  DashboardHeaderServer,
+  MetricsSkeleton,
+  TableSkeleton,
+  ChartSkeleton,
+} from "./_components/dashboard-sections";
+
+// Beri tahu Next.js agar halaman ini selalu di-render fresh di server
+// (tidak di-static-generate), tapi data di dalamnya tetap di-cache via
+// unstable_cache masing-masing fungsi di dashboard-data.ts.
+export const dynamic = "force-dynamic";
 
 export default async function DashboardPage() {
   const { userId } = await auth();
-  const waStatus = await getWaStatus();
-  const userStore = userId
-    ? await db.query.stores.findFirst({
-        where: eq(stores.userId, userId),
-      })
-    : null;
 
-  const productsList =
-    userStore?.id != null
-      ? await db.query.products.findMany({
-          where: eq(products.storeId, userStore.id),
-          columns: {
-            id: true,
-            name: true,
-            price: true,
-            stock: true,
-            stockCritical: true,
-            imageUrl: true,
-            description: true,
-            createdAt: true,
-          },
-        })
-      : [];
+  // Resolve store — hanya fetch kolom minimal (id, name)
+  const userStore = userId ? await getStoreForDashboard(userId) : null;
 
-  // 1. Hitung statistik dari data products
-  const totalProducts = productsList.length;
-  const totalStock = productsList.reduce((acc, product) => acc + product.stock, 0);
-  const totalValue = productsList.reduce(
-    (acc, product) => acc + product.price * product.stock,
-    0
-  );
-  const lowStock = productsList.filter((product) => product.stock <= product.stockCritical).length;
-
-  // 2. Format Rupiah
-  const formatRupiah = (value: number) => {
-    return new Intl.NumberFormat("id-ID", {
-      style: "currency",
-      currency: "IDR",
-      maximumFractionDigits: 0,
-    }).format(value);
-  };
-
-  // 3. Bungkus dalam objek 'metrics' agar sesuai dengan props komponen
-  const metrics = {
-    totalValue: formatRupiah(totalValue),
-    totalProducts: totalProducts,
-    totalStock: totalStock,
-    lowStock: lowStock,
-  };
-
-  const stockChartData = productsList.map((p) => ({
-    name: p.name,
-    value: p.stock,
-  }));
-
-  const eventLogItems =
-    userStore?.id != null
-      ? (
-          await db.query.eventLogs.findMany({
-            where: eq(eventLogs.storeId, userStore.id),
-            orderBy: [desc(eventLogs.createdAt)],
-            columns: { id: true, title: true, detail: true, createdAt: true },
-            limit: 8,
-          })
-        ).map((row) => ({
-          id: row.id,
-          title: row.title,
-          detail: row.detail ?? undefined,
-          date: new Date(row.createdAt).toISOString(),
-        }))
-      : [];
-
+  // ── State: belum punya toko ───────────────────────────────────────────────
   if (!userStore) {
     return (
       <PageContainer className="h-full w-full">
@@ -118,69 +55,38 @@ export default async function DashboardPage() {
     );
   }
 
+  // ── State: punya toko ─────────────────────────────────────────────────────
   return (
     <PageContainer className="h-full w-full">
       <div className="flex h-full flex-col overflow-hidden">
+        {/* Header mengambil data produknya sendiri via DashboardHeaderServer */}
         <div className="flex-none">
-          <DashboardHeader products={productsList} />
+          <Suspense fallback={<DashboardHeader />}>
+            <DashboardHeaderServer storeId={userStore.id} />
+          </Suspense>
         </div>
+
         <div className="flex-1 overflow-y-auto p-4 md:p-6">
-          <div className="flex flex-col gap-4 md:gap-6">
-            <MetricsRow
-              totalValue={metrics.totalValue}
-              totalProducts={metrics.totalProducts}
-              totalStock={metrics.totalStock}
-              lowStock={metrics.lowStock}
-              products={productsList as MetricProduct[]}
-            />
-            <LowStockAlert products={productsList.filter((p) => p.stock <= p.stockCritical)} />
-            
-            {!waStatus.connected && (
-              <div className="flex items-center justify-between rounded-lg border border-red-500/50 bg-red-500/10 p-4 text-red-500 dark:bg-red-500/5">
-                <div className="flex items-center gap-3">
-                  <div className="rounded-full bg-red-500/20 p-2">
-                    <AlertTriangle className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <h4 className="font-mono text-sm font-bold uppercase tracking-tight">System Alert: WhatsApp Disconnected</h4>
-                    <p className="font-mono text-xs opacity-80">WhatsApp alerts for low stock will not be sent until reconnected.</p>
-                  </div>
+          {/*
+            DashboardSections membungkus setiap sub-section dengan
+            Suspense-nya masing-masing, sehingga konten "streaming"
+            ke browser secepat masing-masing query selesai.
+          */}
+          <Suspense
+            fallback={
+              <div className="flex flex-col gap-4 md:gap-6">
+                <MetricsSkeleton />
+                <TableSkeleton />
+                <div className="grid grid-cols-1 gap-4 md:gap-6 lg:grid-cols-3 lg:min-h-[350px]">
+                  <ChartSkeleton />
+                  <ChartSkeleton />
+                  <ChartSkeleton />
                 </div>
-                <Link 
-                  href="/dashboard?setup=wa"
-                  className="flex items-center gap-2 rounded border border-red-500/50 bg-red-500 px-3 py-1.5 font-mono text-xs font-bold text-white transition-colors hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
-                >
-                  <Settings2 className="h-4 w-4" />
-                  RECONNECT NOW
-                </Link>
               </div>
-            )}
-            <div>
-              <div className="mb-3 flex items-center justify-between">
-                <p className="font-mono text-xs uppercase tracking-widest text-gray-500 dark:text-gray-400">
-                  RECENT ASSETS
-                </p>
-                <Link
-                  href="/dashboard/inventory"
-                  className="font-mono text-xs text-primary hover:text-red-700 dark:hover:text-red-400 hover:underline"
-                >
-                  View full list →
-                </Link>
-              </div>
-              <ProductsTable products={productsList.slice(0, 5)} />
-            </div>
-            <div className="grid grid-cols-1 gap-4 md:gap-6 lg:grid-cols-3 lg:min-h-[350px]">
-              <div className="min-h-[300px] w-full lg:h-full">
-                <GrowthChart data={stockChartData} title="CURRENT STOCK LEVELS" className="h-full" />
-              </div>
-              <div className="min-h-[350px] w-full lg:h-full">
-                <AssetDonutChart data={productsList} title="ASSET DISTRIBUTION" className="h-full" />
-              </div>
-              <div className="min-h-[300px] w-full lg:h-full">
-                <EventLog events={eventLogItems} className="h-full" />
-              </div>
-            </div>
-          </div>
+            }
+          >
+            <DashboardSections storeId={userStore.id} />
+          </Suspense>
         </div>
       </div>
     </PageContainer>
