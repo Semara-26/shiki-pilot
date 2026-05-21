@@ -481,6 +481,16 @@ export async function updateProductStock(
       const WA_API_KEY = process.env.WA_API_KEY;
 
       if (WA_GATEWAY_URL && WA_API_KEY) {
+        // Sanitasi nomor di sisi pengirim sebelum dikirim ke gateway
+        let sanitizedPhone = userStore.whatsappNumber.replace(/\D/g, '');
+        if (sanitizedPhone.startsWith('62')) {
+          // Sudah format internasional, tidak perlu modifikasi
+        } else if (sanitizedPhone.startsWith('0')) {
+          sanitizedPhone = '62' + sanitizedPhone.slice(1);
+        } else if (sanitizedPhone.length >= 9) {
+          sanitizedPhone = '62' + sanitizedPhone;
+        }
+
         fetch(`${WA_GATEWAY_URL}/send-alert`, {
           method: "POST",
           headers: {
@@ -489,7 +499,7 @@ export async function updateProductStock(
           },
           body: JSON.stringify({
             store_name: userStore.name,
-            owner_phone: userStore.whatsappNumber,
+            owner_phone: sanitizedPhone,
             alert_type: "critical",
             items: [
               {
@@ -557,3 +567,207 @@ export async function checkProductStock(
     };
   }
 }
+
+/**
+ * Helper untuk AI Tool: Agregasi data penjualan menggunakan Drizzle Raw SQL.
+ * TIDAK menarik data mentah ke Node.js — semua kalkulasi terjadi di sisi database.
+ * @param storeId - ID toko yang sedang login
+ * @param period - 'daily' | 'weekly' | 'monthly'
+ */
+export async function getSalesAnalytics(
+  storeId: string,
+  period: 'daily' | 'weekly' | 'monthly'
+): Promise<{
+  success: boolean;
+  message: string;
+  data?: {
+    totalRevenue: number;
+    totalTransactions: number;
+    topProduct: string;
+    topProductQty: number;
+    period: string;
+  };
+}> {
+  try {
+    // Menentukan interval waktu berdasarkan period
+    const intervalMap = {
+      daily: '1 day',
+      weekly: '7 days',
+      monthly: '30 days',
+    };
+    const interval = intervalMap[period];
+
+    // Query 1: Total pendapatan & jumlah transaksi dalam periode (Atomic DB Aggregation)
+    const revenueResult = await db.execute(
+      sql`
+        SELECT
+          COALESCE(SUM(t.total_price), 0) AS total_revenue,
+          COUNT(t.id) AS total_transactions
+        FROM transactions t
+        WHERE t.store_id = ${storeId}
+          AND t.created_at >= NOW() - ${interval}::interval
+      `
+    );
+
+    // Query 2: Produk terlaris berdasarkan total kuantitas terjual (Atomic DB Aggregation)
+    const topProductResult = await db.execute(
+      sql`
+        SELECT
+          p.name AS product_name,
+          SUM(t.quantity) AS total_qty
+        FROM transactions t
+        JOIN products p ON t.product_id = p.id
+        WHERE t.store_id = ${storeId}
+          AND t.created_at >= NOW() - ${interval}::interval
+        GROUP BY p.name
+        ORDER BY total_qty DESC
+        LIMIT 1
+      `
+    );
+
+    const revenue = revenueResult[0];
+    const topProduct = topProductResult[0];
+
+    const totalRevenue = Number(revenue?.total_revenue ?? 0);
+    const totalTransactions = Number(revenue?.total_transactions ?? 0);
+    const topProductName = (topProduct?.product_name as string) ?? 'Belum ada transaksi';
+    const topProductQty = Number(topProduct?.total_qty ?? 0);
+
+    const periodLabel = { daily: 'Hari Ini', weekly: '7 Hari Terakhir', monthly: '30 Hari Terakhir' }[period];
+
+    return {
+      success: true,
+      message: `Analitik berhasil diambil untuk periode ${periodLabel}.`,
+      data: {
+        totalRevenue,
+        totalTransactions,
+        topProduct: topProductName,
+        topProductQty,
+        period: periodLabel,
+      },
+    };
+  } catch (err) {
+    console.error('getSalesAnalytics error:', err);
+    return {
+      success: false,
+      message: 'Gagal mengambil data analitik. Terjadi kesalahan pada server.',
+    };
+  }
+}
+
+/**
+ * Helper untuk Contextual Proactive Insight:
+ * Menghitung velocity penjualan harian per produk dan memprediksi
+ * produk mana yang akan habis dalam < 3 hari.
+ * Semua perhitungan dilakukan di sisi database menggunakan SQL agregasi.
+ */
+export async function getStockRiskProducts(
+  storeId: string
+): Promise<{
+  success: boolean;
+  risks: { name: string; currentStock: number; dailyVelocity: number; daysLeft: number }[];
+}> {
+  try {
+    // Hitung rata-rata penjualan harian per produk dalam 7 hari terakhir
+    // dan bandingkan dengan stok saat ini
+    const rows = await db.execute(
+      sql`
+        SELECT
+          p.name,
+          p.stock AS current_stock,
+          COALESCE(SUM(t.quantity)::float / 7, 0) AS daily_velocity
+        FROM products p
+        LEFT JOIN transactions t
+          ON t.product_id = p.id
+          AND t.store_id = ${storeId}
+          AND t.created_at >= NOW() - INTERVAL '7 days'
+        WHERE p.store_id = ${storeId}
+          AND p.stock > 0
+        GROUP BY p.id, p.name, p.stock
+        HAVING COALESCE(SUM(t.quantity)::float / 7, 0) > 0
+        ORDER BY (p.stock / NULLIF(COALESCE(SUM(t.quantity)::float / 7, 0.001), 0)) ASC
+        LIMIT 5
+      `
+    );
+
+    const risks = (rows as Record<string, unknown>[])
+      .map((row) => {
+        const dailyVelocity = Number(row.daily_velocity ?? 0);
+        const currentStock = Number(row.current_stock ?? 0);
+        const daysLeft = dailyVelocity > 0 ? Math.floor(currentStock / dailyVelocity) : 999;
+        return {
+          name: row.name as string,
+          currentStock,
+          dailyVelocity: Math.round(dailyVelocity * 10) / 10,
+          daysLeft,
+        };
+      })
+      .filter((r) => r.daysLeft < 3);
+
+    return { success: true, risks };
+  } catch (err) {
+    console.error('getStockRiskProducts error:', err);
+    return { success: true, risks: [] }; // fail gracefully — jangan blokir respons utama
+  }
+}
+
+/**
+ * Helper untuk AI Tool: Menghasilkan data laporan CSV dalam format string.
+ * Dipakai oleh API route /api/report/generate.
+ * Mengembalikan raw CSV string dengan data transaksi dalam periode tertentu.
+ */
+export async function generateReportData(
+  storeId: string,
+  period: 'daily' | 'weekly' | 'monthly'
+): Promise<{ success: boolean; csvContent?: string; filename?: string; message: string }> {
+  try {
+    const intervalMap = { daily: '1 day', weekly: '7 days', monthly: '30 days' };
+    const interval = intervalMap[period];
+
+    const rows = await db.execute(
+      sql`
+        SELECT
+          t.created_at,
+          p.name AS product_name,
+          t.quantity,
+          t.total_price,
+          t.payment_type
+        FROM transactions t
+        JOIN products p ON t.product_id = p.id
+        WHERE t.store_id = ${storeId}
+          AND t.created_at >= NOW() - ${interval}::interval
+        ORDER BY t.created_at DESC
+      `
+    );
+
+    const txRows = rows as Record<string, unknown>[];
+
+    if (txRows.length === 0) {
+      return { success: false, message: 'Tidak ada data transaksi pada periode yang dipilih.' };
+    }
+
+    // Build CSV dengan BOM UTF-8 agar Excel membacanya dengan benar
+    const header = 'Tanggal;Nama Produk;Kuantitas;Total Pendapatan (Rp);Metode Bayar';
+    const dataRows = txRows.map((row) => {
+      const date = new Date(row.created_at as string).toLocaleDateString('id-ID');
+      const name = String(row.product_name ?? '').replace(/;/g, ',');
+      const qty = Number(row.quantity ?? 0);
+      const total = Number(row.total_price ?? 0);
+      const payment = String(row.payment_type ?? '');
+      return `${date};${name};${qty};${total};${payment}`;
+    });
+
+    const totalRevenue = txRows.reduce((s, r) => s + Number(r.total_price ?? 0), 0);
+    const grandTotalRow = `;GRAND TOTAL;${txRows.reduce((s, r) => s + Number(r.quantity ?? 0), 0)};${totalRevenue};`;
+
+    const csvContent = '\uFEFF' + [header, ...dataRows, grandTotalRow].join('\n');
+    const periodLabel = { daily: 'Harian', weekly: 'Mingguan', monthly: 'Bulanan' }[period];
+    const filename = `Laporan_${periodLabel}_ShikiPilot_${new Date().toISOString().slice(0, 10)}.csv`;
+
+    return { success: true, csvContent, filename, message: 'Laporan berhasil dibuat.' };
+  } catch (err) {
+    console.error('generateReportData error:', err);
+    return { success: false, message: 'Gagal membuat laporan. Terjadi kesalahan pada server.' };
+  }
+}
+

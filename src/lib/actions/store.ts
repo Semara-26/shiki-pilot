@@ -133,8 +133,51 @@ export async function createStore(
       description: description || null,
     });
 
+    // ── Proactive WA Onboarding: Kirim pesan sambutan asynchronous ──────────
+    // Fire-and-forget: jika gateway gagal, proses pembuatan toko tetap sukses
+    const WA_GATEWAY_URL = process.env.WA_GATEWAY_URL;
+    const WA_API_KEY = process.env.WA_API_KEY;
+
+    if (WA_GATEWAY_URL && WA_API_KEY) {
+      // Sanitasi nomor WA ke format internasional 62xxx
+      let sanitizedPhone = whatsapp_number.replace(/\D/g, '');
+      if (sanitizedPhone.startsWith('62')) {
+        // Sudah format internasional, tidak perlu modifikasi
+      } else if (sanitizedPhone.startsWith('0')) {
+        sanitizedPhone = '62' + sanitizedPhone.slice(1);
+      } else if (sanitizedPhone.length >= 9) {
+        sanitizedPhone = '62' + sanitizedPhone;
+      }
+
+      const welcomeMessage =
+        `🚀 Halo! Pendaftaran toko Anda di ShikiPilot berhasil.\n\n` +
+        `Nomor ini telah resmi terhubung dengan ShikiPilot AI WA Assistant. Mulai sekarang, saya siap membantu Anda mengurus toko langsung dari chat WA!\n\n` +
+        `Apa saja yang bisa saya bantu di sini?\n` +
+        `📦 Mengecek dan menambah/mengurangi ketersediaan stok barang.\n` +
+        `📈 Memberikan ringkasan cepat performa penjualan.\n` +
+        `⚠️ Mengirimkan alarm otomatis jika ada stok yang mulai kritis.\n\n` +
+        `💻 Catatan: Untuk fitur tingkat lanjut seperti unduh laporan lengkap (CSV/PDF) dan analitik mendalam, silakan akses langsung melalui Dashboard Web ShikiPilot.\n\n` +
+        `Ketik "Bantuan" kapan saja jika Anda butuh panduan. Selamat mengembangkan bisnis Anda bersama ShikiPilot! 🎉`;
+
+      fetch(`${WA_GATEWAY_URL}/send-message`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': WA_API_KEY,
+        },
+        body: JSON.stringify({
+          to: `${sanitizedPhone}@s.whatsapp.net`,
+          text: welcomeMessage,
+        }),
+      }).catch((err) => {
+        console.error('[WA Onboarding] Gagal kirim pesan sambutan toko baru:', err);
+      });
+    }
+    // ────────────────────────────────────────────────────────────────────────
+
     revalidatePath('/dashboard');
     return { success: true };
+
   } catch (err) {
     // SECURITY F-07: Log detail error di server, kembalikan pesan generik ke client
     console.error('createStore error:', err);
