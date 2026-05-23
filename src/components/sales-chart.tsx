@@ -41,14 +41,18 @@ function formatRupiah(value: number) {
 
 interface SalesTooltipContentProps {
   active?: boolean;
-  payload?: Array<{ payload?: { name?: string; value?: number }; value?: number }>;
+  payload?: Array<{
+    payload?: { name?: string; value?: number };
+    value?: number;
+  }>;
 }
 
 function SalesTooltipContent({ active, payload }: SalesTooltipContentProps) {
   if (!active || !payload?.length) return null;
   const item = payload[0].payload ?? payload[0];
   const name = (item as { name?: string })?.name ?? "";
-  const value = (item as { value?: number })?.value ?? (payload[0].value as number) ?? 0;
+  const value =
+    (item as { value?: number })?.value ?? (payload[0].value as number) ?? 0;
   return (
     <motion.div
       initial={{ opacity: 0, y: 10, scale: 0.95 }}
@@ -56,7 +60,9 @@ function SalesTooltipContent({ active, payload }: SalesTooltipContentProps) {
       transition={{ duration: 0.2, ease: "easeOut" }}
       className="rounded-md border border-ink/30 bg-white p-3 shadow-lg dark:border-white/20 dark:bg-[#0a0a0a]"
     >
-      <p className="mb-1 font-mono text-xs text-ink dark:text-gray-300">{name}</p>
+      <p className="mb-1 font-mono text-xs text-ink dark:text-gray-300">
+        {name}
+      </p>
       <p className="font-mono text-lg font-semibold tabular-nums text-ink dark:text-gray-100">
         {formatRupiah(Number(value))}
       </p>
@@ -69,7 +75,12 @@ const GRID_STROKE_DARK = "rgba(255,255,255,0.1)";
 const TICK_FILL_LIGHT = "#374151";
 const TICK_FILL_DARK = "#9ca3af";
 
-export function SalesChart({ data, title, className, embedded }: SalesChartProps) {
+export function SalesChart({
+  data,
+  title,
+  className,
+  embedded,
+}: SalesChartProps) {
   const { resolvedTheme } = useTheme();
   const isDark = resolvedTheme === "dark";
   const gridStroke = isDark ? GRID_STROKE_DARK : GRID_STROKE_LIGHT;
@@ -81,8 +92,9 @@ export function SalesChart({ data, title, className, embedded }: SalesChartProps
     <div
       className={cn(
         "flex h-full flex-col overflow-hidden",
-        !embedded && "rounded-lg border-2 border-ink bg-white p-4 md:p-6 dark:border-white/20 dark:bg-[#0a0a0a]",
-        className
+        !embedded &&
+          "rounded-lg border-2 border-ink bg-white p-4 md:p-6 dark:border-white/20 dark:bg-[#0a0a0a]",
+        className,
       )}
     >
       {title && (

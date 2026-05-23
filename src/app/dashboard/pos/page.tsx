@@ -34,7 +34,10 @@ export default async function POSPage() {
     return (
       <div className="flex h-full flex-col overflow-hidden bg-white dark:bg-[#0a0a0a]">
         <div className="flex-none">
-          <DashboardHeader breadcrumbs="TERMINAL" title="KERANJANG PINTAR // POS" />
+          <DashboardHeader
+            breadcrumbs="TERMINAL"
+            title="KERANJANG PINTAR // POS"
+          />
         </div>
         <div className="flex flex-1 items-center justify-center p-6">
           <div className="rounded-lg border-2 border-ink dark:border-white/20 bg-white dark:bg-[#0a0a0a] p-8 text-center">
@@ -64,10 +67,7 @@ export default async function POSPage() {
           title="KERANJANG PINTAR // MICRO-POS"
         />
       </div>
-      <POSClient
-        products={productsList}
-        storeId={userStore.id}
-      />
+      <POSClient products={productsList} storeId={userStore.id} />
     </div>
   );
 }

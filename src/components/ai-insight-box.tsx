@@ -24,13 +24,13 @@ interface AiInsightBoxProps {
 /** Kompres chartData menjadi teks ringkasan singkat untuk menghemat token API */
 function buildPayload(
   chartData: ChartDataSummary,
-  timeFilter: string
+  timeFilter: string,
 ): { summary: string; productNames: string } {
   const fmt = (n: number) => `Rp ${n.toLocaleString("id-ID")}`;
 
   const totalRevenue = (chartData.revenueOverTime ?? []).reduce(
     (s, d) => s + d.value,
-    0
+    0,
   );
 
   const topList = (chartData.topProducts ?? []).slice(0, 5);
@@ -65,7 +65,7 @@ async function fetchInsight(
   summary: string,
   productNames: string,
   timeFilter: string,
-  businessName?: string
+  businessName?: string,
 ): Promise<string> {
   const res = await fetch("/api/ai/insight", {
     method: "POST",
@@ -80,7 +80,8 @@ async function fetchInsight(
   const json = await res.json().catch(() => ({}));
   if (!res.ok) {
     throw new Error(
-      (json as { error?: string }).error ?? "Maaf, tidak dapat memuat insight saat ini."
+      (json as { error?: string }).error ??
+        "Maaf, tidak dapat memuat insight saat ini.",
     );
   }
   return json.insight ?? json.message ?? "";
@@ -103,12 +104,19 @@ export function AiInsightBox({
     setInsight("");
     try {
       const { summary, productNames } = buildPayload(chartData, filter);
-      const text = await fetchInsight(summary, productNames, filter, businessName);
+      const text = await fetchInsight(
+        summary,
+        productNames,
+        filter,
+        businessName,
+      );
       setInsight(text);
       setHasGenerated(true);
     } catch (err) {
       setInsight(
-        err instanceof Error ? err.message : "Maaf, tidak dapat memuat insight saat ini."
+        err instanceof Error
+          ? err.message
+          : "Maaf, tidak dapat memuat insight saat ini.",
       );
     } finally {
       setIsLoading(false);
@@ -119,7 +127,7 @@ export function AiInsightBox({
     <div
       className={cn(
         "overflow-hidden rounded-lg border-2 border-ink bg-white p-4 md:p-6 dark:border-white/20 dark:bg-[#0a0a0a]",
-        className
+        className,
       )}
     >
       {/* Header */}

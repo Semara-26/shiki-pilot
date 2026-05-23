@@ -10,10 +10,7 @@ export default function DashboardLoading() {
       {/* Metrics row skeleton (4 cards) */}
       <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {[1, 2, 3, 4].map((i) => (
-          <div
-            key={i}
-            className="animate-pulse rounded-md bg-secondary/50 p-4"
-          >
+          <div key={i} className="animate-pulse rounded-md bg-secondary/50 p-4">
             <div className="mb-2 h-3 w-20 rounded-md bg-secondary/70" />
             <div className="h-8 w-24 rounded-md bg-secondary/70" />
           </div>

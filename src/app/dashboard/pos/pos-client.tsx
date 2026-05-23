@@ -43,10 +43,13 @@ export function POSClient({ products, storeId }: POSClientProps) {
   }, []);
 
   const filteredProducts = products.filter((p) =>
-    p.name.toLowerCase().includes(searchQuery.toLowerCase())
+    p.name.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
-  const grandTotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const grandTotal = cart.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0,
+  );
   const cashNum = parseInt(cashReceived.replace(/\D/g, ""), 10) || 0;
   const change = Math.max(0, cashNum - grandTotal);
 
@@ -56,8 +59,8 @@ export function POSClient({ products, storeId }: POSClientProps) {
       if (existing.quantity >= existing.stock) return;
       setCart(
         cart.map((c) =>
-          c.id === product.id ? { ...c, quantity: c.quantity + 1 } : c
-        )
+          c.id === product.id ? { ...c, quantity: c.quantity + 1 } : c,
+        ),
       );
     } else {
       setCart([...cart, { ...product, quantity: 1 }]);
@@ -72,7 +75,7 @@ export function POSClient({ products, storeId }: POSClientProps) {
           const qty = Math.max(0, Math.min(c.stock, c.quantity + delta));
           return { ...c, quantity: qty };
         })
-        .filter((c) => c.quantity > 0)
+        .filter((c) => c.quantity > 0),
     );
   };
 
@@ -85,7 +88,7 @@ export function POSClient({ products, storeId }: POSClientProps) {
           const qty = Math.max(0, Math.min(c.stock, num));
           return { ...c, quantity: qty };
         })
-        .filter((c) => c.quantity > 0 || c.id === productId)
+        .filter((c) => c.quantity > 0 || c.id === productId),
     );
   };
 
@@ -102,7 +105,9 @@ export function POSClient({ products, storeId }: POSClientProps) {
     if (isSubmittingRef.current) return;
 
     if (cart.length === 0) {
-      toast.error("Keranjang kosong", { description: "Tambah produk terlebih dahulu." });
+      toast.error("Keranjang kosong", {
+        description: "Tambah produk terlebih dahulu.",
+      });
       return;
     }
     if (grandTotal === 0) {
@@ -134,7 +139,11 @@ export function POSClient({ products, storeId }: POSClientProps) {
         }));
 
       // Kirim effectiveCash sebagai uang_diterima ke DB
-      const result = await createBulkTransactions(storeId, items, effectiveCash);
+      const result = await createBulkTransactions(
+        storeId,
+        items,
+        effectiveCash,
+      );
 
       if (result.success) {
         const methodLabel = paymentType === "cash" ? "Cash" : "QRIS";
@@ -169,7 +178,9 @@ export function POSClient({ products, storeId }: POSClientProps) {
       // Logika QRIS: inject grandTotal ke display & bypass validasi input
       if (paymentType === "qris_statis") {
         setActivePayment("qris_statis");
-        setCashReceived(grandTotal > 0 ? grandTotal.toLocaleString("id-ID") : "");
+        setCashReceived(
+          grandTotal > 0 ? grandTotal.toLocaleString("id-ID") : "",
+        );
       } else {
         setActivePayment("cash");
       }
@@ -271,67 +282,68 @@ export function POSClient({ products, storeId }: POSClientProps) {
           <p className="mb-3 font-mono text-xs font-bold uppercase tracking-widest text-ink dark:text-gray-300">
             KERANJANG
           </p>
-        {cart.length === 0 ? (
-          <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-ink/30 dark:border-white/20 py-12">
-            <ShoppingCart className="h-12 w-12 text-gray-400 dark:text-gray-500" />
-            <p className="mt-2 font-mono text-sm text-gray-500 dark:text-gray-400">
-              Keranjang kosong. Tap produk untuk menambah.
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-2">
-            {cart.map((item) => (
-              <div
-                key={item.id}
-                className="flex items-center gap-2 rounded-lg border-2 border-ink dark:border-white/20 bg-white dark:bg-[#0a0a0a] p-3"
-              >
-                <div className="min-w-0 flex-1">
-                  <p className="truncate font-mono text-sm font-medium text-ink dark:text-white">
-                    {item.name}
-                  </p>
-                  <p className="font-mono text-xs text-gray-500 dark:text-gray-400">
-                    {formatRupiah(item.price)} × {item.quantity} ={" "}
-                    {formatRupiah(item.price * item.quantity)}
-                  </p>
+          {cart.length === 0 ? (
+            <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-ink/30 dark:border-white/20 py-12">
+              <ShoppingCart className="h-12 w-12 text-gray-400 dark:text-gray-500" />
+              <p className="mt-2 font-mono text-sm text-gray-500 dark:text-gray-400">
+                Keranjang kosong. Tap produk untuk menambah.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {cart.map((item) => (
+                <div
+                  key={item.id}
+                  className="flex items-center gap-2 rounded-lg border-2 border-ink dark:border-white/20 bg-white dark:bg-[#0a0a0a] p-3"
+                >
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate font-mono text-sm font-medium text-ink dark:text-white">
+                      {item.name}
+                    </p>
+                    <p className="font-mono text-xs text-gray-500 dark:text-gray-400">
+                      {formatRupiah(item.price)} × {item.quantity} ={" "}
+                      {formatRupiah(item.price * item.quantity)}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={() => updateQuantity(item.id, -1)}
+                      className="flex h-9 w-9 items-center justify-center rounded border-2 border-ink dark:border-white/20 text-ink dark:text-white hover:bg-ink hover:text-white dark:hover:bg-white/20 dark:hover:text-white transition-colors"
+                    >
+                      <Minus className="h-4 w-4" />
+                    </button>
+                    <input
+                      type="number"
+                      min={0}
+                      max={item.stock}
+                      value={item.quantity}
+                      onChange={(e) => {
+                        const v = e.target.value;
+                        if (v === "") {
+                          setQuantityDirect(item.id, 0);
+                        } else {
+                          const num = parseInt(v, 10);
+                          if (!Number.isNaN(num))
+                            setQuantityDirect(item.id, num);
+                        }
+                      }}
+                      onBlur={() => handleQuantityBlur(item.id)}
+                      className="w-12 text-center font-mono text-sm font-bold tabular-nums bg-transparent border-b border-ink/30 dark:border-white/30 text-ink dark:text-white focus:outline-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => updateQuantity(item.id, 1)}
+                      disabled={item.quantity >= item.stock}
+                      className="flex h-9 w-9 items-center justify-center rounded border-2 border-ink dark:border-white/20 text-ink dark:text-white hover:bg-ink hover:text-white dark:hover:bg-white/20 dark:hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <Plus className="h-4 w-4" />
+                    </button>
+                  </div>
                 </div>
-                <div className="flex items-center gap-1">
-                  <button
-                    type="button"
-                    onClick={() => updateQuantity(item.id, -1)}
-                    className="flex h-9 w-9 items-center justify-center rounded border-2 border-ink dark:border-white/20 text-ink dark:text-white hover:bg-ink hover:text-white dark:hover:bg-white/20 dark:hover:text-white transition-colors"
-                  >
-                    <Minus className="h-4 w-4" />
-                  </button>
-                  <input
-                    type="number"
-                    min={0}
-                    max={item.stock}
-                    value={item.quantity}
-                    onChange={(e) => {
-                      const v = e.target.value;
-                      if (v === "") {
-                        setQuantityDirect(item.id, 0);
-                      } else {
-                        const num = parseInt(v, 10);
-                        if (!Number.isNaN(num)) setQuantityDirect(item.id, num);
-                      }
-                    }}
-                    onBlur={() => handleQuantityBlur(item.id)}
-                    className="w-12 text-center font-mono text-sm font-bold tabular-nums bg-transparent border-b border-ink/30 dark:border-white/30 text-ink dark:text-white focus:outline-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => updateQuantity(item.id, 1)}
-                    disabled={item.quantity >= item.stock}
-                    className="flex h-9 w-9 items-center justify-center rounded border-2 border-ink dark:border-white/20 text-ink dark:text-white hover:bg-ink hover:text-white dark:hover:bg-white/20 dark:hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <Plus className="h-4 w-4" />
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
@@ -374,13 +386,14 @@ export function POSClient({ products, storeId }: POSClientProps) {
               {differenceLabel}
             </span>
             <span className="font-mono text-xl font-bold tabular-nums text-ink dark:text-white">
-              {activePayment === "qris_statis" ? formatRupiah(0) : formatRupiah(change)}
+              {activePayment === "qris_statis"
+                ? formatRupiah(0)
+                : formatRupiah(change)}
             </span>
           </div>
 
           {/* Tombol Pembayaran — 2 tombol berdampingan (Two-Step Confirmation) */}
           <div className="grid grid-cols-2 gap-3 pt-1">
-
             {/* CASH */}
             {(() => {
               const isArmed = confirmState === "cash";
@@ -402,17 +415,15 @@ export function POSClient({ products, storeId }: POSClientProps) {
                     className="absolute top-0 left-0 h-full bg-yellow-300/60 dark:bg-yellow-200/40"
                     style={{
                       width: isArmed ? "100%" : "0%",
-                      transition: isArmed
-                        ? "width 3000ms linear"
-                        : "none",
+                      transition: isArmed ? "width 3000ms linear" : "none",
                     }}
                   />
                   <span className="relative z-10">
                     {isSubmittingThis
                       ? "⏳ Menyimpan..."
                       : isArmed
-                      ? "✅ Konfirmasi CASH?"
-                      : "💵 CASH"}
+                        ? "✅ Konfirmasi CASH?"
+                        : "💵 CASH"}
                   </span>
                 </button>
               );
@@ -421,7 +432,8 @@ export function POSClient({ products, storeId }: POSClientProps) {
             {/* QRIS — 1-klik preview, 2-klik eksekusi */}
             {(() => {
               const isArmed = confirmState === "qris_statis";
-              const isSubmittingThis = isSubmitting && activePayment === "qris_statis";
+              const isSubmittingThis =
+                isSubmitting && activePayment === "qris_statis";
               return (
                 <button
                   type="button"
@@ -447,17 +459,15 @@ export function POSClient({ products, storeId }: POSClientProps) {
                     className="absolute top-0 left-0 h-full bg-yellow-300/60 dark:bg-yellow-200/40"
                     style={{
                       width: isArmed ? "100%" : "0%",
-                      transition: isArmed
-                        ? "width 3000ms linear"
-                        : "none",
+                      transition: isArmed ? "width 3000ms linear" : "none",
                     }}
                   />
                   <span className="relative z-10">
                     {isSubmittingThis
                       ? "⏳ Menyimpan..."
                       : isArmed
-                      ? "✅ Konfirmasi QRIS?"
-                      : "📱 QRIS"}
+                        ? "✅ Konfirmasi QRIS?"
+                        : "📱 QRIS"}
                   </span>
                 </button>
               );
@@ -467,7 +477,8 @@ export function POSClient({ products, storeId }: POSClientProps) {
           {/* Hint saat tombol armed */}
           {confirmState !== null && !isSubmitting && (
             <p className="text-center font-mono text-xs text-amber-500 dark:text-amber-400">
-              ⚡ Klik sekali lagi untuk konfirmasi, atau tunggu 3 detik untuk batal.
+              ⚡ Klik sekali lagi untuk konfirmasi, atau tunggu 3 detik untuk
+              batal.
             </p>
           )}
         </div>

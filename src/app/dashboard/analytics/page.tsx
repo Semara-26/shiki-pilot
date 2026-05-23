@@ -41,8 +41,8 @@ export default async function AnalyticsPage() {
       .where(
         and(
           eq(transactions.storeId, userStore.id),
-          gte(transactions.createdAt, since)
-        )
+          gte(transactions.createdAt, since),
+        ),
       )
       .orderBy(desc(transactions.createdAt));
 

@@ -108,10 +108,10 @@ function DrawerContent({ activeDrawer, products, onClose }: DrawerProps) {
   const lowStockProducts = products.filter((p) => p.stock <= p.stockCritical);
   const totalAssetValue = products.reduce(
     (acc, p) => acc + p.price * p.stock,
-    0
+    0,
   );
   const sortedProducts = [...products].sort(
-    (a, b) => b.price * b.stock - a.price * a.stock
+    (a, b) => b.price * b.stock - a.price * a.stock,
   );
 
   return (
@@ -246,7 +246,9 @@ function DrawerContent({ activeDrawer, products, onClose }: DrawerProps) {
             <div className="flex-1 overflow-y-auto p-6">
               <div className="space-y-2">
                 {products.length === 0 ? (
-                  <p className="text-muted-foreground">No products on record.</p>
+                  <p className="text-muted-foreground">
+                    No products on record.
+                  </p>
                 ) : (
                   products.map((p) => (
                     <div
@@ -272,10 +274,9 @@ function DrawerContent({ activeDrawer, products, onClose }: DrawerProps) {
 }
 
 // Lazy-load DrawerContent supaya tidak ikut bundle awal
-const LazyDrawerContent = dynamic(
-  () => Promise.resolve(DrawerContent),
-  { ssr: false }
-);
+const LazyDrawerContent = dynamic(() => Promise.resolve(DrawerContent), {
+  ssr: false,
+});
 
 // ─── MetricsRow ───────────────────────────────────────────────────────────────
 
@@ -314,7 +315,7 @@ export function MetricsRow({
       <div
         className={cn(
           "grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4",
-          className
+          className,
         )}
       >
         {cards.map(({ key, label, drawerKey }) => (

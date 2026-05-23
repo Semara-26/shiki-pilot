@@ -13,7 +13,10 @@ export async function getWaStatus() {
     const WA_API_KEY = process.env.WA_API_KEY;
 
     if (!WA_GATEWAY_URL || !WA_API_KEY) {
-      return { connected: false, error: "Sistem Gateway WhatsApp belum dikonfigurasi di server." };
+      return {
+        connected: false,
+        error: "Sistem Gateway WhatsApp belum dikonfigurasi di server.",
+      };
     }
 
     const res = await fetch(`${WA_GATEWAY_URL}/api/wa-status`, {
@@ -35,6 +38,9 @@ export async function getWaStatus() {
     };
   } catch (err) {
     console.error("WA Gateway check error:", err);
-    return { connected: false, error: "Server tidak bisa terhubung ke Gateway (Offline)." };
+    return {
+      connected: false,
+      error: "Server tidak bisa terhubung ke Gateway (Offline).",
+    };
   }
 }

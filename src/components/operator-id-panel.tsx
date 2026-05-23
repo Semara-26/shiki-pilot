@@ -40,17 +40,21 @@ export function OperatorIdPanel({ isOpen, onClose }: OperatorIdPanelProps) {
   const router = useRouter();
   const pathname = usePathname();
 
-  const [isPrefsOpen, setIsPrefsOpen] = useState(searchParams.get("setup") === "wa");
-  const [initialPrefTab, setInitialPrefTab] = useState<"ACCOUNT" | "STORE INFO">(
-    searchParams.get("setup") === "wa" ? "STORE INFO" : "ACCOUNT"
+  const [isPrefsOpen, setIsPrefsOpen] = useState(
+    searchParams.get("setup") === "wa",
   );
+  const [initialPrefTab, setInitialPrefTab] = useState<
+    "ACCOUNT" | "STORE INFO"
+  >(searchParams.get("setup") === "wa" ? "STORE INFO" : "ACCOUNT");
   const [isDocOpen, setIsDocOpen] = useState(false);
-  const [localOverrides, setLocalOverrides] = useState<Partial<{
-    name: string;
-    email: string;
-    avatar: string;
-    storeName: string;
-  }>>({});
+  const [localOverrides, setLocalOverrides] = useState<
+    Partial<{
+      name: string;
+      email: string;
+      avatar: string;
+      storeName: string;
+    }>
+  >({});
 
   const userProfile = useMemo(() => {
     const baseName = user?.fullName ?? "SYSTEM_OPERATOR";
@@ -63,7 +67,12 @@ export function OperatorIdPanel({ isOpen, onClose }: OperatorIdPanelProps) {
       avatar: localOverrides.avatar ?? baseAvatar,
       storeName: localOverrides.storeName ?? "",
     };
-  }, [user?.fullName, user?.primaryEmailAddress?.emailAddress, user?.imageUrl, localOverrides]);
+  }, [
+    user?.fullName,
+    user?.primaryEmailAddress?.emailAddress,
+    user?.imageUrl,
+    localOverrides,
+  ]);
 
   useEffect(() => {
     if (searchParams.get("setup") === "wa") {
@@ -75,24 +84,26 @@ export function OperatorIdPanel({ isOpen, onClose }: OperatorIdPanelProps) {
   const isDark = theme !== "light";
   const toggleTheme = () => setTheme(isDark ? "light" : "dark");
 
-  const nameForInitials = localOverrides.name ?? user?.fullName ?? "SYSTEM_OPERATOR";
-  const initials = nameForInitials
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((w) => w[0] ?? "")
-    .join("")
-    .toUpperCase() || "OP";
+  const nameForInitials =
+    localOverrides.name ?? user?.fullName ?? "SYSTEM_OPERATOR";
+  const initials =
+    nameForInitials
+      .split(/\s+/)
+      .slice(0, 2)
+      .map((w) => w[0] ?? "")
+      .join("")
+      .toUpperCase() || "OP";
 
   const panelContent = (
     <AnimatePresence>
       {isOpen && (
         <motion.div
-        initial={{ opacity: 0, y: 10, scale: 0.95 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        exit={{ opacity: 0, y: 10, scale: 0.95 }}
-        transition={{ duration: 0.2, ease: "easeOut" }}
-        className="fixed bottom-4 left-4 z-[100] w-[320px] max-h-[calc(100vh-3rem)] overflow-y-auto rounded-md border-2 border-ink bg-white shadow-neo backdrop-blur-md dark:border-red-500/30 dark:bg-surface-dark dark:shadow-none origin-bottom-left md:left-[272px]"
-      >
+          initial={{ opacity: 0, y: 10, scale: 0.95 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: 10, scale: 0.95 }}
+          transition={{ duration: 0.2, ease: "easeOut" }}
+          className="fixed bottom-4 left-4 z-[100] w-[320px] max-h-[calc(100vh-3rem)] overflow-y-auto rounded-md border-2 border-ink bg-white shadow-neo backdrop-blur-md dark:border-red-500/30 dark:bg-surface-dark dark:shadow-none origin-bottom-left md:left-[272px]"
+        >
           {/* Scanline overlay */}
           <div
             className="pointer-events-none absolute inset-0 z-[1] opacity-[0.03]"
@@ -150,7 +161,9 @@ export function OperatorIdPanel({ isOpen, onClose }: OperatorIdPanelProps) {
                       <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-75" />
                       <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
                     </span>
-                    <span className="text-ink/90 dark:text-foreground/90">ONLINE</span>
+                    <span className="text-ink/90 dark:text-foreground/90">
+                      ONLINE
+                    </span>
                     <span>{"// SECURE"}</span>
                   </div>
                 </div>
@@ -197,7 +210,7 @@ export function OperatorIdPanel({ isOpen, onClose }: OperatorIdPanelProps) {
                     <span
                       className={cn(
                         "font-mono text-[10px] font-bold",
-                        isDark ? "text-primary" : "text-slate-500"
+                        isDark ? "text-primary" : "text-slate-500",
                       )}
                     >
                       {isDark ? "DARK" : "LIGHT"}
@@ -212,13 +225,13 @@ export function OperatorIdPanel({ isOpen, onClose }: OperatorIdPanelProps) {
                       }}
                       className={cn(
                         "relative h-6 w-11 shrink-0 rounded-sm transition-colors",
-                        isDark ? "bg-primary" : "bg-slate-300"
+                        isDark ? "bg-primary" : "bg-slate-300",
                       )}
                     >
                       <span
                         className={cn(
                           "absolute top-0.5 left-0.5 h-4 w-4 rounded-sm bg-white transition-transform",
-                          isDark && "translate-x-5"
+                          isDark && "translate-x-5",
                         )}
                       />
                     </button>
@@ -250,7 +263,7 @@ export function OperatorIdPanel({ isOpen, onClose }: OperatorIdPanelProps) {
               <button
                 type="button"
                 onClick={() => signOut({ redirectUrl: "/" })}
-                className="flex w-full items-center justify-center gap-2 rounded-md border-2 border-ink bg-white py-3 font-mono text-sm font-semibold text-primary transition-colors hover:bg-red-50 dark:border-primary/50 dark:bg-transparent dark:hover:bg-primary dark:hover:text-primary-foreground"
+                className="flex w-full items-center justify-center gap-2 rounded-md border-2 border-ink bg-white py-3 font-mono text-sm font-semibold text-primary transition-colors hover:bg-primary/10 dark:border-primary/50 dark:bg-transparent dark:hover:bg-primary dark:hover:text-primary-foreground"
               >
                 <Power className="h-4 w-4" />
                 TERMINATE SESSION

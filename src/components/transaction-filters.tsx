@@ -17,9 +17,17 @@ export function TransactionFilters() {
   const [start, setStart] = useState(urlStart);
   const [end, setEnd] = useState(urlEnd);
 
-  const [prevUrl, setPrevUrl] = useState({ id: urlId, start: urlStart, end: urlEnd });
+  const [prevUrl, setPrevUrl] = useState({
+    id: urlId,
+    start: urlStart,
+    end: urlEnd,
+  });
 
-  if (urlId !== prevUrl.id || urlStart !== prevUrl.start || urlEnd !== prevUrl.end) {
+  if (
+    urlId !== prevUrl.id ||
+    urlStart !== prevUrl.start ||
+    urlEnd !== prevUrl.end
+  ) {
     setId(urlId);
     setStart(urlStart);
     setEnd(urlEnd);
@@ -28,7 +36,7 @@ export function TransactionFilters() {
 
   const handleApplyFilter = () => {
     const params = new URLSearchParams(searchParams);
-    
+
     if (id.trim()) params.set("id", id);
     else params.delete("id");
 
@@ -53,7 +61,10 @@ export function TransactionFilters() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end w-full">
         {/* Input ID Transaksi */}
         <div className="flex-1 w-full">
-          <label htmlFor="tx-id" className="block mb-1.5 font-mono text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+          <label
+            htmlFor="tx-id"
+            className="block mb-1.5 font-mono text-[10px] font-bold uppercase tracking-wider text-muted-foreground"
+          >
             ID TRANSAKSI
           </label>
           <div className="relative">
@@ -68,15 +79,18 @@ export function TransactionFilters() {
             />
           </div>
         </div>
-        
+
         {/* Input Tanggal Mulai */}
         <div className="flex-1 w-full sm:max-w-40">
-           <label htmlFor="tx-start" className="block mb-1.5 font-mono text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+          <label
+            htmlFor="tx-start"
+            className="block mb-1.5 font-mono text-[10px] font-bold uppercase tracking-wider text-muted-foreground"
+          >
             START DATE
           </label>
           <div className="relative">
             <Calendar className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-             <input
+            <input
               id="tx-start"
               type="date"
               value={start}
@@ -88,12 +102,15 @@ export function TransactionFilters() {
 
         {/* Input Tanggal Akhir */}
         <div className="flex-1 w-full sm:max-w-40">
-           <label htmlFor="tx-end" className="block mb-1.5 font-mono text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+          <label
+            htmlFor="tx-end"
+            className="block mb-1.5 font-mono text-[10px] font-bold uppercase tracking-wider text-muted-foreground"
+          >
             END DATE
           </label>
           <div className="relative">
             <Calendar className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-             <input
+            <input
               id="tx-end"
               type="date"
               value={end}
@@ -103,7 +120,7 @@ export function TransactionFilters() {
             />
           </div>
         </div>
-        
+
         {/* Action Buttons */}
         <div className="flex items-center gap-2 mt-2 sm:mt-0">
           {(id || start || end || searchParams.toString()) && (

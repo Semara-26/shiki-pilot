@@ -1,17 +1,19 @@
-import { auth } from '@clerk/nextjs/server';
-import { notFound } from 'next/navigation';
-import { eq, and } from 'drizzle-orm';
-import { db } from '@/src/db';
-import { stores, products } from '@/src/db/schema';
-import { DashboardHeader } from '@/src/components/dashboard-header';
-import { PageContainer } from '@/src/components/page-animation';
-import { ProductEditForm } from './product-edit-form';
+import { auth } from "@clerk/nextjs/server";
+import { notFound } from "next/navigation";
+import { eq, and } from "drizzle-orm";
+import { db } from "@/src/db";
+import { stores, products } from "@/src/db/schema";
+import { DashboardHeader } from "@/src/components/dashboard-header";
+import { PageContainer } from "@/src/components/page-animation";
+import { ProductEditForm } from "./product-edit-form";
 
 interface EditProductPageProps {
   params: Promise<{ id: string }>;
 }
 
-export default async function EditProductPage({ params }: EditProductPageProps) {
+export default async function EditProductPage({
+  params,
+}: EditProductPageProps) {
   const { id } = await params;
   const { userId } = await auth();
 
@@ -70,7 +72,8 @@ export default async function EditProductPage({ params }: EditProductPageProps) 
                   Edit Produk
                 </h2>
                 <p className="mt-1 font-mono text-sm text-muted-foreground">
-                  Deskripsi produk akan diproses dengan AI untuk pencarian semantik.
+                  Deskripsi produk akan diproses dengan AI untuk pencarian
+                  semantik.
                 </p>
               </div>
               <ProductEditForm initialData={initialData} />

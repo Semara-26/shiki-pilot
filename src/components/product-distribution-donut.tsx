@@ -1,17 +1,18 @@
 "use client";
 
-import {
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-  Tooltip,
-} from "recharts";
+import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from "recharts";
 import { useTheme } from "next-themes";
 import { motion } from "framer-motion";
 import { cn } from "@/src/lib/utils";
 
-const NERV_COLORS = ["#22d3ee", "#ef4444", "#f97316", "#eab308", "#a855f7", "#ec4899"];
+const NERV_COLORS = [
+  "#22d3ee",
+  "#ef4444",
+  "#f97316",
+  "#eab308",
+  "#a855f7",
+  "#ec4899",
+];
 
 export interface DistributionDataPoint {
   name: string;
@@ -34,7 +35,11 @@ function formatRupiah(value: number) {
 
 interface TooltipProps {
   active?: boolean;
-  payload?: Array<{ name?: string; value?: number; payload?: { percentage?: number } }>;
+  payload?: Array<{
+    name?: string;
+    value?: number;
+    payload?: { percentage?: number };
+  }>;
 }
 
 function DonutTooltip({ active, payload }: TooltipProps) {
@@ -55,7 +60,9 @@ function DonutTooltip({ active, payload }: TooltipProps) {
         {formatRupiah(value)}
       </p>
       {pct != null && (
-        <p className="mt-0.5 font-mono text-xs text-white/80">{pct.toFixed(1)}%</p>
+        <p className="mt-0.5 font-mono text-xs text-white/80">
+          {pct.toFixed(1)}%
+        </p>
       )}
     </motion.div>
   );
@@ -88,7 +95,7 @@ export function ProductDistributionDonut({
         // Hapus h-full dan overflow-hidden: biarkan tinggi komponen tumbuh natural
         // agar legend bisa muncul penuh dan container tidak memotong scroll area
         "flex flex-col rounded-lg border-2 border-ink bg-white p-4 md:p-6 dark:border-white/20 dark:bg-[#0a0a0a]",
-        className
+        className,
       )}
     >
       {title && (
@@ -98,7 +105,9 @@ export function ProductDistributionDonut({
       )}
       {isEmpty ? (
         <div className="flex flex-1 items-center justify-center">
-          <p className="font-mono text-sm text-muted-foreground">No revenue data</p>
+          <p className="font-mono text-sm text-muted-foreground">
+            No revenue data
+          </p>
         </div>
       ) : (
         <div className="flex flex-col gap-4">
@@ -114,15 +123,16 @@ export function ProductDistributionDonut({
                   paddingAngle={2}
                   stroke="transparent"
                   label={(props) => {
-                    const { x, y, textAnchor, percent, cx, cy, index } = props as {
-                      x?: number;
-                      y?: number;
-                      textAnchor?: string;
-                      percent?: number;
-                      cx?: number;
-                      cy?: number;
-                      index?: number;
-                    };
+                    const { x, y, textAnchor, percent, cx, cy, index } =
+                      props as {
+                        x?: number;
+                        y?: number;
+                        textAnchor?: string;
+                        percent?: number;
+                        cx?: number;
+                        cy?: number;
+                        index?: number;
+                      };
                     const showPct = (percent ?? 0) >= 0.03;
                     const centerLabel =
                       index === 0 ? (
@@ -159,7 +169,10 @@ export function ProductDistributionDonut({
                           <text
                             x={x}
                             y={y}
-                            textAnchor={(textAnchor as "start" | "middle" | "end") ?? "middle"}
+                            textAnchor={
+                              (textAnchor as "start" | "middle" | "end") ??
+                              "middle"
+                            }
                             fill={labelColor}
                             fontSize={11}
                           >
@@ -195,7 +208,9 @@ export function ProductDistributionDonut({
                 {/* Dot warna produk */}
                 <span
                   className="mt-0.5 h-3 w-3 shrink-0 rounded-full border border-gray-300 dark:border-white/20"
-                  style={{ backgroundColor: NERV_COLORS[i % NERV_COLORS.length] }}
+                  style={{
+                    backgroundColor: NERV_COLORS[i % NERV_COLORS.length],
+                  }}
                   aria-hidden
                 />
                 {/* Nama produk: break-words agar tidak terpotong parah, cukup wrap */}

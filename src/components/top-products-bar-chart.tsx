@@ -81,19 +81,23 @@ interface TopProductsBarChartProps {
   className?: string;
 }
 
-const BAR_COLOR_LIGHT = "#ef4444";
-const BAR_COLOR_DARK = "#22d3ee";
+const BAR_COLOR_LIGHT = "hsl(var(--primary))";
+const BAR_COLOR_DARK = "hsl(var(--primary))";
 
 interface TooltipProps {
   active?: boolean;
-  payload?: Array<{ payload?: { name?: string; value?: number }; value?: number }>;
+  payload?: Array<{
+    payload?: { name?: string; value?: number };
+    value?: number;
+  }>;
 }
 
 function ChartTooltip({ active, payload }: TooltipProps) {
   if (!active || !payload?.length) return null;
   const item = payload[0].payload ?? payload[0];
   const name = (item as { name?: string })?.name ?? "";
-  const value = (item as { value?: number })?.value ?? (payload[0].value as number) ?? 0;
+  const value =
+    (item as { value?: number })?.value ?? (payload[0].value as number) ?? 0;
   return (
     <motion.div
       initial={{ opacity: 0, y: 10, scale: 0.95 }}
@@ -101,9 +105,12 @@ function ChartTooltip({ active, payload }: TooltipProps) {
       transition={{ duration: 0.2 }}
       className="rounded-md border border-ink/30 bg-white p-3 shadow-lg dark:border-white/20 dark:bg-[#0a0a0a]"
     >
-      <p className="mb-1 font-mono text-xs text-ink dark:text-gray-300">{name}</p>
+      <p className="mb-1 font-mono text-xs text-ink dark:text-gray-300">
+        {name}
+      </p>
       <p className="font-mono text-base font-semibold tabular-nums text-ink dark:text-gray-100">
-        {value} <span className="text-sm font-normal text-muted-foreground">unit</span>
+        {value}{" "}
+        <span className="text-sm font-normal text-muted-foreground">unit</span>
       </p>
     </motion.div>
   );
@@ -114,7 +121,11 @@ const GRID_DARK = "rgba(255,255,255,0.1)";
 const TICK_LIGHT = "#374151";
 const TICK_DARK = "#9ca3af";
 
-export function TopProductsBarChart({ data, title, className }: TopProductsBarChartProps) {
+export function TopProductsBarChart({
+  data,
+  title,
+  className,
+}: TopProductsBarChartProps) {
   const { resolvedTheme } = useTheme();
   const isDark = resolvedTheme === "dark";
   const barColor = isDark ? BAR_COLOR_DARK : BAR_COLOR_LIGHT;
@@ -123,7 +134,7 @@ export function TopProductsBarChart({ data, title, className }: TopProductsBarCh
     <div
       className={cn(
         "flex h-full flex-col overflow-hidden rounded-lg border-2 border-ink bg-white p-4 md:p-6 dark:border-white/20 dark:bg-[#0a0a0a]",
-        className
+        className,
       )}
     >
       {title && (
@@ -166,7 +177,10 @@ export function TopProductsBarChart({ data, title, className }: TopProductsBarCh
               axisLine={false}
               tickFormatter={(v) => String(Math.round(Number(v)))}
             />
-            <Tooltip content={<ChartTooltip />} cursor={{ fill: "rgba(0,0,0,0.03)" }} />
+            <Tooltip
+              content={<ChartTooltip />}
+              cursor={{ fill: "rgba(0,0,0,0.03)" }}
+            />
             <Bar
               dataKey="value"
               fill={barColor}

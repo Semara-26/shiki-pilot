@@ -9,7 +9,7 @@ import { stores, transactions, products } from "@/src/db/schema";
 export type BulkTransactionItem = {
   productId: string;
   quantity: number;
-  paymentType: 'cash' | 'qris_statis';
+  paymentType: "cash" | "qris_statis";
 };
 
 export type BulkTransactionResult =
@@ -21,7 +21,7 @@ export async function createBulkTransactions(
   items: BulkTransactionItem[],
   // cashReceived: jumlah uang diterima (untuk QRIS = grandTotal, untuk cash = input kasir)
   // Diterima sebagai parameter untuk konsistensi API, siap dipakai saat kolom DB tersedia
-  cashReceived?: number
+  cashReceived?: number,
 ): Promise<BulkTransactionResult> {
   try {
     const { userId } = await auth();
@@ -34,22 +34,28 @@ export async function createBulkTransactions(
       columns: { id: true, name: true, whatsappNumber: true },
     });
     if (!userStore || userStore.id !== storeId) {
-      return { success: false, error: "Toko tidak ditemukan atau tidak memiliki akses." };
+      return {
+        success: false,
+        error: "Toko tidak ditemukan atau tidak memiliki akses.",
+      };
     }
 
     if (items.length === 0) {
-      return { success: false, error: "Keranjang kosong. Tambah produk terlebih dahulu." };
+      return {
+        success: false,
+        error: "Keranjang kosong. Tambah produk terlebih dahulu.",
+      };
     }
 
     // --- Validasi stok & ambil harga terkini dari DB sebelum memulai transaksi ---
     const productIds = items.map((item) => item.productId);
     const currentStocks = await db
-      .select({ 
-        id: products.id, 
-        name: products.name, 
-        stock: products.stock, 
+      .select({
+        id: products.id,
+        name: products.name,
+        stock: products.stock,
         price: products.price,
-        stockCritical: products.stockCritical 
+        stockCritical: products.stockCritical,
       })
       .from(products)
       .where(inArray(products.id, productIds));
@@ -97,14 +103,16 @@ export async function createBulkTransactions(
             and(
               eq(products.id, item.productId),
               // Safety check: pastikan stok tidak turun ke negatif
-              gte(products.stock, item.quantity)
-            )
+              gte(products.stock, item.quantity),
+            ),
           )
           .returning({ id: products.id });
 
         // Jika tidak ada baris yang ter-update, stok tidak mencukupi — rollback
         if (updated.length === 0) {
-          throw new Error(`Stok produk berubah saat transaksi berlangsung. Coba lagi.`);
+          throw new Error(
+            `Stok produk berubah saat transaksi berlangsung. Coba lagi.`,
+          );
         }
       }
     });

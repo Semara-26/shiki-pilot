@@ -1,11 +1,11 @@
-'use server';
+"use server";
 
-import { auth } from '@clerk/nextjs/server';
-import { revalidatePath } from 'next/cache';
-import { eq } from 'drizzle-orm';
-import { z } from 'zod';
-import { db } from '../../db';
-import { stores } from '../../db/schema';
+import { auth } from "@clerk/nextjs/server";
+import { revalidatePath } from "next/cache";
+import { eq } from "drizzle-orm";
+import { z } from "zod";
+import { db } from "../../db";
+import { stores } from "../../db/schema";
 
 export type StoreInfoForPrefs = {
   id: string;
@@ -20,30 +20,38 @@ export type StoreInfoForPrefs = {
 };
 
 const updateStoreInfoSchema = z.object({
-  name: z.string().min(1, 'Nama toko wajib diisi').max(100).optional(),
+  name: z.string().min(1, "Nama toko wajib diisi").max(100).optional(),
   businessType: z.string().max(50).optional().nullable(),
-  contactEmail: z.union([z.string().email(), z.literal('')]).optional(),
+  contactEmail: z.union([z.string().email(), z.literal("")]).optional(),
   phone: z.string().max(30).optional().nullable(),
-  whatsappNumber: z.string().min(10).max(15).regex(/^(08|62)\d+$/).optional(),
+  whatsappNumber: z
+    .string()
+    .min(10)
+    .max(15)
+    .regex(/^(08|62)\d+$/)
+    .optional(),
   address: z.string().min(10).max(500).optional(),
 });
 
 const createStoreSchema = z.object({
   name: z
     .string()
-    .min(1, 'Nama toko wajib diisi')
-    .max(100, 'Nama toko maksimal 100 karakter'),
-  whatsapp_number: z.string()
-    .min(10, 'Nomor WhatsApp minimal 10 digit')
-    .max(15, 'Nomor WhatsApp maksimal 15 digit')
-    .regex(/^(08|62)\d+$/, 'Nomor WhatsApp hanya boleh berisi angka dan wajib diawali 08 atau 62'),
-  address: z.string()
-    .min(10, 'Alamat minimal 10 karakter'),
+    .min(1, "Nama toko wajib diisi")
+    .max(100, "Nama toko maksimal 100 karakter"),
+  whatsapp_number: z
+    .string()
+    .min(10, "Nomor WhatsApp minimal 10 digit")
+    .max(15, "Nomor WhatsApp maksimal 15 digit")
+    .regex(
+      /^(08|62)\d+$/,
+      "Nomor WhatsApp hanya boleh berisi angka dan wajib diawali 08 atau 62",
+    ),
+  address: z.string().min(10, "Alamat minimal 10 karakter"),
   description: z
     .string()
-    .max(500, 'Deskripsi maksimal 500 karakter')
+    .max(500, "Deskripsi maksimal 500 karakter")
     .optional()
-    .or(z.literal('')),
+    .or(z.literal("")),
 });
 
 export type CreateStoreState = {
@@ -61,8 +69,8 @@ function generateSlug(name: string): string {
   return name
     .toLowerCase()
     .trim()
-    .replace(/\s+/g, '-')
-    .replace(/[^a-z0-9-]/g, '');
+    .replace(/\s+/g, "-")
+    .replace(/[^a-z0-9-]/g, "");
 }
 
 function randomSuffix(): string {
@@ -71,12 +79,12 @@ function randomSuffix(): string {
 
 export async function createStore(
   _prevState: CreateStoreState,
-  formData: FormData
+  formData: FormData,
 ): Promise<CreateStoreState> {
   try {
     const { userId } = await auth();
     if (!userId) {
-      return { error: 'Anda harus login untuk membuat toko.' };
+      return { error: "Anda harus login untuk membuat toko." };
     }
 
     const existingUserStore = await db.query.stores.findFirst({
@@ -85,27 +93,34 @@ export async function createStore(
     });
 
     if (existingUserStore) {
-      return { error: 'Anda sudah memiliki toko. Satu akun hanya dapat memiliki satu toko.' };
+      return {
+        error:
+          "Anda sudah memiliki toko. Satu akun hanya dapat memiliki satu toko.",
+      };
     }
 
     const raw = {
-      name: formData.get('name') ?? '',
-      whatsapp_number: formData.get('whatsapp_number') ?? '',
-      address: formData.get('address') ?? '',
-      description: formData.get('description') ?? '',
+      name: formData.get("name") ?? "",
+      whatsapp_number: formData.get("whatsapp_number") ?? "",
+      address: formData.get("address") ?? "",
+      description: formData.get("description") ?? "",
     };
 
     const parsed = createStoreSchema.safeParse({
       name: raw.name,
       whatsapp_number: raw.whatsapp_number,
       address: raw.address,
-      description: raw.description === '' ? undefined : raw.description,
+      description: raw.description === "" ? undefined : raw.description,
     });
 
     if (!parsed.success) {
-      const fieldErrors: CreateStoreState['fieldErrors'] = {};
+      const fieldErrors: CreateStoreState["fieldErrors"] = {};
       for (const issue of parsed.error.issues) {
-        const path = issue.path[0] as 'name' | 'description' | 'whatsapp_number' | 'address';
+        const path = issue.path[0] as
+          | "name"
+          | "description"
+          | "whatsapp_number"
+          | "address";
         if (!fieldErrors[path]) fieldErrors[path] = [];
         fieldErrors[path]!.push(issue.message);
       }
@@ -140,13 +155,13 @@ export async function createStore(
 
     if (WA_GATEWAY_URL && WA_API_KEY) {
       // Sanitasi nomor WA ke format internasional 62xxx
-      let sanitizedPhone = whatsapp_number.replace(/\D/g, '');
-      if (sanitizedPhone.startsWith('62')) {
+      let sanitizedPhone = whatsapp_number.replace(/\D/g, "");
+      if (sanitizedPhone.startsWith("62")) {
         // Sudah format internasional, tidak perlu modifikasi
-      } else if (sanitizedPhone.startsWith('0')) {
-        sanitizedPhone = '62' + sanitizedPhone.slice(1);
+      } else if (sanitizedPhone.startsWith("0")) {
+        sanitizedPhone = "62" + sanitizedPhone.slice(1);
       } else if (sanitizedPhone.length >= 9) {
-        sanitizedPhone = '62' + sanitizedPhone;
+        sanitizedPhone = "62" + sanitizedPhone;
       }
 
       const welcomeMessage =
@@ -160,34 +175,39 @@ export async function createStore(
         `Ketik "Bantuan" kapan saja jika Anda butuh panduan. Selamat mengembangkan bisnis Anda bersama ShikiPilot! 🎉`;
 
       fetch(`${WA_GATEWAY_URL}/send-message`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': WA_API_KEY,
+          "Content-Type": "application/json",
+          "x-api-key": WA_API_KEY,
         },
         body: JSON.stringify({
           to: `${sanitizedPhone}@s.whatsapp.net`,
           text: welcomeMessage,
         }),
       }).catch((err) => {
-        console.error('[WA Onboarding] Gagal kirim pesan sambutan toko baru:', err);
+        console.error(
+          "[WA Onboarding] Gagal kirim pesan sambutan toko baru:",
+          err,
+        );
       });
     }
     // ────────────────────────────────────────────────────────────────────────
 
-    revalidatePath('/dashboard');
+    revalidatePath("/dashboard");
     return { success: true };
-
   } catch (err) {
     // SECURITY F-07: Log detail error di server, kembalikan pesan generik ke client
-    console.error('createStore error:', err);
-    if (err instanceof Error && err.message.includes('unique')) {
-      if (err.message.includes('whatsapp_number') || err.message.includes('whatsappNumber')) {
-        return { error: 'Nomor WhatsApp sudah digunakan oleh toko lain.' };
+    console.error("createStore error:", err);
+    if (err instanceof Error && err.message.includes("unique")) {
+      if (
+        err.message.includes("whatsapp_number") ||
+        err.message.includes("whatsappNumber")
+      ) {
+        return { error: "Nomor WhatsApp sudah digunakan oleh toko lain." };
       }
-      return { error: 'Nama toko sudah digunakan, coba nama lain.' };
+      return { error: "Nama toko sudah digunakan, coba nama lain." };
     }
-    return { error: 'Gagal membuat toko. Coba lagi.' };
+    return { error: "Gagal membuat toko. Coba lagi." };
   }
 }
 
@@ -214,7 +234,7 @@ export async function getStoreByUserId(): Promise<StoreInfoForPrefs | null> {
 
     return store ?? null;
   } catch (err) {
-    console.error('getStoreByUserId error:', err);
+    console.error("getStoreByUserId error:", err);
     return null;
   }
 }
@@ -231,17 +251,17 @@ export async function updateStoreInfo(
     phone?: string | null;
     whatsappNumber?: string;
     address?: string;
-  }
+  },
 ): Promise<UpdateStoreInfoState> {
   try {
     const { userId } = await auth();
     if (!userId) {
-      return { error: 'Anda harus login untuk menyimpan perubahan.' };
+      return { error: "Anda harus login untuk menyimpan perubahan." };
     }
 
     const parsed = updateStoreInfoSchema.safeParse(data);
     if (!parsed.success) {
-      return { error: parsed.error.issues[0]?.message ?? 'Data tidak valid.' };
+      return { error: parsed.error.issues[0]?.message ?? "Data tidak valid." };
     }
 
     const store = await db.query.stores.findFirst({
@@ -250,7 +270,7 @@ export async function updateStoreInfo(
     });
 
     if (!store) {
-      return { error: 'Toko tidak ditemukan. Buat toko terlebih dahulu.' };
+      return { error: "Toko tidak ditemukan. Buat toko terlebih dahulu." };
     }
 
     const updates: Partial<{
@@ -263,11 +283,17 @@ export async function updateStoreInfo(
     }> = {};
 
     if (parsed.data.name !== undefined) updates.name = parsed.data.name;
-    if (parsed.data.businessType !== undefined) updates.businessType = parsed.data.businessType === '' ? null : parsed.data.businessType;
-    if (parsed.data.contactEmail !== undefined) updates.contactEmail = parsed.data.contactEmail === '' ? null : parsed.data.contactEmail;
+    if (parsed.data.businessType !== undefined)
+      updates.businessType =
+        parsed.data.businessType === "" ? null : parsed.data.businessType;
+    if (parsed.data.contactEmail !== undefined)
+      updates.contactEmail =
+        parsed.data.contactEmail === "" ? null : parsed.data.contactEmail;
     if (parsed.data.phone !== undefined) updates.phone = parsed.data.phone;
-    if (parsed.data.whatsappNumber !== undefined) updates.whatsappNumber = parsed.data.whatsappNumber;
-    if (parsed.data.address !== undefined) updates.address = parsed.data.address;
+    if (parsed.data.whatsappNumber !== undefined)
+      updates.whatsappNumber = parsed.data.whatsappNumber;
+    if (parsed.data.address !== undefined)
+      updates.address = parsed.data.address;
 
     if (Object.keys(updates).length === 0) {
       return { success: true };
@@ -275,16 +301,19 @@ export async function updateStoreInfo(
 
     await db.update(stores).set(updates).where(eq(stores.id, store.id));
 
-    revalidatePath('/dashboard');
+    revalidatePath("/dashboard");
     return { success: true };
   } catch (err) {
     // SECURITY F-07: Log detail error di server, kembalikan pesan generik ke client
-    console.error('updateStoreInfo error:', err);
-    if (err instanceof Error && err.message.includes('unique')) {
-      if (err.message.includes('whatsapp_number') || err.message.includes('whatsappNumber')) {
-        return { error: 'Nomor WhatsApp sudah digunakan oleh toko lain.' };
+    console.error("updateStoreInfo error:", err);
+    if (err instanceof Error && err.message.includes("unique")) {
+      if (
+        err.message.includes("whatsapp_number") ||
+        err.message.includes("whatsappNumber")
+      ) {
+        return { error: "Nomor WhatsApp sudah digunakan oleh toko lain." };
       }
     }
-    return { error: 'Gagal menyimpan perubahan. Coba lagi.' };
+    return { error: "Gagal menyimpan perubahan. Coba lagi." };
   }
 }

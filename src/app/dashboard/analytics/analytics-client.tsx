@@ -2,7 +2,13 @@
 
 import { useState, useMemo, useRef, useEffect } from "react";
 import Link from "next/link";
-import { ArrowLeft, BarChart3, Download, ChevronDown, Loader2 } from "lucide-react";
+import {
+  ArrowLeft,
+  BarChart3,
+  Download,
+  ChevronDown,
+  Loader2,
+} from "lucide-react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import html2canvas from "html2canvas";
@@ -15,11 +21,30 @@ import type { RawTransaction } from "./page";
 
 export type TimeFilter = "daily" | "weekly" | "monthly";
 
-const MONTH_LABELS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const MONTH_LABELS = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+];
 
 /** Fallback raw transactions saat DB kosong */
 const FALLBACK_RAW: RawTransaction[] = (() => {
-  const products = ["Raja Tuna", "Kerupuk Tuna Bawang", "Sarden Premium", "Abon Tuna Pedas", "Fish Ball"];
+  const products = [
+    "Raja Tuna",
+    "Kerupuk Tuna Bawang",
+    "Sarden Premium",
+    "Abon Tuna Pedas",
+    "Fish Ball",
+  ];
   const out: RawTransaction[] = [];
   const now = new Date();
   for (let i = 0; i < 21; i++) {
@@ -46,7 +71,7 @@ interface AnalyticsClientProps {
 
 function processRevenueOverTime(
   transactions: RawTransaction[],
-  filter: TimeFilter
+  filter: TimeFilter,
 ): { name: string; value: number }[] {
   if (transactions.length === 0) return [];
 
@@ -118,10 +143,15 @@ function processRevenueOverTime(
     });
 }
 
-function processTopProducts(transactions: RawTransaction[]): { name: string; value: number }[] {
+function processTopProducts(
+  transactions: RawTransaction[],
+): { name: string; value: number }[] {
   const byProduct = new Map<string, number>();
   for (const tx of transactions) {
-    byProduct.set(tx.productName, (byProduct.get(tx.productName) ?? 0) + tx.quantity);
+    byProduct.set(
+      tx.productName,
+      (byProduct.get(tx.productName) ?? 0) + tx.quantity,
+    );
   }
   return Array.from(byProduct.entries())
     .map(([name, value]) => ({ name, value }))
@@ -129,10 +159,15 @@ function processTopProducts(transactions: RawTransaction[]): { name: string; val
     .slice(0, 8);
 }
 
-function processDistribution(transactions: RawTransaction[]): { name: string; value: number }[] {
+function processDistribution(
+  transactions: RawTransaction[],
+): { name: string; value: number }[] {
   const byProduct = new Map<string, number>();
   for (const tx of transactions) {
-    byProduct.set(tx.productName, (byProduct.get(tx.productName) ?? 0) + tx.totalPrice);
+    byProduct.set(
+      tx.productName,
+      (byProduct.get(tx.productName) ?? 0) + tx.totalPrice,
+    );
   }
   return Array.from(byProduct.entries())
     .map(([name, value]) => ({ name, value }))
@@ -145,7 +180,11 @@ const DAYS_BY_FILTER: Record<TimeFilter, number> = {
   monthly: 365, // 12 months
 };
 
-export function AnalyticsClient({ rawTransactions, hasStore, businessName }: AnalyticsClientProps) {
+export function AnalyticsClient({
+  rawTransactions,
+  hasStore,
+  businessName,
+}: AnalyticsClientProps) {
   const [timeFilter, setTimeFilter] = useState<TimeFilter>("weekly");
   const [isExportOpen, setIsExportOpen] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
@@ -162,15 +201,15 @@ export function AnalyticsClient({ rawTransactions, hasStore, businessName }: Ana
 
   const revenueOverTimeData = useMemo(
     () => processRevenueOverTime(filteredTransactions, timeFilter),
-    [filteredTransactions, timeFilter]
+    [filteredTransactions, timeFilter],
   );
   const topProductsData = useMemo(
     () => processTopProducts(filteredTransactions),
-    [filteredTransactions]
+    [filteredTransactions],
   );
   const distributionData = useMemo(
     () => processDistribution(filteredTransactions),
-    [filteredTransactions]
+    [filteredTransactions],
   );
 
   const chartDataSummary = useMemo(
@@ -179,16 +218,20 @@ export function AnalyticsClient({ rawTransactions, hasStore, businessName }: Ana
       topProducts: topProductsData,
       distribution: distributionData,
     }),
-    [revenueOverTimeData, topProductsData, distributionData]
+    [revenueOverTimeData, topProductsData, distributionData],
   );
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (exportDropdownRef.current && !exportDropdownRef.current.contains(e.target as Node)) {
+      if (
+        exportDropdownRef.current &&
+        !exportDropdownRef.current.contains(e.target as Node)
+      ) {
         setIsExportOpen(false);
       }
     };
-    if (isExportOpen) document.addEventListener("mousedown", handleClickOutside);
+    if (isExportOpen)
+      document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isExportOpen]);
 
@@ -201,9 +244,15 @@ export function AnalyticsClient({ rawTransactions, hasStore, businessName }: Ana
 
       // --- Computed summary values ---
       const formatRp = (val: number) => `Rp ${val.toLocaleString("id-ID")}`;
-      const totalRevenue = filteredTransactions.reduce((s, tx) => s + tx.totalPrice, 0);
+      const totalRevenue = filteredTransactions.reduce(
+        (s, tx) => s + tx.totalPrice,
+        0,
+      );
       const totalAssetValue = txs.reduce((s, tx) => s + tx.totalPrice, 0);
-      const totalQty = filteredTransactions.reduce((s, tx) => s + tx.quantity, 0);
+      const totalQty = filteredTransactions.reduce(
+        (s, tx) => s + tx.quantity,
+        0,
+      );
 
       // --- HEADER BLOCK (Logo + Judul + Meta) ---
       const now = new Date();
@@ -215,7 +264,11 @@ export function AnalyticsClient({ rawTransactions, hasStore, businessName }: Ana
 
       doc.setFontSize(9);
       doc.setTextColor(117, 117, 117);
-      const printDate = now.toLocaleDateString("id-ID", { day: "2-digit", month: "long", year: "numeric" });
+      const printDate = now.toLocaleDateString("id-ID", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+      });
       doc.text(`Dicetak: ${printDate}`, 33, 27);
       if (businessName) {
         doc.text(`Toko: ${businessName}`, 33, 32);
@@ -231,7 +284,10 @@ export function AnalyticsClient({ rawTransactions, hasStore, businessName }: Ana
 
       doc.setFontSize(9);
       doc.setTextColor(117, 117, 117);
-      const periodLabel = now.toLocaleDateString("id-ID", { month: "long", year: "numeric" });
+      const periodLabel = now.toLocaleDateString("id-ID", {
+        month: "long",
+        year: "numeric",
+      });
       doc.text(`Periode: ${periodLabel}`, 14, currentY);
       currentY += 6;
 
@@ -239,7 +295,11 @@ export function AnalyticsClient({ rawTransactions, hasStore, businessName }: Ana
       doc.setTextColor(30, 30, 30);
       doc.text(`Total Pendapatan  :  ${formatRp(totalRevenue)}`, 14, currentY);
       currentY += 6;
-      doc.text(`Total Nilai Aset   :  ${formatRp(totalAssetValue)}`, 14, currentY);
+      doc.text(
+        `Total Nilai Aset   :  ${formatRp(totalAssetValue)}`,
+        14,
+        currentY,
+      );
       currentY += 9;
 
       // Garis abu-abu tipis pemisah summary → chart
@@ -271,7 +331,12 @@ export function AnalyticsClient({ rawTransactions, hasStore, businessName }: Ana
         formatRp(tx.totalPrice),
       ]);
 
-      const grandTotalRow = ["", "GRAND TOTAL", totalQty, formatRp(totalRevenue)];
+      const grandTotalRow = [
+        "",
+        "GRAND TOTAL",
+        totalQty,
+        formatRp(totalRevenue),
+      ];
       const grandTotalRowIndex = tableRows.length;
 
       autoTable(doc, {
@@ -286,7 +351,10 @@ export function AnalyticsClient({ rawTransactions, hasStore, businessName }: Ana
           lineWidth: 0.1,
         },
         didParseCell: (data) => {
-          if (data.section === "body" && data.row.index === grandTotalRowIndex) {
+          if (
+            data.section === "body" &&
+            data.row.index === grandTotalRowIndex
+          ) {
             data.cell.styles.fontStyle = "bold";
             data.cell.styles.fillColor = [243, 244, 246];
             data.cell.styles.textColor = [30, 30, 30];
@@ -297,7 +365,11 @@ export function AnalyticsClient({ rawTransactions, hasStore, businessName }: Ana
       // --- FOOTER ---
       doc.setFontSize(8);
       doc.setTextColor(117, 117, 117);
-      doc.text("Generated otomatis oleh Sistem ShikiPilot", 14, pageHeight - 10);
+      doc.text(
+        "Generated otomatis oleh Sistem ShikiPilot",
+        14,
+        pageHeight - 10,
+      );
 
       doc.save("Laporan_Performa_ShikiPilot.pdf");
     } catch (err) {
@@ -308,7 +380,12 @@ export function AnalyticsClient({ rawTransactions, hasStore, businessName }: Ana
   };
 
   const handleExportCSV = () => {
-    const headers = ["Tanggal", "Nama Produk", "Kuantitas", "Total Pendapatan (Rp)"];
+    const headers = [
+      "Tanggal",
+      "Nama Produk",
+      "Kuantitas",
+      "Total Pendapatan (Rp)",
+    ];
     const escapeCsv = (val: string | number) => {
       const s = String(val);
       return s.includes(";") || s.includes('"') || s.includes("\n")
@@ -317,7 +394,12 @@ export function AnalyticsClient({ rawTransactions, hasStore, businessName }: Ana
     };
     const rows = filteredTransactions.map((tx) => {
       const date = new Date(tx.createdAt).toLocaleDateString("id-ID");
-      return [escapeCsv(date), escapeCsv(tx.productName), tx.quantity, tx.totalPrice].join(";");
+      return [
+        escapeCsv(date),
+        escapeCsv(tx.productName),
+        tx.quantity,
+        tx.totalPrice,
+      ].join(";");
     });
     const csvContent = "\uFEFF" + [headers.join(";"), ...rows].join("\n");
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
@@ -372,13 +454,19 @@ export function AnalyticsClient({ rawTransactions, hasStore, businessName }: Ana
               >
                 <Download size={14} />
                 Ekspor Data
-                <ChevronDown size={13} className={`transition-transform duration-200 ${isExportOpen ? "rotate-180" : ""}`} />
+                <ChevronDown
+                  size={13}
+                  className={`transition-transform duration-200 ${isExportOpen ? "rotate-180" : ""}`}
+                />
               </button>
               {isExportOpen && (
                 <div className="absolute left-0 top-full z-50 mt-1.5 w-44 origin-top-left rounded-md border border-surface-border bg-surface-dark py-1 shadow-lg sm:left-auto sm:right-0 sm:origin-top-right">
                   <button
                     type="button"
-                    onClick={() => { handleExportCSV(); setIsExportOpen(false); }}
+                    onClick={() => {
+                      handleExportCSV();
+                      setIsExportOpen(false);
+                    }}
                     className="flex w-full items-center gap-2 px-3 py-2 text-left font-mono text-xs uppercase tracking-wider text-gray-300 transition-colors hover:bg-primary/20 hover:text-primary"
                   >
                     <Download size={13} />
@@ -387,7 +475,10 @@ export function AnalyticsClient({ rawTransactions, hasStore, businessName }: Ana
                   <button
                     type="button"
                     disabled={isExporting}
-                    onClick={() => { setIsExportOpen(false); handleExportPDF(); }}
+                    onClick={() => {
+                      setIsExportOpen(false);
+                      handleExportPDF();
+                    }}
                     className="flex w-full items-center gap-2 px-3 py-2 text-left font-mono text-xs uppercase tracking-wider text-gray-300 transition-colors hover:bg-primary/20 hover:text-primary disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     {isExporting ? (
@@ -401,27 +492,40 @@ export function AnalyticsClient({ rawTransactions, hasStore, businessName }: Ana
               )}
             </div>
             <div className="flex rounded-md border-2 border-ink dark:border-white/20 p-0.5">
-            {(["daily", "weekly", "monthly"] as const).map((f) => (
-              <button
-                key={f}
-                type="button"
-                onClick={() => setTimeFilter(f)}
-                className={`
+              {(["daily", "weekly", "monthly"] as const).map((f) => (
+                <button
+                  key={f}
+                  type="button"
+                  onClick={() => setTimeFilter(f)}
+                  className={`
                   px-2 py-1 sm:px-3 sm:py-1.5 font-mono text-xs font-medium uppercase transition-colors
-                  ${timeFilter === f
-                    ? "bg-primary text-primary-foreground dark:bg-[#22d3ee] dark:text-[#0a0a0a]"
-                    : "text-ink dark:text-gray-400 hover:text-primary dark:hover:text-[#22d3ee]"}
+                  ${
+                    timeFilter === f
+                      ? "bg-primary text-primary-foreground dark:bg-[#22d3ee] dark:text-[#0a0a0a]"
+                      : "text-ink dark:text-gray-400 hover:text-primary dark:hover:text-[#22d3ee]"
+                  }
                 `}
-              >
-                {f === "daily" ? "Daily" : f === "weekly" ? "Weekly" : "Monthly"}
-              </button>
-            ))}
+                >
+                  {f === "daily"
+                    ? "Daily"
+                    : f === "weekly"
+                      ? "Weekly"
+                      : "Monthly"}
+                </button>
+              ))}
             </div>
           </div>
         </div>
-        <div id="revenue-chart-container" className="w-full min-h-[300px] h-[300px] md:h-[320px]">
+        <div
+          id="revenue-chart-container"
+          className="w-full min-h-[300px] h-[300px] md:h-[320px]"
+        >
           <SalesChart
-            data={revenueOverTimeData.length > 0 ? revenueOverTimeData : [{ name: "—", value: 0 }]}
+            data={
+              revenueOverTimeData.length > 0
+                ? revenueOverTimeData
+                : [{ name: "—", value: 0 }]
+            }
             embedded
             className="h-full"
           />

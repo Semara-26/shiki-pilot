@@ -145,7 +145,7 @@ async function RecentAssetsSection({ storeId }: { storeId: string }) {
         </p>
         <Link
           href="/dashboard/inventory"
-          className="font-mono text-xs text-primary hover:text-red-700 dark:hover:text-red-400 hover:underline"
+          className="font-mono text-xs text-primary hover:text-primary-hover dark:hover:text-primary/80 hover:underline"
         >
           View full list →
         </Link>

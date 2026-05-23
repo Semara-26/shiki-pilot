@@ -9,7 +9,7 @@ import { PageContainer } from "@/src/components/page-animation";
 import { AiImportButton } from "./ai-import-button";
 import { SearchInput } from "@/src/components/search-input";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 export default async function InventoryPage(props: {
   searchParams?: Promise<{ q?: string }>;
@@ -29,7 +29,7 @@ export default async function InventoryPage(props: {
       ? await db.query.products.findMany({
           where: and(
             eq(products.storeId, userStore.id),
-            safeQ ? ilike(products.name, `%${safeQ}%`) : undefined
+            safeQ ? ilike(products.name, `%${safeQ}%`) : undefined,
           ),
           columns: {
             id: true,

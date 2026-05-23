@@ -69,7 +69,11 @@ export function SystemPreferencesModal({
   const [isLoadingStore, setIsLoadingStore] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string>("");
   const [showPassword, setShowPassword] = useState(false);
-  const [waStatus, setWaStatus] = useState<{ connected: boolean; qr?: string; error?: string } | null>(null);
+  const [waStatus, setWaStatus] = useState<{
+    connected: boolean;
+    qr?: string;
+    error?: string;
+  } | null>(null);
   const [isWaLoading, setIsWaLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -149,7 +153,11 @@ export function SystemPreferencesModal({
     setAvatarUrl("");
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >,
+  ) => {
     const { id, value } = e.target;
     setFormData((prev) => ({ ...prev, [id]: value }));
   };
@@ -183,7 +191,9 @@ export function SystemPreferencesModal({
       });
       onClose();
     } catch {
-      toast.error("Gagal menyimpan", { description: "Terjadi kesalahan. Coba lagi." });
+      toast.error("Gagal menyimpan", {
+        description: "Terjadi kesalahan. Coba lagi.",
+      });
     } finally {
       setIsSyncing(false);
     }
@@ -207,14 +217,18 @@ export function SystemPreferencesModal({
             <div className="relative shrink-0">
               <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border-2 border-primary bg-muted font-mono text-2xl font-semibold text-foreground">
                 {avatarUrl ? (
-                  <img src={avatarUrl} alt="Avatar" className="h-full w-full object-cover" />
+                  <img
+                    src={avatarUrl}
+                    alt="Avatar"
+                    className="h-full w-full object-cover"
+                  />
                 ) : (
-                  (formData.username
+                  formData.username
                     .split(/\s+/)
                     .slice(0, 2)
                     .map((w) => w[0] ?? "")
                     .join("")
-                    .toUpperCase() || "OP")
+                    .toUpperCase() || "OP"
                 )}
               </div>
               <button
@@ -353,11 +367,27 @@ export function SystemPreferencesModal({
                 onChange={handleInputChange}
                 className={inputClass}
               >
-                <option value="" className="text-black dark:text-white">Pilih tipe bisnis</option>
-                <option value="F&B / Retail" className="text-black dark:text-white">F&B / Retail</option>
-                <option value="Services" className="text-black dark:text-white">Services</option>
-                <option value="Manufacturing" className="text-black dark:text-white">Manufacturing</option>
-                <option value="Other" className="text-black dark:text-white">Other</option>
+                <option value="" className="text-black dark:text-white">
+                  Pilih tipe bisnis
+                </option>
+                <option
+                  value="F&B / Retail"
+                  className="text-black dark:text-white"
+                >
+                  F&B / Retail
+                </option>
+                <option value="Services" className="text-black dark:text-white">
+                  Services
+                </option>
+                <option
+                  value="Manufacturing"
+                  className="text-black dark:text-white"
+                >
+                  Manufacturing
+                </option>
+                <option value="Other" className="text-black dark:text-white">
+                  Other
+                </option>
               </select>
             </div>
             <div>
@@ -427,7 +457,9 @@ export function SystemPreferencesModal({
               disabled={isWaLoading}
               className="flex items-center justify-center gap-1.5 rounded bg-white px-2.5 py-1.5 border border-ink/20 font-mono text-[10px] font-bold text-ink dark:bg-surface-darker dark:border-white/10 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 transition-colors disabled:opacity-50"
             >
-              <RefreshCw className={cn("h-3 w-3", isWaLoading && "animate-spin")} />
+              <RefreshCw
+                className={cn("h-3 w-3", isWaLoading && "animate-spin")}
+              />
               REFRESH
             </button>
           </div>
@@ -441,7 +473,7 @@ export function SystemPreferencesModal({
               </div>
             ) : waStatus?.connected ? (
               <div className="flex items-center gap-3">
-                 <span className="relative flex h-2 w-2">
+                <span className="relative flex h-2 w-2">
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-75" />
                   <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
                 </span>
@@ -462,15 +494,15 @@ export function SystemPreferencesModal({
                     </span>
                   )}
                 </div>
-                
+
                 {waStatus?.qr && (
                   <div className="mt-2 flex max-w-[200px] flex-col items-center rounded-md border-2 border-red-200 bg-white p-4 dark:border-red-900/50 dark:bg-black/50">
                     <p className="mb-3 text-center text-xs font-bold text-ink dark:text-white">
                       Scan QR WhatsApp
                     </p>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img 
-                      src={waStatus.qr} 
+                    <img
+                      src={waStatus.qr}
                       alt="WhatsApp QR Code"
                       className="aspect-square h-auto w-full rounded-sm"
                     />
@@ -594,7 +626,9 @@ export function SystemPreferencesModal({
                 FEATURE_LOCKED // 2FA AUTENTIKASI
               </p>
               <p className="mt-1.5 text-[10px] text-gray-500 dark:text-slate-300">
-                Sistem keamanan OTP dan biometrik sedang dalam tahap sinkronisasi jaringan. Fitur ini akan tersedia pada pembaruan sistem berikutnya.
+                Sistem keamanan OTP dan biometrik sedang dalam tahap
+                sinkronisasi jaringan. Fitur ini akan tersedia pada pembaruan
+                sistem berikutnya.
               </p>
             </div>
           </div>
@@ -664,7 +698,7 @@ export function SystemPreferencesModal({
                           "flex flex-shrink-0 items-center gap-2 whitespace-nowrap rounded-sm px-3 py-2.5 text-left text-sm font-bold transition-colors md:w-full md:gap-3 md:border-l-2",
                           isActive
                             ? "border-primary bg-ink text-white dark:bg-primary dark:text-primary-foreground md:border-l-primary"
-                            : "border-transparent text-gray-600 hover:bg-gray-200 hover:text-ink dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-white md:border-l-transparent"
+                            : "border-transparent text-gray-600 hover:bg-gray-200 hover:text-ink dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-white md:border-l-transparent",
                         )}
                       >
                         <Icon className="h-4 w-4 shrink-0" />
@@ -719,7 +753,12 @@ export function SystemPreferencesModal({
                       disabled={isSyncing}
                       className="order-1 flex min-w-[120px] items-center justify-center gap-2 rounded-sm bg-primary px-5 py-2 font-mono text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-70 sm:order-2"
                     >
-                      <RefreshCw className={cn("h-3.5 w-3.5 shrink-0", isSyncing && "animate-spin")} />
+                      <RefreshCw
+                        className={cn(
+                          "h-3.5 w-3.5 shrink-0",
+                          isSyncing && "animate-spin",
+                        )}
+                      />
                       {isSyncing ? "Menyimpan..." : "SYNC DATA"}
                     </button>
                   </div>

@@ -55,7 +55,7 @@ const config: Config = {
         "surface-border": "#392828",
         "text-main": "#FFFFFF",
         "text-muted": "#a3a3a3",
-        "primary-hover": "#cc0b0b",
+        "primary-hover": "#0284c7",
         chart: {
           "1": "hsl(var(--chart-1))",
           "2": "hsl(var(--chart-2))",

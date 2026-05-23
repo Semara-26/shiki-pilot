@@ -14,7 +14,7 @@ import { useTheme } from "next-themes";
 import { motion } from "framer-motion";
 import { cn } from "@/src/lib/utils";
 
-const CHART_COLOR = "#f20d0d";
+const CHART_COLOR = "hsl(var(--primary))";
 
 type CursorShape = { x?: number; y?: number; width?: number; height?: number };
 
@@ -28,7 +28,7 @@ function CustomCursor({ x, y, width, height }: CursorShape) {
         y={y}
         width={width}
         height={height}
-        fill="rgba(242, 13, 13, 0.08)"
+        fill="rgba(14, 165, 233, 0.08)"
       />
     </g>
   );
@@ -36,23 +36,27 @@ function CustomCursor({ x, y, width, height }: CursorShape) {
 
 interface HoloTooltipProps {
   active?: boolean;
-  payload?: Array<{ payload?: { name?: string; value?: number }; value?: number }>;
+  payload?: Array<{
+    payload?: { name?: string; value?: number };
+    value?: number;
+  }>;
 }
 
 function HoloTooltip({ active, payload }: HoloTooltipProps) {
   if (!active || !payload?.length) return null;
   const item = payload[0].payload ?? payload[0];
   const fullName = (item as { name?: string })?.name ?? "";
-  const stock = (item as { value?: number })?.value ?? (payload[0].value as number) ?? 0;
+  const stock =
+    (item as { value?: number })?.value ?? (payload[0].value as number) ?? 0;
   return (
     <motion.div
       initial={{ opacity: 0, y: 10, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ duration: 0.4, ease: "easeOut" }}
-      className="rounded-md border border-primary/50 bg-background/90 p-3 shadow-[0_0_20px_rgba(242,13,13,0.3)] backdrop-blur-md"
+      className="rounded-md border border-primary/50 bg-background/90 p-3 shadow-[0_0_20px_rgba(14,165,233,0.3)] backdrop-blur-md"
     >
       <p className="mb-1 font-mono text-xs text-muted-foreground">{fullName}</p>
-      <p className="font-mono text-xl font-semibold tabular-nums text-foreground drop-shadow-[0_0_8px_rgba(242,13,13,0.8)]">
+      <p className="font-mono text-xl font-semibold tabular-nums text-foreground drop-shadow-[0_0_8px_rgba(14,165,233,0.8)]">
         {stock}{" "}
         <span className="text-sm font-normal text-muted-foreground">stok</span>
       </p>
@@ -89,7 +93,8 @@ function wrapLabelText(text: string): string[] {
       current += (current ? " " : "") + w;
     } else {
       if (current) lines.push(current);
-      current = w.length > MAX_CHARS_PER_LINE ? w.slice(0, MAX_CHARS_PER_LINE) : w;
+      current =
+        w.length > MAX_CHARS_PER_LINE ? w.slice(0, MAX_CHARS_PER_LINE) : w;
     }
   }
   if (current) lines.push(current);
@@ -104,7 +109,13 @@ interface WrappedYAxisTickProps {
   fontSize?: number;
 }
 
-function WrappedYAxisTick({ x = 0, y = 0, payload, fill, fontSize = 11 }: WrappedYAxisTickProps) {
+function WrappedYAxisTick({
+  x = 0,
+  y = 0,
+  payload,
+  fill,
+  fontSize = 11,
+}: WrappedYAxisTickProps) {
   const text = payload?.value ?? payload?.name ?? "";
   const lines = wrapLabelText(text);
   const lineHeight = fontSize + 2;
@@ -138,7 +149,7 @@ export function GrowthChart({ data, title, className }: GrowthChartProps) {
     <div
       className={cn(
         "flex h-full flex-col overflow-hidden rounded-lg border-2 border-ink bg-white p-4 md:p-6 dark:border-white/10 dark:bg-surface-dark",
-        className
+        className,
       )}
     >
       {title && (
@@ -151,7 +162,12 @@ export function GrowthChart({ data, title, className }: GrowthChartProps) {
           style={{ height: `${Math.max(data.length * 44, 280)}px` }}
           className="w-full"
         >
-          <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
+          <ResponsiveContainer
+            width="100%"
+            height="100%"
+            minWidth={0}
+            minHeight={0}
+          >
             <BarChart
               data={data}
               layout="vertical"
@@ -179,10 +195,7 @@ export function GrowthChart({ data, title, className }: GrowthChartProps) {
                 axisLine={{ stroke: gridStroke }}
                 tick={<WrappedYAxisTick fill={tickFill} fontSize={11} />}
               />
-              <Tooltip
-                content={<HoloTooltip />}
-                cursor={<CustomCursor />}
-              />
+              <Tooltip content={<HoloTooltip />} cursor={<CustomCursor />} />
               <Bar
                 dataKey="value"
                 fill={CHART_COLOR}
@@ -191,11 +204,11 @@ export function GrowthChart({ data, title, className }: GrowthChartProps) {
                 animationDuration={1500}
                 barSize={28}
                 activeBar={{
-                  stroke: "#f20d0d",
+                  stroke: "hsl(var(--primary))",
                   strokeWidth: 1,
-                  fill: "#f20d0d",
+                  fill: "hsl(var(--primary))",
                   fillOpacity: 0.8,
-                  filter: "drop-shadow(0 0 5px rgba(242,13,13,0.5))",
+                  filter: "drop-shadow(0 0 5px rgba(14,165,233,0.5))",
                 }}
               >
                 <LabelList

@@ -1,19 +1,19 @@
-'use client';
+"use client";
 
-import { useActionState, useState, useEffect } from 'react';
-import Link from 'next/link';
-import { toast } from 'sonner';
+import { useActionState, useState, useEffect } from "react";
+import Link from "next/link";
+import { toast } from "sonner";
 import {
   updateProduct,
   type CreateProductState,
-} from '@/src/lib/actions/product';
+} from "@/src/lib/actions/product";
 
 const initialState: CreateProductState = {};
 
 const inputClass =
-  'w-full rounded-md border border-border bg-secondary/50 px-4 py-2.5 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none';
+  "w-full rounded-md border border-border bg-secondary/50 px-4 py-2.5 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none";
 
-const labelClass = 'block font-mono text-sm text-muted-foreground mb-1.5';
+const labelClass = "block font-mono text-sm text-muted-foreground mb-1.5";
 
 export interface ProductEditInitialData {
   id: string;
@@ -32,15 +32,15 @@ interface ProductEditFormProps {
 export function ProductEditForm({ initialData }: ProductEditFormProps) {
   const [state, formAction, isPending] = useActionState(
     updateProduct,
-    initialState
+    initialState,
   );
   const [imagePreview, setImagePreview] = useState<string | null>(
-    initialData.imageUrl
+    initialData.imageUrl,
   );
 
   useEffect(() => {
     if (state?.error) {
-      toast.error('Gagal menyimpan', { description: state.error });
+      toast.error("Gagal menyimpan", { description: state.error });
     }
   }, [state?.error]);
 
@@ -79,12 +79,13 @@ export function ProductEditForm({ initialData }: ProductEditFormProps) {
           placeholder="Contoh: Kaos Polos Cotton Combed"
           className={inputClass}
           aria-invalid={!!state?.fieldErrors?.name}
-          aria-describedby={
-            state?.fieldErrors?.name ? 'name-error' : undefined
-          }
+          aria-describedby={state?.fieldErrors?.name ? "name-error" : undefined}
         />
         {state?.fieldErrors?.name && (
-          <p id="name-error" className="mt-1.5 font-mono text-sm text-destructive">
+          <p
+            id="name-error"
+            className="mt-1.5 font-mono text-sm text-destructive"
+          >
             {state.fieldErrors.name[0]}
           </p>
         )}
@@ -92,7 +93,8 @@ export function ProductEditForm({ initialData }: ProductEditFormProps) {
 
       <div>
         <label className={labelClass}>
-          Gambar Produk <span className="text-muted-foreground/80">(opsional)</span>
+          Gambar Produk{" "}
+          <span className="text-muted-foreground/80">(opsional)</span>
         </label>
         <div className="mt-1.5">
           <label
@@ -108,7 +110,7 @@ export function ProductEditForm({ initialData }: ProductEditFormProps) {
               onChange={handleImageChange}
               aria-invalid={!!state?.fieldErrors?.image}
               aria-describedby={
-                state?.fieldErrors?.image ? 'image-error' : undefined
+                state?.fieldErrors?.image ? "image-error" : undefined
               }
             />
             {imagePreview ? (
@@ -132,12 +134,17 @@ export function ProductEditForm({ initialData }: ProductEditFormProps) {
                     d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14"
                   />
                 </svg>
-                <span className="font-mono text-sm">Klik untuk pilih gambar (max 2MB)</span>
+                <span className="font-mono text-sm">
+                  Klik untuk pilih gambar (max 2MB)
+                </span>
               </div>
             )}
           </label>
           {state?.fieldErrors?.image && (
-            <p id="image-error" className="mt-1.5 font-mono text-sm text-destructive">
+            <p
+              id="image-error"
+              className="mt-1.5 font-mono text-sm text-destructive"
+            >
               {state.fieldErrors.image[0]}
             </p>
           )}
@@ -161,11 +168,14 @@ export function ProductEditForm({ initialData }: ProductEditFormProps) {
             className={inputClass}
             aria-invalid={!!state?.fieldErrors?.price}
             aria-describedby={
-              state?.fieldErrors?.price ? 'price-error' : undefined
+              state?.fieldErrors?.price ? "price-error" : undefined
             }
           />
           {state?.fieldErrors?.price && (
-            <p id="price-error" className="mt-1.5 font-mono text-sm text-destructive">
+            <p
+              id="price-error"
+              className="mt-1.5 font-mono text-sm text-destructive"
+            >
               {state.fieldErrors.price[0]}
             </p>
           )}
@@ -186,11 +196,14 @@ export function ProductEditForm({ initialData }: ProductEditFormProps) {
             className={inputClass}
             aria-invalid={!!state?.fieldErrors?.stock}
             aria-describedby={
-              state?.fieldErrors?.stock ? 'stock-error' : undefined
+              state?.fieldErrors?.stock ? "stock-error" : undefined
             }
           />
           {state?.fieldErrors?.stock && (
-            <p id="stock-error" className="mt-1.5 font-mono text-sm text-destructive">
+            <p
+              id="stock-error"
+              className="mt-1.5 font-mono text-sm text-destructive"
+            >
               {state.fieldErrors.stock[0]}
             </p>
           )}
@@ -212,14 +225,20 @@ export function ProductEditForm({ initialData }: ProductEditFormProps) {
           className={inputClass}
           aria-invalid={!!state?.fieldErrors?.stockCritical}
           aria-describedby={
-            state?.fieldErrors?.stockCritical ? 'stockCritical-error' : undefined
+            state?.fieldErrors?.stockCritical
+              ? "stockCritical-error"
+              : undefined
           }
         />
         <p className="mt-1.5 font-mono text-xs text-muted-foreground/70">
-          AI dan WhatsApp akan mengingatkan Anda jika stok menyentuh angka ini. Default: 10.
+          AI dan WhatsApp akan mengingatkan Anda jika stok menyentuh angka ini.
+          Default: 10.
         </p>
         {state?.fieldErrors?.stockCritical && (
-          <p id="stockCritical-error" className="mt-1.5 font-mono text-sm text-destructive">
+          <p
+            id="stockCritical-error"
+            className="mt-1.5 font-mono text-sm text-destructive"
+          >
             {state.fieldErrors.stockCritical[0]}
           </p>
         )}
@@ -239,9 +258,7 @@ export function ProductEditForm({ initialData }: ProductEditFormProps) {
           className={`${inputClass} resize-none`}
           aria-invalid={!!state?.fieldErrors?.description}
           aria-describedby={
-            state?.fieldErrors?.description
-              ? 'description-error'
-              : undefined
+            state?.fieldErrors?.description ? "description-error" : undefined
           }
         />
         {state?.fieldErrors?.description && (
@@ -266,7 +283,7 @@ export function ProductEditForm({ initialData }: ProductEditFormProps) {
           disabled={isPending}
           className="flex-1 rounded-md bg-primary px-4 py-2.5 font-mono text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background disabled:pointer-events-none disabled:opacity-60"
         >
-          {isPending ? 'MENYIMPAN...' : 'Simpan Perubahan'}
+          {isPending ? "MENYIMPAN..." : "Simpan Perubahan"}
         </button>
       </div>
     </form>

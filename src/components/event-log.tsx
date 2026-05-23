@@ -45,7 +45,7 @@ export function EventLog({
     <div
       className={cn(
         "rounded-lg border-2 border-ink bg-white dark:border-white/10 dark:bg-surface-dark",
-        className
+        className,
       )}
     >
       <div className="border-b border-gray-200 px-4 py-3 md:px-6 dark:border-white/10">
@@ -64,7 +64,7 @@ export function EventLog({
               <span className="font-mono leading-tight">
                 {event.date != null
                   ? formatEventDate(event.date)
-                  : event.timestamp ?? "—"}
+                  : (event.timestamp ?? "—")}
               </span>
             </div>
             <div className="min-w-0 flex-1">

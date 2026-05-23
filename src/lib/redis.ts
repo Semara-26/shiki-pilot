@@ -13,7 +13,7 @@ export const redis = new Redis({
  */
 export const ratelimit = new Ratelimit({
   redis: redis,
-  limiter: Ratelimit.slidingWindow(25, '60 s'),
+  limiter: Ratelimit.slidingWindow(25, "60 s"),
   analytics: true,
 });
 
@@ -24,8 +24,8 @@ export const ratelimit = new Ratelimit({
  */
 export const waRatelimitMinute = new Ratelimit({
   redis: redis,
-  limiter: Ratelimit.slidingWindow(10, '60 s'),
-  prefix: 'wa_rl_min',
+  limiter: Ratelimit.slidingWindow(10, "60 s"),
+  prefix: "wa_rl_min",
   analytics: true,
 });
 
@@ -36,7 +36,7 @@ export const waRatelimitMinute = new Ratelimit({
  */
 export const waRatelimitDaily = new Ratelimit({
   redis: redis,
-  limiter: Ratelimit.slidingWindow(100, '86400 s'),
-  prefix: 'wa_rl_day',
+  limiter: Ratelimit.slidingWindow(100, "86400 s"),
+  prefix: "wa_rl_day",
   analytics: true,
 });

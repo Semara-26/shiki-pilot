@@ -26,9 +26,9 @@ import { deleteProduct } from "@/src/actions/product-actions";
 const ConfirmDeleteModal = dynamic(
   () =>
     import("@/src/components/confirm-delete-modal").then(
-      (m) => m.ConfirmDeleteModal
+      (m) => m.ConfirmDeleteModal,
     ),
-  { ssr: false }
+  { ssr: false },
 );
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -146,7 +146,7 @@ const AssetModal = memo(function AssetModal({
                       "inline-block rounded px-2 py-0.5 text-xs font-medium uppercase",
                       product.stock > 0
                         ? "bg-chart-2/20 text-chart-2"
-                        : "bg-destructive/20 text-destructive"
+                        : "bg-destructive/20 text-destructive",
                     )}
                   >
                     {product.stock > 0 ? "ACTIVE" : "OUT_OF_STOCK"}
@@ -161,7 +161,9 @@ const AssetModal = memo(function AssetModal({
                 <dt className="text-muted-foreground uppercase tracking-wider">
                   Stock
                 </dt>
-                <dd className="tabular-nums text-foreground">{product.stock}</dd>
+                <dd className="tabular-nums text-foreground">
+                  {product.stock}
+                </dd>
               </dl>
             </div>
           </div>
@@ -235,7 +237,7 @@ const ProductTableRow = memo(function ProductTableRow({
               "inline-block rounded-md px-2 py-1 text-xs font-medium uppercase tracking-wider",
               product.stock > 0
                 ? "bg-chart-2/20 text-chart-2"
-                : "bg-destructive/20 text-destructive"
+                : "bg-destructive/20 text-destructive",
             )}
           >
             {product.stock > 0 ? "ACTIVE" : "OUT_OF_STOCK"}
@@ -344,7 +346,7 @@ export function ProductsTable({
       <div
         className={cn(
           "rounded-lg overflow-hidden border-2 border-ink bg-white dark:border-white/10 dark:bg-surface-dark",
-          className
+          className,
         )}
       >
         <div className="overflow-x-auto">

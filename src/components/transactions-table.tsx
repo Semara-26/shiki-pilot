@@ -94,7 +94,7 @@ const ReceiptModal = memo(function ReceiptModal({
         exit={{ opacity: 0, scale: 0.95, y: 8 }}
         transition={{ type: "spring", stiffness: 320, damping: 26, mass: 0.7 }}
         style={{ willChange: "transform, opacity" }}
-        className="w-full max-w-md overflow-hidden rounded-md border border-primary/50 bg-secondary/90 p-6 shadow-[0_0_30px_rgba(242,13,13,0.3)] relative"
+        className="w-full max-w-md overflow-hidden rounded-md border border-primary/50 bg-secondary/90 p-6 shadow-[0_0_30px_rgba(14,165,233,0.3)] relative"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -290,7 +290,7 @@ export function TransactionsTable({
     <div
       className={cn(
         "rounded-lg overflow-hidden border-2 border-ink bg-white dark:border-white/10 dark:bg-surface-dark",
-        className
+        className,
       )}
     >
       <div className="overflow-x-auto">

@@ -27,7 +27,13 @@ const fadeRight = (delay = 0) => ({
 });
 
 /* ── Logo ── */
-function ShikiLogo({ size = 56, className = "" }: { size?: number; className?: string }) {
+function ShikiLogo({
+  size = 56,
+  className = "",
+}: {
+  size?: number;
+  className?: string;
+}) {
   return (
     <Image
       src="/icon.png"
@@ -147,13 +153,14 @@ export default function Home() {
 
   return (
     <div className="font-sans bg-[#050505] text-white antialiased selection:bg-primary selection:text-white overflow-x-hidden">
-
       {/* ── Header ── */}
       <header className="w-full border-b border-surface-border bg-[#050505]/90 backdrop-blur-md fixed top-0 z-50">
         <div className="max-w-[1280px] mx-auto px-6 h-20 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <ShikiLogo size={80} className="h-10 w-10 md:h-16 md:w-16" />
-            <h2 className="text-white text-2xl md:text-3xl font-black tracking-tight">ShikiPilot</h2>
+            <h2 className="text-white text-2xl md:text-3xl font-black tracking-tight">
+              ShikiPilot
+            </h2>
           </div>
           <Link
             href="/dashboard"
@@ -165,7 +172,6 @@ export default function Home() {
       </header>
 
       <main className="pt-20">
-
         {/* ══════════════════════════════════════
             HERO
         ══════════════════════════════════════ */}
@@ -174,12 +180,16 @@ export default function Home() {
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-10%,rgba(242,13,13,0.12),transparent)] pointer-events-none" />
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_40%_at_50%_110%,rgba(242,13,13,0.06),transparent)] pointer-events-none" />
           {/* Grid pattern */}
-          <div className="absolute inset-0 opacity-[0.03] pointer-events-none"
-            style={{ backgroundImage: "linear-gradient(rgba(255,255,255,0.5) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.5) 1px,transparent 1px)", backgroundSize: "40px 40px" }}
+          <div
+            className="absolute inset-0 opacity-[0.03] pointer-events-none"
+            style={{
+              backgroundImage:
+                "linear-gradient(rgba(255,255,255,0.5) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.5) 1px,transparent 1px)",
+              backgroundSize: "40px 40px",
+            }}
           />
 
           <div className="relative z-10 max-w-4xl mx-auto flex flex-col items-center gap-7">
-
             {/* Badge */}
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
@@ -214,8 +224,8 @@ export default function Home() {
               transition={{ duration: 0.6, delay: 0.22 }}
               className="text-lg md:text-xl text-gray-400 max-w-2xl leading-relaxed"
             >
-              Satu platform untuk kasir, gudang, dan analisis data. Dibangun untuk kecepatan,
-              didesain untuk pertumbuhan bisnismu.
+              Satu platform untuk kasir, gudang, dan analisis data. Dibangun
+              untuk kecepatan, didesain untuk pertumbuhan bisnismu.
             </motion.p>
 
             {/* CTA */}
@@ -229,10 +239,11 @@ export default function Home() {
                 className="group inline-flex items-center gap-2 rounded-lg bg-primary px-8 py-4 text-base font-bold text-white transition-all duration-300 hover:bg-primary/90 hover:scale-105 hover:shadow-[0_0_40px_-8px_rgba(242,13,13,0.8)]"
               >
                 Buka Dashboard
-                <span className="transition-transform group-hover:translate-x-1">→</span>
+                <span className="transition-transform group-hover:translate-x-1">
+                  →
+                </span>
               </Link>
             </motion.div>
-
           </div>
         </section>
 
@@ -242,7 +253,9 @@ export default function Home() {
         <section className="px-6 py-24 border-t border-surface-border bg-[#080808]">
           <div className="max-w-[1100px] mx-auto">
             <motion.div {...fadeUp()} className="text-center mb-14">
-              <p className="font-mono text-xs uppercase tracking-widest text-primary mb-3">Pain Points</p>
+              <p className="font-mono text-xs uppercase tracking-widest text-primary mb-3">
+                Pain Points
+              </p>
               <h2 className="text-3xl md:text-5xl font-black text-white leading-tight">
                 Udah capek ngurusin toko manual terus?
               </h2>
@@ -257,8 +270,12 @@ export default function Home() {
                 >
                   <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   <span className="text-4xl mb-5 block">{p.emoji}</span>
-                  <h3 className="text-lg font-bold text-white mb-2 tracking-tight">{p.title}</h3>
-                  <p className="text-sm text-gray-500 leading-relaxed">{p.desc}</p>
+                  <h3 className="text-lg font-bold text-white mb-2 tracking-tight">
+                    {p.title}
+                  </h3>
+                  <p className="text-sm text-gray-500 leading-relaxed">
+                    {p.desc}
+                  </p>
                 </motion.div>
               ))}
             </div>
@@ -271,7 +288,9 @@ export default function Home() {
         <section className="px-6 py-24 border-t border-surface-border bg-[#050505]">
           <div className="max-w-[1100px] mx-auto">
             <motion.div {...fadeUp()} className="text-center mb-14">
-              <p className="font-mono text-xs uppercase tracking-widest text-primary mb-3">Solusi</p>
+              <p className="font-mono text-xs uppercase tracking-widest text-primary mb-3">
+                Solusi
+              </p>
               <h2 className="text-3xl md:text-5xl font-black text-white leading-tight">
                 Solusi Pintar Buat Bisnis yang Nggak Mau Ribet.
               </h2>
@@ -285,8 +304,12 @@ export default function Home() {
                   className="group relative p-8 rounded-xl border border-primary/20 bg-gradient-to-br from-primary/5 to-transparent hover:border-primary/50 hover:shadow-[0_0_40px_-12px_rgba(242,13,13,0.4)] transition-all duration-300"
                 >
                   <span className="text-4xl mb-5 block">{s.emoji}</span>
-                  <h3 className="text-lg font-bold text-white mb-2 tracking-tight">{s.title}</h3>
-                  <p className="text-sm text-gray-400 leading-relaxed">{s.desc}</p>
+                  <h3 className="text-lg font-bold text-white mb-2 tracking-tight">
+                    {s.title}
+                  </h3>
+                  <p className="text-sm text-gray-400 leading-relaxed">
+                    {s.desc}
+                  </p>
                 </motion.div>
               ))}
             </div>
@@ -299,7 +322,9 @@ export default function Home() {
         <section className="px-6 py-24 border-t border-surface-border bg-[#080808]">
           <div className="max-w-[1100px] mx-auto">
             <motion.div {...fadeUp()} className="text-center mb-20">
-              <p className="font-mono text-xs uppercase tracking-widest text-primary mb-3">Cara Kerja</p>
+              <p className="font-mono text-xs uppercase tracking-widest text-primary mb-3">
+                Cara Kerja
+              </p>
               <h2 className="text-3xl md:text-5xl font-black text-white leading-tight">
                 Cara Pakainya Gimana? Gampang Banget!
               </h2>
@@ -312,9 +337,14 @@ export default function Home() {
                   className={`grid grid-cols-1 lg:grid-cols-2 gap-12 items-center ${step.flip ? "lg:[&>*:first-child]:order-2 lg:[&>*:last-child]:order-1" : ""}`}
                 >
                   {/* Image(s) */}
-                  <motion.div {...(step.flip ? fadeRight(0.1) : fadeLeft(0.1))} className="relative group">
+                  <motion.div
+                    {...(step.flip ? fadeRight(0.1) : fadeLeft(0.1))}
+                    className="relative group"
+                  >
                     <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-red-900/10 rounded-2xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-                    <div className={`relative rounded-2xl overflow-hidden border border-white/5 bg-[#0d0d0d] shadow-2xl ${step.images.length > 1 ? "grid grid-cols-2 gap-2 p-2" : ""}`}>
+                    <div
+                      className={`relative rounded-2xl overflow-hidden border border-white/5 bg-[#0d0d0d] shadow-2xl ${step.images.length > 1 ? "grid grid-cols-2 gap-2 p-2" : ""}`}
+                    >
                       {step.images.map((src) => (
                         <Image
                           key={src}
@@ -329,15 +359,22 @@ export default function Home() {
                   </motion.div>
 
                   {/* Text */}
-                  <motion.div {...(step.flip ? fadeLeft(0.2) : fadeRight(0.2))} className="flex flex-col gap-5">
+                  <motion.div
+                    {...(step.flip ? fadeLeft(0.2) : fadeRight(0.2))}
+                    className="flex flex-col gap-5"
+                  >
                     <div className="inline-flex items-center gap-3">
-                      <span className="font-mono text-5xl font-black text-primary/20 leading-none">{step.num}</span>
+                      <span className="font-mono text-5xl font-black text-primary/20 leading-none">
+                        {step.num}
+                      </span>
                       <span className="h-px flex-1 bg-primary/20" />
                     </div>
                     <h3 className="text-2xl md:text-3xl font-black text-white tracking-tight">
                       {step.emoji} {step.title}
                     </h3>
-                    <p className="text-base text-gray-400 leading-relaxed">{step.desc}</p>
+                    <p className="text-base text-gray-400 leading-relaxed">
+                      {step.desc}
+                    </p>
                   </motion.div>
                 </div>
               ))}
@@ -351,20 +388,29 @@ export default function Home() {
         <section className="px-6 py-20 border-t border-surface-border bg-[#050505]">
           <div className="max-w-[1100px] mx-auto">
             <motion.div {...fadeUp()} className="text-center mb-12">
-              <p className="font-mono text-xs uppercase tracking-widest text-primary mb-3">Tech Stack</p>
+              <p className="font-mono text-xs uppercase tracking-widest text-primary mb-3">
+                Tech Stack
+              </p>
               <h2 className="text-2xl md:text-4xl font-black text-white">
                 Dibangun dengan Teknologi Modern & Scalable.
               </h2>
             </motion.div>
 
-            <motion.div {...fadeUp(0.15)} className="flex flex-wrap justify-center gap-4">
+            <motion.div
+              {...fadeUp(0.15)}
+              className="flex flex-wrap justify-center gap-4"
+            >
               {TECH_STACK.map((tech) => (
                 <div
                   key={tech.name}
                   className="group flex items-center gap-2 px-5 py-3 rounded-lg border border-white/5 bg-[#0d0d0d] text-gray-600 hover:text-white hover:border-primary/50 hover:shadow-[0_0_20px_-8px_rgba(242,13,13,0.5)] transition-all duration-300 cursor-default"
                 >
-                  <span className="text-lg group-hover:text-primary transition-colors">{tech.icon}</span>
-                  <span className="font-mono text-sm font-semibold tracking-wide">{tech.name}</span>
+                  <span className="text-lg group-hover:text-primary transition-colors">
+                    {tech.icon}
+                  </span>
+                  <span className="font-mono text-sm font-semibold tracking-wide">
+                    {tech.name}
+                  </span>
                 </div>
               ))}
             </motion.div>
@@ -377,7 +423,9 @@ export default function Home() {
         <section className="px-6 py-24 border-t border-surface-border bg-[#080808]">
           <div className="max-w-[560px] mx-auto">
             <motion.div {...fadeUp()} className="text-center mb-12">
-              <p className="font-mono text-xs uppercase tracking-widest text-primary mb-3">Harga</p>
+              <p className="font-mono text-xs uppercase tracking-widest text-primary mb-3">
+                Harga
+              </p>
               <h2 className="text-3xl md:text-5xl font-black text-white leading-tight">
                 Bebas Biaya Langganan. Selamanya.
               </h2>
@@ -400,7 +448,10 @@ export default function Home() {
 
               <ul className="space-y-3 mb-8">
                 {PRICING_FEATURES.map((f) => (
-                  <li key={f} className="flex items-center gap-3 text-sm text-gray-300">
+                  <li
+                    key={f}
+                    className="flex items-center gap-3 text-sm text-gray-300"
+                  >
                     <span className="text-primary shrink-0">✓</span>
                     {f}
                   </li>
@@ -426,7 +477,9 @@ export default function Home() {
         <section className="px-6 py-24 border-t border-surface-border bg-[#050505]">
           <div className="max-w-[720px] mx-auto">
             <motion.div {...fadeUp()} className="text-center mb-14">
-              <p className="font-mono text-xs uppercase tracking-widest text-primary mb-3">FAQ</p>
+              <p className="font-mono text-xs uppercase tracking-widest text-primary mb-3">
+                FAQ
+              </p>
               <h2 className="text-3xl md:text-5xl font-black text-white">
                 Masih Punya Pertanyaan?
               </h2>
@@ -443,7 +496,9 @@ export default function Home() {
                     onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
                     className="w-full flex items-center justify-between gap-4 px-6 py-5 text-left"
                   >
-                    <span className="font-semibold text-white text-sm md:text-base">{faq.q}</span>
+                    <span className="font-semibold text-white text-sm md:text-base">
+                      {faq.q}
+                    </span>
                     <ChevronDown
                       className={`shrink-0 w-5 h-5 text-gray-500 transition-transform duration-300 ${openFaq === idx ? "rotate-180 text-primary" : ""}`}
                     />
@@ -476,7 +531,9 @@ export default function Home() {
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_60%_at_50%_50%,rgba(242,13,13,0.08),transparent)] pointer-events-none" />
           <div className="max-w-[720px] mx-auto text-center relative z-10">
             <motion.div {...fadeUp()}>
-              <p className="font-mono text-xs uppercase tracking-widest text-primary mb-4">Mulai Sekarang</p>
+              <p className="font-mono text-xs uppercase tracking-widest text-primary mb-4">
+                Mulai Sekarang
+              </p>
               <h2 className="text-3xl md:text-5xl font-black text-white leading-tight mb-4">
                 Siap Bikin Tokomu Makin Modern?
               </h2>
@@ -502,20 +559,23 @@ export default function Home() {
             </motion.div>
           </div>
         </section>
-
       </main>
 
       {/* ── Footer ── */}
       <footer className="border-t border-surface-border bg-surface-dark py-12 px-6">
         <div className="max-w-[1280px] mx-auto">
-
           {/* Top row */}
-          <motion.div {...fadeUp()} className="flex flex-col md:flex-row items-start justify-between gap-10 pb-8 border-b border-surface-border/50">
+          <motion.div
+            {...fadeUp()}
+            className="flex flex-col md:flex-row items-start justify-between gap-10 pb-8 border-b border-surface-border/50"
+          >
             {/* Brand */}
             <div className="flex flex-col gap-3">
               <div className="flex items-center gap-3">
                 <ShikiLogo size={72} className="h-12 w-12" />
-                <span className="text-white font-black text-2xl tracking-tight">ShikiPilot</span>
+                <span className="text-white font-black text-2xl tracking-tight">
+                  ShikiPilot
+                </span>
               </div>
               <p className="text-text-muted text-sm max-w-xs leading-relaxed">
                 Sistem POS cerdas, dari komunitas untuk komunitas.
@@ -524,7 +584,9 @@ export default function Home() {
 
             {/* Contact / Social */}
             <div className="flex flex-col gap-4">
-              <p className="text-white text-sm font-semibold uppercase tracking-widest font-mono">Ikuti Kami</p>
+              <p className="text-white text-sm font-semibold uppercase tracking-widest font-mono">
+                Ikuti Kami
+              </p>
               <div className="flex items-center gap-4">
                 <a
                   href="https://www.instagram.com/semaradana_kadek/"
@@ -559,12 +621,12 @@ export default function Home() {
 
           {/* Bottom row */}
           <div className="pt-6 flex justify-center">
-            <p className="text-text-muted text-xs font-mono">© 2026 ShikiPilot. Dibangun dengan ☕</p>
+            <p className="text-text-muted text-xs font-mono">
+              © 2026 ShikiPilot. Dibangun dengan ☕
+            </p>
           </div>
-
         </div>
       </footer>
-
     </div>
   );
 }

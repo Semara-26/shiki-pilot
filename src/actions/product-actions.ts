@@ -1,10 +1,10 @@
-'use server';
+"use server";
 
-import { auth } from '@clerk/nextjs/server';
-import { revalidatePath } from 'next/cache';
-import { eq, and } from 'drizzle-orm';
-import { db } from '@/src/db';
-import { stores, products, eventLogs } from '@/src/db/schema';
+import { auth } from "@clerk/nextjs/server";
+import { revalidatePath } from "next/cache";
+import { eq, and } from "drizzle-orm";
+import { db } from "@/src/db";
+import { stores, products, eventLogs } from "@/src/db/schema";
 
 export type DeleteProductResult = { success?: boolean; error?: string };
 
@@ -16,7 +16,7 @@ export async function deleteProduct(id: string): Promise<DeleteProductResult> {
   try {
     const { userId } = await auth();
     if (!userId) {
-      return { error: 'Anda harus login untuk menghapus produk.' };
+      return { error: "Anda harus login untuk menghapus produk." };
     }
 
     const userStore = await db.query.stores.findFirst({
@@ -24,7 +24,7 @@ export async function deleteProduct(id: string): Promise<DeleteProductResult> {
       columns: { id: true },
     });
     if (!userStore) {
-      return { error: 'Toko tidak ditemukan.' };
+      return { error: "Toko tidak ditemukan." };
     }
 
     const product = await db.query.products.findFirst({
@@ -32,7 +32,7 @@ export async function deleteProduct(id: string): Promise<DeleteProductResult> {
       columns: { name: true },
     });
     if (!product) {
-      return { error: 'Produk tidak ditemukan atau tidak dapat dihapus.' };
+      return { error: "Produk tidak ditemukan atau tidak dapat dihapus." };
     }
 
     const productName = product.name;
@@ -43,19 +43,21 @@ export async function deleteProduct(id: string): Promise<DeleteProductResult> {
         .where(and(eq(products.id, id), eq(products.storeId, userStore.id)));
       await tx.insert(eventLogs).values({
         storeId: userStore.id,
-        title: 'Asset Terminated',
+        title: "Asset Terminated",
         detail: productName,
       });
     });
 
-    revalidatePath('/dashboard/inventory');
-    revalidatePath('/dashboard');
+    revalidatePath("/dashboard/inventory");
+    revalidatePath("/dashboard");
     return { success: true };
   } catch (err) {
-    console.error('deleteProduct error:', err);
+    console.error("deleteProduct error:", err);
     return {
       error:
-        err instanceof Error ? err.message : 'Gagal menghapus produk. Coba lagi.',
+        err instanceof Error
+          ? err.message
+          : "Gagal menghapus produk. Coba lagi.",
     };
   }
 }

@@ -1,22 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import {
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-} from "recharts";
+import { ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { cn } from "@/src/lib/utils";
 
 const NERV_COLORS = [
-  "#f20d0d",
-  "#991b1b",
-  "#450a0a",
-  "#262626",
-  "#7f1d1d",
+  "#0ea5e9", // sky-500 (Primary)
+  "#0284c7", // sky-600
+  "#0369a1", // sky-700
+  "#075985", // sky-800
+  "#0c4a6e", // sky-900
 ];
-
 
 function formatRupiah(value: number): string {
   return new Intl.NumberFormat("id-ID", {
@@ -51,7 +45,10 @@ export function AssetDonutChart({
   title = "ASSET DISTRIBUTION",
   className,
 }: AssetDonutChartProps) {
-  const [hoveredData, setHoveredData] = useState<{ name: string; value: number } | null>(null);
+  const [hoveredData, setHoveredData] = useState<{
+    name: string;
+    value: number;
+  } | null>(null);
 
   const chartData = data
     .map((p) => ({
@@ -74,7 +71,7 @@ export function AssetDonutChart({
     <div
       className={cn(
         "flex h-full flex-col overflow-hidden rounded-lg border-2 border-ink bg-white p-4 md:p-6 dark:border-white/10 dark:bg-surface-dark",
-        className
+        className,
       )}
     >
       {title && (
@@ -85,7 +82,9 @@ export function AssetDonutChart({
 
       {isEmpty ? (
         <div className="flex flex-1 items-center justify-center">
-          <p className="font-mono text-sm text-gray-500 dark:text-gray-400">No asset data</p>
+          <p className="font-mono text-sm text-gray-500 dark:text-gray-400">
+            No asset data
+          </p>
         </div>
       ) : (
         <>
@@ -105,7 +104,9 @@ export function AssetDonutChart({
                     outerRadius={80}
                     paddingAngle={1}
                     stroke="transparent"
-                    onMouseEnter={(_, index) => setHoveredData(chartData[index])}
+                    onMouseEnter={(_, index) =>
+                      setHoveredData(chartData[index])
+                    }
                     onMouseLeave={() => setHoveredData(null)}
                   >
                     {chartData.map((_, index) => (
@@ -125,8 +126,10 @@ export function AssetDonutChart({
               <p className="truncate font-mono text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">
                 {hoveredData ? hoveredData.name : "TOTAL ASET"}
               </p>
-              <p className="mt-1 truncate font-mono text-base font-bold tabular-nums text-ink drop-shadow-[0_0_6px_rgba(242,13,13,0.5)] sm:text-lg dark:text-white">
-                {hoveredData ? formatRupiahShort(hoveredData.value) : formatRupiahShort(totalValue)}
+              <p className="mt-1 truncate font-mono text-base font-bold tabular-nums text-ink drop-shadow-[0_0_6px_rgba(14,165,233,0.5)] sm:text-lg dark:text-white">
+                {hoveredData
+                  ? formatRupiahShort(hoveredData.value)
+                  : formatRupiahShort(totalValue)}
               </p>
             </div>
           </div>
@@ -141,7 +144,9 @@ export function AssetDonutChart({
                 >
                   <span
                     className="h-3 w-3 shrink-0 rounded-full border border-gray-200 dark:border-white/10"
-                    style={{ backgroundColor: NERV_COLORS[index % NERV_COLORS.length] }}
+                    style={{
+                      backgroundColor: NERV_COLORS[index % NERV_COLORS.length],
+                    }}
                   />
                   <span className="min-w-0 flex-1 truncate text-gray-700 dark:text-gray-300">
                     {item.name}

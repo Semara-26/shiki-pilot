@@ -1,19 +1,21 @@
-'use server';
+"use server";
 
-import { auth } from '@clerk/nextjs/server';
-import { eq, asc } from 'drizzle-orm';
-import { db } from '../../db';
-import { stores, chats, messages } from '../../db/schema';
+import { auth } from "@clerk/nextjs/server";
+import { eq, asc } from "drizzle-orm";
+import { db } from "../../db";
+import { stores, chats, messages } from "../../db/schema";
 
 /**
  * Mendapatkan atau membuat chat untuk toko current user (Single Thread: satu ruang obrolan per toko).
  * Jika toko sudah punya chat, return chat_id. Jika belum, insert baru lalu return chat_id.
  */
-export async function getOrCreateChat(): Promise<{ chatId: string } | { error: string }> {
+export async function getOrCreateChat(): Promise<
+  { chatId: string } | { error: string }
+> {
   try {
     const { userId } = await auth();
     if (!userId) {
-      return { error: 'Anda harus login.' };
+      return { error: "Anda harus login." };
     }
 
     const userStore = await db.query.stores.findFirst({
@@ -21,7 +23,7 @@ export async function getOrCreateChat(): Promise<{ chatId: string } | { error: s
       columns: { id: true },
     });
     if (!userStore) {
-      return { error: 'Buat toko terlebih dahulu.' };
+      return { error: "Buat toko terlebih dahulu." };
     }
 
     const existing = await db.query.chats.findFirst({
@@ -41,8 +43,8 @@ export async function getOrCreateChat(): Promise<{ chatId: string } | { error: s
     return { chatId: inserted.id };
   } catch (err) {
     // SECURITY F-07: Log detail error di server, kembalikan pesan generik ke client
-    console.error('getOrCreateChat error:', err);
-    return { error: 'Gagal membuat atau mengambil sesi chat.' };
+    console.error("getOrCreateChat error:", err);
+    return { error: "Gagal membuat atau mengambil sesi chat." };
   }
 }
 
@@ -50,12 +52,15 @@ export async function getOrCreateChat(): Promise<{ chatId: string } | { error: s
  * Mengambil riwayat pesan dari database berdasarkan chat_id, urut ASC by created_at.
  */
 export async function getChatHistory(
-  chatId: string
-): Promise<{ messages: { id: string; role: string; content: string }[] } | { error: string }> {
+  chatId: string,
+): Promise<
+  | { messages: { id: string; role: string; content: string }[] }
+  | { error: string }
+> {
   try {
     const { userId } = await auth();
     if (!userId) {
-      return { error: 'Anda harus login.' };
+      return { error: "Anda harus login." };
     }
 
     const chatWithStore = await db.query.chats.findFirst({
@@ -63,7 +68,7 @@ export async function getChatHistory(
       columns: { id: true, storeId: true },
     });
     if (!chatWithStore) {
-      return { error: 'Chat tidak ditemukan.' };
+      return { error: "Chat tidak ditemukan." };
     }
 
     const userStore = await db.query.stores.findFirst({
@@ -71,7 +76,7 @@ export async function getChatHistory(
       columns: { id: true },
     });
     if (!userStore || userStore.id !== chatWithStore.storeId) {
-      return { error: 'Akses ditolak.' };
+      return { error: "Akses ditolak." };
     }
 
     const rows = await db
@@ -87,8 +92,8 @@ export async function getChatHistory(
     return { messages: rows };
   } catch (err) {
     // SECURITY F-07: Log detail error di server, kembalikan pesan generik ke client
-    console.error('getChatHistory error:', err);
-    return { error: 'Gagal mengambil riwayat chat.' };
+    console.error("getChatHistory error:", err);
+    return { error: "Gagal mengambil riwayat chat." };
   }
 }
 
@@ -97,13 +102,13 @@ export async function getChatHistory(
  */
 export async function saveMessage(
   chatId: string,
-  role: 'user' | 'assistant',
-  content: string
+  role: "user" | "assistant",
+  content: string,
 ): Promise<{ success: true } | { error: string }> {
   try {
     const { userId } = await auth();
     if (!userId) {
-      return { error: 'Anda harus login.' };
+      return { error: "Anda harus login." };
     }
 
     const chatWithStore = await db.query.chats.findFirst({
@@ -111,7 +116,7 @@ export async function saveMessage(
       columns: { id: true, storeId: true },
     });
     if (!chatWithStore) {
-      return { error: 'Chat tidak ditemukan.' };
+      return { error: "Chat tidak ditemukan." };
     }
 
     const userStore = await db.query.stores.findFirst({
@@ -119,7 +124,7 @@ export async function saveMessage(
       columns: { id: true },
     });
     if (!userStore || userStore.id !== chatWithStore.storeId) {
-      return { error: 'Akses ditolak.' };
+      return { error: "Akses ditolak." };
     }
 
     await db.insert(messages).values({
@@ -131,7 +136,7 @@ export async function saveMessage(
     return { success: true };
   } catch (err) {
     // SECURITY F-07: Log detail error di server, kembalikan pesan generik ke client
-    console.error('saveMessage error:', err);
-    return { error: 'Gagal menyimpan pesan.' };
+    console.error("saveMessage error:", err);
+    return { error: "Gagal menyimpan pesan." };
   }
 }

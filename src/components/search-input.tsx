@@ -101,7 +101,7 @@ export function SearchInput({
           "h-10 w-full sm:w-64 md:w-80 rounded-md border px-9 py-2 text-sm font-mono text-ink placeholder:text-gray-500 transition-colors focus:outline-none focus:ring-1 dark:text-white dark:placeholder:text-gray-400 bg-white dark:bg-surface-dark",
           isPending
             ? "border-primary/50 focus:border-primary focus:ring-primary opacity-80"
-            : "border-ink/20 focus:border-primary focus:ring-primary dark:border-white/10"
+            : "border-ink/20 focus:border-primary focus:ring-primary dark:border-white/10",
         )}
       />
     </div>

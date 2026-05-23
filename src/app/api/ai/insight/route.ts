@@ -15,9 +15,21 @@ function extractProductNames(chartData: unknown): string {
   const collectFromArray = (arr: unknown) => {
     if (!Array.isArray(arr)) return;
     for (const item of arr) {
-      if (item && typeof item === "object" && "name" in item && typeof (item as { name: unknown }).name === "string") {
+      if (
+        item &&
+        typeof item === "object" &&
+        "name" in item &&
+        typeof (item as { name: unknown }).name === "string"
+      ) {
         const name = (item as { name: string }).name.trim();
-        if (name && !/^\d{1,2}\s+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)$/i.test(name) && !/^Week\s+\d+$/i.test(name) && !/^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)$/i.test(name)) {
+        if (
+          name &&
+          !/^\d{1,2}\s+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)$/i.test(
+            name,
+          ) &&
+          !/^Week\s+\d+$/i.test(name) &&
+          !/^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)$/i.test(name)
+        ) {
           names.add(name);
         }
       }
@@ -41,31 +53,47 @@ export async function POST(req: Request) {
     const { success, limit, reset, remaining } = await ratelimit.limit(userId);
     if (!success) {
       return NextResponse.json(
-        { error: "Asisten AI sedang memproses banyak data, mohon tunggu sekitar satu menit." },
-        { 
+        {
+          error:
+            "Asisten AI sedang memproses banyak data, mohon tunggu sekitar satu menit.",
+        },
+        {
           status: 429,
           headers: {
-            'X-RateLimit-Limit': limit.toString(),
-            'X-RateLimit-Remaining': remaining.toString(),
-            'X-RateLimit-Reset': reset.toString(),
-          }
-        }
+            "X-RateLimit-Limit": limit.toString(),
+            "X-RateLimit-Remaining": remaining.toString(),
+            "X-RateLimit-Reset": reset.toString(),
+          },
+        },
       );
     }
 
     const body = await req.json().catch(() => ({}));
-    const { chartData, timeFilter, businessName, productNames: clientProductNames } = body;
+    const {
+      chartData,
+      timeFilter,
+      businessName,
+      productNames: clientProductNames,
+    } = body;
 
     const timeFilterStr = String(timeFilter ?? "weekly");
-    const businessNameStr = typeof businessName === "string" && businessName.trim() ? businessName.trim() : "Toko User";
-    const chartDataJson = typeof chartData === "string" ? chartData : JSON.stringify(chartData ?? {});
+    const businessNameStr =
+      typeof businessName === "string" && businessName.trim()
+        ? businessName.trim()
+        : "Toko User";
+    const chartDataJson =
+      typeof chartData === "string"
+        ? chartData
+        : JSON.stringify(chartData ?? {});
     const productNames =
       typeof clientProductNames === "string" && clientProductNames.trim()
         ? clientProductNames.trim()
         : extractProductNames(chartData);
 
-    const userPrompt = PROMPT_TEMPLATE
-      .replace("{businessName}", businessNameStr)
+    const userPrompt = PROMPT_TEMPLATE.replace(
+      "{businessName}",
+      businessNameStr,
+    )
       .replace("{productNames}", productNames)
       .replace("{timeFilter}", timeFilterStr)
       .replace("{chartDataJson}", chartDataJson);
@@ -84,7 +112,7 @@ export async function POST(req: Request) {
           "Maaf, asisten AI sedang mengalami gangguan koneksi. Silakan coba beberapa saat lagi.",
         insight: "",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

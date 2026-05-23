@@ -72,7 +72,10 @@ export function Sidebar() {
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
+      if (
+        profileRef.current &&
+        !profileRef.current.contains(event.target as Node)
+      ) {
         setIsProfileOpen(false);
       }
     }
@@ -92,12 +95,22 @@ export function Sidebar() {
           className="flex h-20 shrink-0 items-center gap-3 border-b border-gray-200 px-4 transition-colors hover:bg-white dark:border-white/10 dark:hover:bg-white/5"
         >
           <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-md">
-            <Image src="/icon.png" alt="ShikiPilot" width={80} height={80} className="object-contain" />
+            <Image
+              src="/icon.png"
+              alt="ShikiPilot"
+              width={80}
+              height={80}
+              className="object-contain"
+            />
           </div>
-          <span className={cn(
-            "whitespace-nowrap text-xl font-black tracking-[0.15em] text-gray-700 transition-opacity duration-200 dark:text-sidebar-foreground",
-            sidebar?.isOpen ? "block opacity-100" : "hidden opacity-0 group-hover:block group-hover:opacity-100 md:group-hover:block md:group-hover:opacity-100"
-          )}>
+          <span
+            className={cn(
+              "whitespace-nowrap text-xl font-black tracking-[0.15em] text-gray-700 transition-opacity duration-200 dark:text-sidebar-foreground",
+              sidebar?.isOpen
+                ? "block opacity-100"
+                : "hidden opacity-0 group-hover:block group-hover:opacity-100 md:group-hover:block md:group-hover:opacity-100",
+            )}
+          >
             SHIKIPILOT
           </span>
         </Link>
@@ -118,18 +131,28 @@ export function Sidebar() {
                 className={cn(
                   "relative flex items-center gap-3 border-r-2 border-transparent px-4 py-3 text-sm transition-colors",
                   "text-gray-600 hover:bg-white hover:text-primary dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-white",
-                  isActive && "border-primary font-medium text-primary dark:bg-white/5"
+                  isActive &&
+                    "border-primary font-medium text-primary dark:bg-white/5",
                 )}
               >
                 <Icon className="h-5 w-5 shrink-0" />
-                <span className={cn(
-                  "whitespace-nowrap transition-opacity duration-200",
-                  sidebar?.isOpen ? "block opacity-100" : "hidden opacity-0 group-hover:block group-hover:opacity-100 md:group-hover:block md:group-hover:opacity-100"
-                )}>
+                <span
+                  className={cn(
+                    "whitespace-nowrap transition-opacity duration-200",
+                    sidebar?.isOpen
+                      ? "block opacity-100"
+                      : "hidden opacity-0 group-hover:block group-hover:opacity-100 md:group-hover:block md:group-hover:opacity-100",
+                  )}
+                >
                   {item.label}
                 </span>
                 {isActive && (
-                  <ChevronRight className={cn("ml-auto", sidebar?.isOpen ? "block" : "hidden group-hover:block")} />
+                  <ChevronRight
+                    className={cn(
+                      "ml-auto",
+                      sidebar?.isOpen ? "block" : "hidden group-hover:block",
+                    )}
+                  />
                 )}
               </Link>
             </motion.div>
@@ -138,7 +161,10 @@ export function Sidebar() {
       </nav>
 
       {/* User profile — Operator ID Panel trigger */}
-      <div ref={profileRef} className="relative shrink-0 border-t border-gray-200 p-4 dark:border-white/10">
+      <div
+        ref={profileRef}
+        className="relative shrink-0 border-t border-gray-200 p-4 dark:border-white/10"
+      >
         <button
           type="button"
           onClick={() => setIsProfileOpen((v) => !v)}
@@ -159,10 +185,14 @@ export function Sidebar() {
               <User className="h-4 w-4 text-gray-600 dark:text-sidebar-foreground" />
             )}
           </div>
-          <div className={cn(
-            "min-w-0 overflow-hidden text-left transition-opacity duration-200",
-            sidebar?.isOpen ? "block opacity-100" : "hidden opacity-0 group-hover:block group-hover:opacity-100 md:group-hover:block md:group-hover:opacity-100"
-          )}>
+          <div
+            className={cn(
+              "min-w-0 overflow-hidden text-left transition-opacity duration-200",
+              sidebar?.isOpen
+                ? "block opacity-100"
+                : "hidden opacity-0 group-hover:block group-hover:opacity-100 md:group-hover:block md:group-hover:opacity-100",
+            )}
+          >
             <p className="truncate text-xs font-medium text-gray-700 dark:text-sidebar-foreground">
               {displayName}
             </p>
@@ -204,11 +234,13 @@ export function Sidebar() {
           "group z-50 flex h-full shrink-0 flex-col overflow-y-auto border-r border-gray-200 bg-gray-50 text-sidebar-foreground dark:border-white/10 dark:bg-[#0a0a0a] dark:text-sidebar-foreground",
           "transition-[transform,width] duration-300 ease-out",
           "fixed inset-y-0 left-0 w-64 md:relative md:inset-auto md:w-20 md:hover:w-64",
-          sidebar?.isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+          sidebar?.isOpen
+            ? "translate-x-0"
+            : "-translate-x-full md:translate-x-0",
         )}
       >
-      {sidebarContent}
-    </aside>
+        {sidebarContent}
+      </aside>
     </>
   );
 }

@@ -11,7 +11,7 @@ export type RateLimitResult = {
 export type WaRateLimitResult = {
   allowed: boolean;
   /** 'minute' | 'daily' | null — layer mana yang nge-block */
-  blockedBy: 'minute' | 'daily' | null;
+  blockedBy: "minute" | "daily" | null;
   resetMinute: number;
   resetDaily: number;
 };
@@ -34,12 +34,12 @@ export async function checkRateLimit(userId: string): Promise<RateLimitResult> {
   } catch (err) {
     console.error("Rate limit check error:", err);
     // Jika Redis gagal, izinkan request agar layanan tetap berjalan
-    return { 
-      allowed: true, 
+    return {
+      allowed: true,
       count: 0,
       remaining: 25,
       limit: 25,
-      reset: Date.now() + 60000
+      reset: Date.now() + 60000,
     };
   }
 }
@@ -52,7 +52,9 @@ export async function checkRateLimit(userId: string): Promise<RateLimitResult> {
  * Gunakan rawSender (JID / nomor apa adanya) sebagai identifier
  * agar key Redis tidak bisa dimanipulasi lewat format nomor berbeda.
  */
-export async function checkWaRateLimit(senderKey: string): Promise<WaRateLimitResult> {
+export async function checkWaRateLimit(
+  senderKey: string,
+): Promise<WaRateLimitResult> {
   const fallback: WaRateLimitResult = {
     allowed: true,
     blockedBy: null,
@@ -64,10 +66,12 @@ export async function checkWaRateLimit(senderKey: string): Promise<WaRateLimitRe
     // Cek lapisan menit terlebih dahulu (lebih murah & cepat)
     const minResult = await waRatelimitMinute.limit(senderKey);
     if (!minResult.success) {
-      console.warn(`[WA RateLimit] 🚫 Blocked by MINUTE limit — sender: ${senderKey}`);
+      console.warn(
+        `[WA RateLimit] 🚫 Blocked by MINUTE limit — sender: ${senderKey}`,
+      );
       return {
         allowed: false,
-        blockedBy: 'minute',
+        blockedBy: "minute",
         resetMinute: minResult.reset,
         resetDaily: Date.now() + 86_400_000,
       };
@@ -76,10 +80,12 @@ export async function checkWaRateLimit(senderKey: string): Promise<WaRateLimitRe
     // Cek lapisan harian
     const dayResult = await waRatelimitDaily.limit(senderKey);
     if (!dayResult.success) {
-      console.warn(`[WA RateLimit] 🚫 Blocked by DAILY limit — sender: ${senderKey}`);
+      console.warn(
+        `[WA RateLimit] 🚫 Blocked by DAILY limit — sender: ${senderKey}`,
+      );
       return {
         allowed: false,
-        blockedBy: 'daily',
+        blockedBy: "daily",
         resetMinute: minResult.reset,
         resetDaily: dayResult.reset,
       };
@@ -93,7 +99,10 @@ export async function checkWaRateLimit(senderKey: string): Promise<WaRateLimitRe
     };
   } catch (err) {
     // Jika Redis gagal, fail-open agar layanan tidak terhenti
-    console.error('[WA RateLimit] Redis error, failing open:', err instanceof Error ? err.message : String(err));
+    console.error(
+      "[WA RateLimit] Redis error, failing open:",
+      err instanceof Error ? err.message : String(err),
+    );
     return fallback;
   }
 }

@@ -66,16 +66,16 @@ export const getDashboardMetrics = unstable_cache(
     const totalStock = allProducts.reduce((acc, p) => acc + p.stock, 0);
     const totalValue = allProducts.reduce(
       (acc, p) => acc + p.price * p.stock,
-      0
+      0,
     );
     const lowStock = allProducts.filter(
-      (p) => p.stock <= p.stockCritical
+      (p) => p.stock <= p.stockCritical,
     ).length;
 
     return { totalValue, totalProducts, totalStock, lowStock };
   },
   ["dashboard-metrics"],
-  { revalidate: 60, tags: ["dashboard-metrics"] }
+  { revalidate: 60, tags: ["dashboard-metrics"] },
 );
 
 // ─── 3. Recent products (untuk tabel Recent Assets, limit 10) ─────────────────
@@ -100,7 +100,7 @@ export const getRecentProducts = unstable_cache(
     });
   },
   ["dashboard-recent-products"],
-  { revalidate: 60, tags: ["dashboard-recent-products"] }
+  { revalidate: 60, tags: ["dashboard-recent-products"] },
 );
 
 // ─── 4. ALL products (untuk chart & distribusi) ───────────────────────────────
@@ -122,7 +122,7 @@ export const getAllProductsForChart = unstable_cache(
     });
   },
   ["dashboard-chart-products"],
-  { revalidate: 60, tags: ["dashboard-chart-products"] }
+  { revalidate: 60, tags: ["dashboard-chart-products"] },
 );
 
 // ─── 5. Low-stock products (hanya produk kritis) ──────────────────────────────
@@ -148,7 +148,7 @@ export const getLowStockProducts = unstable_cache(
     return all.filter((p) => p.stock <= p.stockCritical);
   },
   ["dashboard-low-stock"],
-  { revalidate: 30, tags: ["dashboard-low-stock"] }
+  { revalidate: 30, tags: ["dashboard-low-stock"] },
 );
 
 // ─── 6. Event log (aktivitas terbaru, limit 8) ────────────────────────────────
@@ -171,5 +171,5 @@ export const getEventLog = unstable_cache(
     }));
   },
   ["dashboard-event-log"],
-  { revalidate: 30, tags: ["dashboard-event-log"] }
+  { revalidate: 30, tags: ["dashboard-event-log"] },
 );

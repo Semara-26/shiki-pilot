@@ -29,14 +29,19 @@ export function DashboardHeader({
   actions,
   className,
 }: DashboardHeaderProps) {
-  const lowStockProducts = products.filter((p) => p.stock < LOW_STOCK_THRESHOLD);
+  const lowStockProducts = products.filter(
+    (p) => p.stock < LOW_STOCK_THRESHOLD,
+  );
   const hasAlerts = lowStockProducts.length > 0;
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const notifRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (notifRef.current && !notifRef.current.contains(event.target as Node)) {
+      if (
+        notifRef.current &&
+        !notifRef.current.contains(event.target as Node)
+      ) {
         setIsNotifOpen(false);
       }
     }
@@ -50,7 +55,7 @@ export function DashboardHeader({
     <header
       className={cn(
         "sticky top-0 z-30 border-b-2 border-ink bg-white backdrop-blur supports-[backdrop-filter]:bg-white/80 dark:border-white/10 dark:bg-surface-dark",
-        className
+        className,
       )}
     >
       <div className="flex h-16 items-center justify-between gap-4 px-4 md:px-6">
