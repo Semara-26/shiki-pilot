@@ -9,8 +9,6 @@ import { Loader2 } from 'lucide-react';
 import { DashboardHeader } from '@/src/components/dashboard-header';
 import { saveMessage } from '@/src/lib/actions/chat';
 
-const AI_ERROR_MESSAGE =
-  'Maaf, asisten AI sedang mengalami gangguan koneksi. Silakan coba beberapa saat lagi.';
 
 export type UIMessageLike = {
   id: string;
@@ -97,10 +95,9 @@ const ToolThinkingBubble = memo(function ToolThinkingBubble({ parts }: { parts: 
         {toolCalls.map((part, index) => {
           const resultPart = toolResults.find(r => r.toolCallId === part.toolCallId);
           const isFinished = !!resultPart || part.state === 'output-available';
-          const dynamicText = isFinished ? 'Berhasil' : 'Berinteraksi dengan sistem...';
 
           let resultText = '';
-          if (resultPart && typeof resultPart.result === 'string') {
+          if (resultPart && 'result' in resultPart && typeof resultPart.result === 'string') {
             resultText = resultPart.result;
           }
 
@@ -259,11 +256,12 @@ export function ChatClient({ chatId, initialMessages }: ChatClientProps) {
   }
 
   const [persistentError, setPersistentError] = useState<Error | null>(null);
+  const [prevError, setPrevError] = useState<Error | undefined>(error);
 
-  useEffect(() => {
+  if (error !== prevError) {
+    setPrevError(error);
     if (error) setPersistentError(error);
-    // Custom error UI renders at the bottom, so no toast.error here to prevent double notification.
-  }, [error]);
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

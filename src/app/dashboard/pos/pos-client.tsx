@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Plus, Minus, ShoppingCart, Search } from "lucide-react";
 import { toast } from "sonner";
 import { createBulkTransactions } from "@/src/lib/actions/transaction";
@@ -28,6 +28,19 @@ export function POSClient({ products, storeId }: POSClientProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activePayment, setActivePayment] = useState<PaymentType>("cash");
+  // Two-step confirmation: null = idle, 'cash'/'qris_statis' = armed/waiting konfirmasi
+  const [confirmState, setConfirmState] = useState<PaymentType | null>(null);
+  const confirmTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // SECURITY: Synchronous guard mencegah Double Submit akibat React State Batching.
+  // useRef dipilih karena mutasi ref bersifat sinkronus dan tidak memicu re-render.
+  const isSubmittingRef = useRef(false);
+
+  // Cleanup timer saat komponen unmount
+  useEffect(() => {
+    return () => {
+      if (confirmTimerRef.current) clearTimeout(confirmTimerRef.current);
+    };
+  }, []);
 
   const filteredProducts = products.filter((p) =>
     p.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -35,8 +48,7 @@ export function POSClient({ products, storeId }: POSClientProps) {
 
   const grandTotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const cashNum = parseInt(cashReceived.replace(/\D/g, ""), 10) || 0;
-  const difference = cashNum - grandTotal; // bisa negatif untuk QRIS
-  const change = Math.max(0, difference);   // untuk cash (tidak boleh negatif di tampilan)
+  const change = Math.max(0, cashNum - grandTotal);
 
   const addToCart = (product: POSProduct) => {
     const existing = cart.find((c) => c.id === product.id);
@@ -85,6 +97,10 @@ export function POSClient({ products, storeId }: POSClientProps) {
   };
 
   const handleSubmit = async (paymentType: PaymentType) => {
+    // SECURITY GUARD: Cek ref sinkronus di baris pertama — tolak jika sudah ada proses berjalan.
+    // Ini mencegah double-submit meski React belum sempat mem-batch state update.
+    if (isSubmittingRef.current) return;
+
     if (cart.length === 0) {
       toast.error("Keranjang kosong", { description: "Tambah produk terlebih dahulu." });
       return;
@@ -94,14 +110,19 @@ export function POSClient({ products, storeId }: POSClientProps) {
       return;
     }
 
-    // Untuk QRIS: jumlah yang ditransfer harus >= total harga
-    if (paymentType === "qris_statis" && cashNum < grandTotal) {
-      toast.error("Transfer kurang", {
-        description: `Jumlah transfer Rp ${cashNum.toLocaleString("id-ID")} kurang dari total Rp ${grandTotal.toLocaleString("id-ID")}.`,
+    // CASH: validasi uang diterima >= grandTotal
+    if (paymentType === "cash" && cashNum < grandTotal) {
+      toast.error("Uang kurang", {
+        description: `Uang diterima Rp ${cashNum.toLocaleString("id-ID")} kurang dari total Rp ${grandTotal.toLocaleString("id-ID")}.`,
       });
       return;
     }
 
+    // QRIS: bypass validasi — jumlah selalu = grandTotal (kembalian 0)
+    const effectiveCash = paymentType === "qris_statis" ? grandTotal : cashNum;
+
+    // Kunci sinkronus SEBELUM operasi async apapun dimulai
+    isSubmittingRef.current = true;
     setIsSubmitting(true);
     try {
       const items = cart
@@ -112,7 +133,8 @@ export function POSClient({ products, storeId }: POSClientProps) {
           paymentType,
         }));
 
-      const result = await createBulkTransactions(storeId, items);
+      // Kirim effectiveCash sebagai uang_diterima ke DB
+      const result = await createBulkTransactions(storeId, items, effectiveCash);
 
       if (result.success) {
         const methodLabel = paymentType === "cash" ? "Cash" : "QRIS";
@@ -127,19 +149,65 @@ export function POSClient({ products, storeId }: POSClientProps) {
     } catch {
       toast.error("Gagal menyimpan", { description: "Terjadi kesalahan." });
     } finally {
+      // Lepas kedua kunci — ref sinkronus dan state UI
+      isSubmittingRef.current = false;
       setIsSubmitting(false);
     }
   };
 
-  const handleCashInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const raw = e.target.value.replace(/\D/g, "");
-    setCashReceived(raw);
+  /**
+   * handleConfirmClick — Two-Step Confirmation (tanpa modal)
+   * Klik 1 (Arm)  : Set confirmState → visual berubah kuning, timer 3 detik untuk auto-reset.
+   * Klik 2 (Fire) : Batalkan timer → eksekusi submit asli.
+   */
+  const handleConfirmClick = (paymentType: PaymentType) => {
+    if (confirmState === paymentType) {
+      // ── KLIK KEDUA: Eksekusi ──
+      if (confirmTimerRef.current) clearTimeout(confirmTimerRef.current);
+      setConfirmState(null);
+
+      // Logika QRIS: inject grandTotal ke display & bypass validasi input
+      if (paymentType === "qris_statis") {
+        setActivePayment("qris_statis");
+        setCashReceived(grandTotal > 0 ? grandTotal.toLocaleString("id-ID") : "");
+      } else {
+        setActivePayment("cash");
+      }
+      handleSubmit(paymentType);
+    } else {
+      // ── KLIK PERTAMA: Arm (aktifkan mode konfirmasi) ──
+      // Batalkan timer sebelumnya jika ada (beralih metode)
+      if (confirmTimerRef.current) clearTimeout(confirmTimerRef.current);
+      setConfirmState(paymentType);
+
+      // Preview input field untuk QRIS saat armed
+      if (paymentType === "qris_statis" && grandTotal > 0) {
+        setCashReceived(grandTotal.toLocaleString("id-ID"));
+      }
+
+      // Auto-reset setelah 3 detik jika tidak ada konfirmasi
+      confirmTimerRef.current = setTimeout(() => {
+        setConfirmState(null);
+        // Bersihkan preview QRIS jika tidak jadi dikonfirmasi
+        if (paymentType === "qris_statis" && activePayment !== "qris_statis") {
+          setCashReceived("");
+        }
+      }, 3000);
+    }
   };
 
-  // Label dan warna bawah dinamis berdasarkan metode aktif
-  const differenceLabel = activePayment === "cash" ? "Kembalian" : "Selisih Transfer";
-  const isQrisDeficit = activePayment === "qris_statis" && difference < 0;
-  const differenceDisplay = activePayment === "cash" ? change : difference;
+  const handleCashInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Strip semua non-digit, lalu format ulang dengan titik ribuan (id-ID)
+    const raw = e.target.value.replace(/\D/g, "");
+    if (raw === "") {
+      setCashReceived("");
+    } else {
+      setCashReceived(Number(raw).toLocaleString("id-ID"));
+    }
+  };
+
+  // Label kembalian — untuk QRIS selalu Rp 0 (exact match)
+  const differenceLabel = activePayment === "cash" ? "Kembalian" : "Kembalian";
 
   return (
     <div className="flex flex-col">
@@ -300,59 +368,106 @@ export function POSClient({ products, storeId }: POSClientProps) {
             </div>
           </div>
 
-          {/* Kembalian / Selisih Transfer */}
-          <div
-            className={`flex items-center justify-between rounded-lg border-2 px-4 py-2 transition-colors ${
-              isQrisDeficit
-                ? "border-red-500/50 bg-red-500/10"
-                : "border-ink/50 dark:border-white/20 bg-gray-50 dark:bg-white/5"
-            }`}
-          >
+          {/* Kembalian */}
+          <div className="flex items-center justify-between rounded-lg border-2 border-ink/50 dark:border-white/20 bg-gray-50 dark:bg-white/5 px-4 py-2 transition-colors">
             <span className="font-mono text-sm uppercase tracking-wider text-gray-600 dark:text-gray-400">
               {differenceLabel}
             </span>
-            <span
-              className={`font-mono text-xl font-bold tabular-nums ${
-                isQrisDeficit ? "text-red-400" : "text-ink dark:text-white"
-              }`}
-            >
-              {isQrisDeficit ? `- ${formatRupiah(Math.abs(differenceDisplay))}` : formatRupiah(differenceDisplay)}
+            <span className="font-mono text-xl font-bold tabular-nums text-ink dark:text-white">
+              {activePayment === "qris_statis" ? formatRupiah(0) : formatRupiah(change)}
             </span>
           </div>
 
-          {/* Tombol Pembayaran — 2 tombol berdampingan */}
+          {/* Tombol Pembayaran — 2 tombol berdampingan (Two-Step Confirmation) */}
           <div className="grid grid-cols-2 gap-3 pt-1">
-            {/* CASH */}
-            <button
-              type="button"
-              onClick={() => {
-                setActivePayment("cash");
-                handleSubmit("cash");
-              }}
-              disabled={cart.length === 0 || isSubmitting}
-              className="flex items-center justify-center gap-2 rounded-lg border-2 border-ink bg-ink py-4 font-mono text-base font-bold uppercase tracking-wider text-white transition-colors hover:bg-ink/80 disabled:opacity-50 disabled:cursor-not-allowed dark:border-white/30 dark:bg-white/10 dark:text-white dark:hover:bg-white/20"
-            >
-              💵 {isSubmitting && activePayment === "cash" ? "Menyimpan..." : "CASH"}
-            </button>
 
-            {/* QRIS */}
-            <button
-              type="button"
-              onClick={() => {
-                setActivePayment("qris_statis");
-                handleSubmit("qris_statis");
-              }}
-              disabled={cart.length === 0 || isSubmitting}
-              className="flex items-center justify-center gap-2 rounded-lg border-2 border-primary bg-primary py-4 font-mono text-base font-bold uppercase tracking-wider text-white transition-colors hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed dark:border-[#22d3ee] dark:bg-[#22d3ee] dark:text-[#0a0a0a] dark:hover:bg-[#22d3ee]/90"
-            >
-              📱 {isSubmitting && activePayment === "qris_statis" ? "Menyimpan..." : "QRIS"}
-            </button>
+            {/* CASH */}
+            {(() => {
+              const isArmed = confirmState === "cash";
+              const isSubmittingThis = isSubmitting && activePayment === "cash";
+              return (
+                <button
+                  type="button"
+                  onClick={() => handleConfirmClick("cash")}
+                  disabled={cart.length === 0 || isSubmitting}
+                  className={[
+                    "relative overflow-hidden flex items-center justify-center gap-2 rounded-lg border-2 py-4 font-mono text-base font-bold uppercase tracking-wider transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed",
+                    isArmed
+                      ? "border-amber-500 bg-amber-500 text-white scale-[1.02] shadow-lg shadow-amber-500/30 dark:border-amber-400 dark:bg-amber-400 dark:text-[#0a0a0a]"
+                      : "border-ink bg-ink text-white hover:bg-ink/80 dark:border-white/30 dark:bg-white/10 dark:text-white dark:hover:bg-white/20",
+                  ].join(" ")}
+                >
+                  {/* Fill Meter: inline style agar tidak bergantung Tailwind JIT */}
+                  <div
+                    className="absolute top-0 left-0 h-full bg-yellow-300/60 dark:bg-yellow-200/40"
+                    style={{
+                      width: isArmed ? "100%" : "0%",
+                      transition: isArmed
+                        ? "width 3000ms linear"
+                        : "none",
+                    }}
+                  />
+                  <span className="relative z-10">
+                    {isSubmittingThis
+                      ? "⏳ Menyimpan..."
+                      : isArmed
+                      ? "✅ Konfirmasi CASH?"
+                      : "💵 CASH"}
+                  </span>
+                </button>
+              );
+            })()}
+
+            {/* QRIS — 1-klik preview, 2-klik eksekusi */}
+            {(() => {
+              const isArmed = confirmState === "qris_statis";
+              const isSubmittingThis = isSubmitting && activePayment === "qris_statis";
+              return (
+                <button
+                  type="button"
+                  onClick={() => handleConfirmClick("qris_statis")}
+                  onMouseEnter={() => {
+                    if (!confirmState && grandTotal > 0)
+                      setCashReceived(grandTotal.toLocaleString("id-ID"));
+                  }}
+                  onMouseLeave={() => {
+                    if (!confirmState && activePayment !== "qris_statis")
+                      setCashReceived("");
+                  }}
+                  disabled={cart.length === 0 || isSubmitting}
+                  className={[
+                    "relative overflow-hidden flex items-center justify-center gap-2 rounded-lg border-2 py-4 font-mono text-base font-bold uppercase tracking-wider transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed",
+                    isArmed
+                      ? "border-amber-500 bg-amber-500 text-white scale-[1.02] shadow-lg shadow-amber-500/30 dark:border-amber-400 dark:bg-amber-400 dark:text-[#0a0a0a]"
+                      : "border-primary bg-primary text-white hover:bg-primary/90 dark:border-[#22d3ee] dark:bg-[#22d3ee] dark:text-[#0a0a0a] dark:hover:bg-[#22d3ee]/90",
+                  ].join(" ")}
+                >
+                  {/* Fill Meter: inline style agar tidak bergantung Tailwind JIT */}
+                  <div
+                    className="absolute top-0 left-0 h-full bg-yellow-300/60 dark:bg-yellow-200/40"
+                    style={{
+                      width: isArmed ? "100%" : "0%",
+                      transition: isArmed
+                        ? "width 3000ms linear"
+                        : "none",
+                    }}
+                  />
+                  <span className="relative z-10">
+                    {isSubmittingThis
+                      ? "⏳ Menyimpan..."
+                      : isArmed
+                      ? "✅ Konfirmasi QRIS?"
+                      : "📱 QRIS"}
+                  </span>
+                </button>
+              );
+            })()}
           </div>
 
-          {/* Hint untuk QRIS jika nominal kurang */}
-          {isQrisDeficit && (
-            <p className="text-center font-mono text-xs text-red-400">
-              ⚠ Nominal transfer kurang dari total. Transaksi QRIS tidak dapat disimpan.
+          {/* Hint saat tombol armed */}
+          {confirmState !== null && !isSubmitting && (
+            <p className="text-center font-mono text-xs text-amber-500 dark:text-amber-400">
+              ⚡ Klik sekali lagi untuk konfirmasi, atau tunggu 3 detik untuk batal.
             </p>
           )}
         </div>

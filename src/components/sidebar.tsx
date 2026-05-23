@@ -29,12 +29,12 @@ const motionLinkProps = {
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutGrid, exact: true },
-  { href: "/dashboard/inventory", label: "Inventory", icon: Package },
-  { href: "/dashboard/pos", label: "POS", icon: ShoppingCart },
+  { href: "/dashboard/inventory", label: "Inventaris", icon: Package },
+  { href: "/dashboard/pos", label: "Kasir (POS)", icon: ShoppingCart },
   { href: "/dashboard/transactions", label: "Transaksi", icon: Receipt },
-  { href: "/dashboard/analytics", label: "Analytics", icon: BarChart3 },
-  { href: "/dashboard/chat", label: "AI Chat", icon: MessageSquare },
-  { href: "/dashboard/products/new", label: "Add Product", icon: PlusCircle },
+  { href: "/dashboard/analytics", label: "Analitik", icon: BarChart3 },
+  { href: "/dashboard/chat", label: "AI Asisten", icon: MessageSquare },
+  { href: "/dashboard/products/new", label: "Tambah Produk", icon: PlusCircle },
 ];
 
 const MAX_NAME_LENGTH = 16;
