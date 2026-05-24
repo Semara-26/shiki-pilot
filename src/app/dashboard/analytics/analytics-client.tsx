@@ -13,6 +13,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import html2canvas from "html2canvas";
 import { LOGO_BASE64 } from "@/src/lib/logo-base64";
+import { LOGO_NEW_BASE64 } from "@/src/lib/logo-new-base64";
 import { SalesChart } from "@/src/components/sales-chart";
 import { TopProductsBarChart } from "@/src/components/top-products-bar-chart";
 import { ProductDistributionDonut } from "@/src/components/product-distribution-donut";
@@ -239,139 +240,294 @@ export function AnalyticsClient({
     setIsExporting(true);
     try {
       const doc = new jsPDF("p", "mm", "a4");
-      const pageWidth = doc.internal.pageSize.getWidth();
-      const pageHeight = doc.internal.pageSize.getHeight();
+      const pageW = doc.internal.pageSize.getWidth();
+      const pageH = doc.internal.pageSize.getHeight();
+      const MARGIN = 14;
+      const CONTENT_W = pageW - MARGIN * 2;
 
-      // --- Computed summary values ---
-      const formatRp = (val: number) => `Rp ${val.toLocaleString("id-ID")}`;
+      // ─── Palette ───────────────────────────────────────────────────────────
+      const CYAN = [14, 165, 233] as [number, number, number]; // sky-500
+      const CYAN_DARK = [3, 105, 161] as [number, number, number]; // sky-700
+      const GRAY_LIGHT = [248, 250, 252] as [number, number, number]; // slate-50
+      const GRAY_MED = [241, 245, 249] as [number, number, number]; // slate-100
+      const GRAY_BORDER = [226, 232, 240] as [number, number, number]; // slate-200
+      const GRAY_TEXT = [100, 116, 139] as [number, number, number]; // slate-500
+      const DARK_TEXT = [15, 23, 42] as [number, number, number]; // slate-900
+      const WHITE = [255, 255, 255] as [number, number, number];
+
+      // ─── Computed summary values ───────────────────────────────────────────
+      const formatRp = (val: number) =>
+        new Intl.NumberFormat("id-ID", {
+          style: "currency",
+          currency: "IDR",
+          maximumFractionDigits: 0,
+        }).format(val);
+
       const totalRevenue = filteredTransactions.reduce(
         (s, tx) => s + tx.totalPrice,
         0,
       );
-      const totalAssetValue = txs.reduce((s, tx) => s + tx.totalPrice, 0);
       const totalQty = filteredTransactions.reduce(
         (s, tx) => s + tx.quantity,
         0,
       );
+      const uniqueProducts = new Set(
+        filteredTransactions.map((tx) => tx.productName),
+      ).size;
 
-      // --- HEADER BLOCK (Logo + Judul + Meta) ---
       const now = new Date();
-      doc.addImage(LOGO_BASE64, "PNG", 14, 14, 15, 15);
-
-      doc.setFontSize(16);
-      doc.setTextColor(242, 13, 13);
-      doc.text("LAPORAN PERFORMA BISNIS", 33, 21);
-
-      doc.setFontSize(9);
-      doc.setTextColor(117, 117, 117);
       const printDate = now.toLocaleDateString("id-ID", {
         day: "2-digit",
         month: "long",
         year: "numeric",
       });
-      doc.text(`Dicetak: ${printDate}`, 33, 27);
-      if (businessName) {
-        doc.text(`Toko: ${businessName}`, 33, 32);
+      const periodMap: Record<string, string> = {
+        daily: "14 Hari Terakhir",
+        weekly: "8 Minggu Terakhir",
+        monthly: "12 Bulan Terakhir",
+      };
+      const periodLabel = periodMap[timeFilter] ?? "";
+
+      // ═══════════════════════════════════════════════════════════════════════
+      // 1. HEADER BAND (cyan background strip)
+      // ═══════════════════════════════════════════════════════════════════════
+      const HEADER_H = 28;
+      doc.setFillColor(...CYAN);
+      doc.rect(0, 0, pageW, HEADER_H, "F");
+
+      // Logo (new brand logo)
+      try {
+        doc.addImage(LOGO_NEW_BASE64, "PNG", MARGIN, 4, 18, 18);
+      } catch {
+        // fallback to old logo if new logo fails
+        doc.addImage(LOGO_BASE64, "PNG", MARGIN, 4, 18, 18);
       }
 
-      // Garis merah pemisah header
-      doc.setDrawColor(242, 13, 13);
-      doc.setLineWidth(0.5);
-      doc.line(14, 36, pageWidth - 14, 36);
+      // Brand name
+      doc.setFontSize(14);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(...WHITE);
+      doc.text("SHIKIPILOT", MARGIN + 21, 13);
 
-      // --- SUMMARY BLOCK (Periode + Ringkasan) ---
-      let currentY = 43;
+      doc.setFontSize(8);
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(186, 230, 253); // sky-200
+      doc.text("LAPORAN ANALITIK PENJUALAN", MARGIN + 21, 19);
 
-      doc.setFontSize(9);
-      doc.setTextColor(117, 117, 117);
-      const periodLabel = now.toLocaleDateString("id-ID", {
-        month: "long",
-        year: "numeric",
+      // Right meta block
+      doc.setFontSize(7.5);
+      doc.setTextColor(...WHITE);
+      const metaX = pageW - MARGIN;
+      doc.text(`Dicetak: ${printDate}`, metaX, 11, { align: "right" });
+      doc.text(`Periode: ${periodLabel}`, metaX, 17, { align: "right" });
+      if (businessName) {
+        doc.text(`Toko: ${businessName}`, metaX, 23, { align: "right" });
+      }
+
+      let curY = HEADER_H + 8;
+
+      // ═══════════════════════════════════════════════════════════════════════
+      // 2. HIGHLIGHT CARDS (KPI row)
+      // ═══════════════════════════════════════════════════════════════════════
+      const cards = [
+        {
+          label: "Total Pendapatan",
+          value: formatRp(totalRevenue),
+          icon: "💰",
+        },
+        {
+          label: "Total Unit Terjual",
+          value: String(totalQty) + " unit",
+          icon: "📦",
+        },
+        {
+          label: "Produk Berbeda",
+          value: String(uniqueProducts) + " SKU",
+          icon: "🏷️",
+        },
+        {
+          label: "Transaksi",
+          value: String(filteredTransactions.length) + "x",
+          icon: "🧾",
+        },
+      ];
+
+      const CARD_W = (CONTENT_W - 6) / 4; // 4 cards, 2 mm gap
+      const CARD_H = 20;
+
+      cards.forEach((card, i) => {
+        const cx = MARGIN + i * (CARD_W + 2);
+
+        // Card background
+        doc.setFillColor(...GRAY_LIGHT);
+        doc.setDrawColor(...GRAY_BORDER);
+        doc.setLineWidth(0.3);
+        doc.roundedRect(cx, curY, CARD_W, CARD_H, 2, 2, "FD");
+
+        // Top accent bar
+        doc.setFillColor(...CYAN);
+        doc.rect(cx, curY, CARD_W, 1.5, "F");
+
+        // Label
+        doc.setFontSize(6.5);
+        doc.setFont("helvetica", "normal");
+        doc.setTextColor(...GRAY_TEXT);
+        doc.text(card.label.toUpperCase(), cx + CARD_W / 2, curY + 7, {
+          align: "center",
+        });
+
+        // Value
+        doc.setFontSize(9);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(...DARK_TEXT);
+        doc.text(card.value, cx + CARD_W / 2, curY + 14, { align: "center" });
       });
-      doc.text(`Periode: ${periodLabel}`, 14, currentY);
-      currentY += 6;
 
-      doc.setFontSize(10);
-      doc.setTextColor(30, 30, 30);
-      doc.text(`Total Pendapatan  :  ${formatRp(totalRevenue)}`, 14, currentY);
-      currentY += 6;
-      doc.text(
-        `Total Nilai Aset   :  ${formatRp(totalAssetValue)}`,
-        14,
-        currentY,
-      );
-      currentY += 9;
+      curY += CARD_H + 8;
 
-      // Garis abu-abu tipis pemisah summary → chart
-      doc.setDrawColor(200, 200, 200);
-      doc.setLineWidth(0.3);
-      doc.line(14, currentY, pageWidth - 14, currentY);
-      currentY += 7;
-
-      // --- CHART SCREENSHOT ---
-      const chartElement = document.getElementById("revenue-chart-container");
-      if (chartElement) {
-        const canvas = await html2canvas(chartElement, {
+      // ═══════════════════════════════════════════════════════════════════════
+      // 3. CHART SCREENSHOT
+      // ═══════════════════════════════════════════════════════════════════════
+      const chartEl = document.getElementById("revenue-chart-container");
+      if (chartEl) {
+        const canvas = await html2canvas(chartEl, {
           scale: 2,
           backgroundColor: "#ffffff",
           useCORS: true,
         });
         const imgData = canvas.toDataURL("image/png");
-        const imgWidth = pageWidth - 28;
-        const imgHeight = (canvas.height * imgWidth) / canvas.width;
-        doc.addImage(imgData, "PNG", 14, currentY, imgWidth, imgHeight);
-        currentY += imgHeight + 8;
+        const imgW = CONTENT_W;
+        const imgH = (canvas.height * imgW) / canvas.width;
+
+        // Section label
+        doc.setFontSize(8);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(...CYAN_DARK);
+        doc.text("GRAFIK PENDAPATAN", MARGIN, curY);
+        doc.setDrawColor(...CYAN);
+        doc.setLineWidth(0.5);
+        doc.line(MARGIN, curY + 1.5, MARGIN + 40, curY + 1.5);
+        curY += 5;
+
+        doc.addImage(imgData, "PNG", MARGIN, curY, imgW, imgH);
+        curY += imgH + 8;
       }
 
-      // --- DATA TABLE + GRAND TOTAL ---
+      // ═══════════════════════════════════════════════════════════════════════
+      // 4. DATA TABLE (zebra-striped, professional)
+      // ═══════════════════════════════════════════════════════════════════════
+
+      // Section label
+      doc.setFontSize(8);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(...CYAN_DARK);
+      doc.text("DETAIL TRANSAKSI", MARGIN, curY);
+      doc.setDrawColor(...CYAN);
+      doc.setLineWidth(0.5);
+      doc.line(MARGIN, curY + 1.5, MARGIN + 37, curY + 1.5);
+      curY += 5;
+
       const tableRows = filteredTransactions.map((tx) => [
         new Date(tx.createdAt).toLocaleDateString("id-ID"),
         tx.productName,
-        tx.quantity,
-        formatRp(tx.totalPrice),
+        { content: String(tx.quantity), styles: { halign: "center" as const } },
+        {
+          content: formatRp(tx.totalPrice),
+          styles: { halign: "right" as const },
+        },
       ]);
 
+      const grandTotalRowIdx = tableRows.length;
       const grandTotalRow = [
-        "",
-        "GRAND TOTAL",
-        totalQty,
-        formatRp(totalRevenue),
+        { content: "", colSpan: 1 },
+        { content: "GRAND TOTAL", styles: { fontStyle: "bold" as const } },
+        {
+          content: String(totalQty),
+          styles: { halign: "center" as const, fontStyle: "bold" as const },
+        },
+        {
+          content: formatRp(totalRevenue),
+          styles: { halign: "right" as const, fontStyle: "bold" as const },
+        },
       ];
-      const grandTotalRowIndex = tableRows.length;
 
       autoTable(doc, {
-        startY: currentY,
-        head: [["Tanggal", "Nama Produk", "Kuantitas", "Total Pendapatan"]],
+        startY: curY,
+        margin: { left: MARGIN, right: MARGIN },
+        head: [
+          [
+            { content: "Tanggal", styles: { halign: "left" } },
+            { content: "Nama Produk", styles: { halign: "left" } },
+            { content: "Kuantitas", styles: { halign: "center" } },
+            { content: "Total Pendapatan", styles: { halign: "right" } },
+          ],
+        ],
         body: [...tableRows, grandTotalRow],
-        headStyles: { fillColor: [153, 27, 27], textColor: 255 },
-        alternateRowStyles: { fillColor: [249, 249, 249] },
-        styles: {
-          textColor: [51, 51, 51],
-          lineColor: [229, 231, 235],
-          lineWidth: 0.1,
+        // Head styling
+        headStyles: {
+          fillColor: CYAN,
+          textColor: WHITE,
+          fontStyle: "bold",
+          fontSize: 8,
+          cellPadding: { top: 3, bottom: 3, left: 3, right: 3 },
         },
+        // Body styling
+        styles: {
+          fontSize: 7.5,
+          textColor: DARK_TEXT,
+          lineColor: GRAY_BORDER,
+          lineWidth: 0.1,
+          cellPadding: { top: 2.5, bottom: 2.5, left: 3, right: 3 },
+        },
+        // Zebra-stripe: even rows get slight tint
+        alternateRowStyles: { fillColor: GRAY_MED },
+        // Grand-total row override
         didParseCell: (data) => {
-          if (
-            data.section === "body" &&
-            data.row.index === grandTotalRowIndex
-          ) {
-            data.cell.styles.fontStyle = "bold";
-            data.cell.styles.fillColor = [243, 244, 246];
-            data.cell.styles.textColor = [30, 30, 30];
+          if (data.section === "body" && data.row.index === grandTotalRowIdx) {
+            data.cell.styles.fillColor = GRAY_LIGHT;
+            data.cell.styles.lineColor = CYAN as unknown as string;
+            data.cell.styles.lineWidth = 0.4;
           }
+        },
+        // Column widths (proportional)
+        columnStyles: {
+          0: { cellWidth: 26 },
+          1: { cellWidth: "auto" },
+          2: { cellWidth: 22 },
+          3: { cellWidth: 36 },
+        },
+        // Prevent rows from splitting across pages
+        rowPageBreak: "avoid",
+        // Footer on every page (page X / Y)
+        didDrawPage: (data) => {
+          const pageCount = (
+            doc as unknown as { internal: { getNumberOfPages(): number } }
+          ).internal.getNumberOfPages();
+          const pageNum = data.pageNumber;
+          doc.setFontSize(7);
+          doc.setFont("helvetica", "normal");
+          doc.setTextColor(...GRAY_TEXT);
+          doc.text(
+            `ShikiPilot — Laporan Analitik  |  ${printDate}${businessName ? "  |  " + businessName : ""}`,
+            MARGIN,
+            pageH - 8,
+          );
+          doc.text(
+            `Hal. ${pageNum} / ${pageCount}`,
+            pageW - MARGIN,
+            pageH - 8,
+            { align: "right" },
+          );
+          // Footer separator line
+          doc.setDrawColor(...GRAY_BORDER);
+          doc.setLineWidth(0.3);
+          doc.line(MARGIN, pageH - 11, pageW - MARGIN, pageH - 11);
         },
       });
 
-      // --- FOOTER ---
-      doc.setFontSize(8);
-      doc.setTextColor(117, 117, 117);
-      doc.text(
-        "Generated otomatis oleh Sistem ShikiPilot",
-        14,
-        pageHeight - 10,
+      doc.save(
+        `Laporan_ShikiPilot_${timeFilter}_${now.toISOString().slice(0, 10)}.pdf`,
       );
-
-      doc.save("Laporan_Performa_ShikiPilot.pdf");
     } catch (err) {
       console.error("PDF export failed:", err);
     } finally {

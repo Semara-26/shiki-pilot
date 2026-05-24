@@ -12,12 +12,10 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "ShikiPilot",
+  title: "ShikiPilot - Jualan Lebih Cepat, Manajemen Lebih Cerdas",
   description: "AI Assistant for UMKM",
   icons: {
-    icon: "/icon.png",
-    shortcut: "/icon.png",
-    apple: "/icon.png",
+    icon: "/logo-new-svg.svg",
   },
 };
 
@@ -28,7 +26,7 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <html lang="en" suppressHydrationWarning>
+      <html lang="en" className="scroll-smooth" suppressHydrationWarning>
         <head>
           <link rel="preconnect" href="https://fonts.googleapis.com" />
           <link

@@ -96,7 +96,7 @@ export function Sidebar() {
         >
           <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-md">
             <Image
-              src="/icon.png"
+              src="/logo-new-svg.svg"
               alt="ShikiPilot"
               width={80}
               height={80}
@@ -105,13 +105,13 @@ export function Sidebar() {
           </div>
           <span
             className={cn(
-              "whitespace-nowrap text-xl font-black tracking-[0.15em] text-gray-700 transition-opacity duration-200 dark:text-sidebar-foreground",
+              "whitespace-nowrap text-xl font-bold tracking-tight transition-opacity duration-200 text-white",
               sidebar?.isOpen
                 ? "block opacity-100"
                 : "hidden opacity-0 group-hover:block group-hover:opacity-100 md:group-hover:block md:group-hover:opacity-100",
             )}
           >
-            SHIKIPILOT
+            ShikiPilot
           </span>
         </Link>
       </motion.div>
