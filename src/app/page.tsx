@@ -76,9 +76,13 @@ export default function Home() {
         {/* Foreground Content */}
         <div className="relative z-10 flex flex-col items-center justify-center text-center gap-8 py-20 px-6">
           <h1 className="relative z-10 font-hero-h1-mobile md:font-hero-h1 text-hero-h1-mobile md:text-hero-h1 text-text-primary text-center max-w-5xl">
-            Jualan Lebih Cepat.
+            <span className="bg-gradient-to-b from-white/90 to-white/30 bg-clip-text text-transparent drop-shadow-sm">
+              Jualan Lebih Cepat.
+            </span>
             <br />
-            Manajemen Lebih Cerdas.
+            <span className="bg-gradient-to-r from-[#0284c7] to-[#38bdf8] bg-clip-text text-transparent">
+              Manajemen Lebih Cerdas.
+            </span>
           </h1>
 
           <Link
@@ -449,7 +453,7 @@ export default function Home() {
           <h2 className="font-section-h2-mobile md:font-section-h2 text-section-h2-mobile md:text-section-h2 mb-10 max-w-4xl mx-auto">
             Siap Jadi UMKM Next Level?
             <br />
-            Mulai Hari Ini dengan ShikiPilot.
+            Mulai Hari Ini dengan <span className="bg-gradient-to-r from-[#0284c7] to-[#38bdf8] bg-clip-text text-transparent">ShikiPilot.</span>
           </h2>
           <Link
             className="inline-flex items-center justify-center bg-[#0ea5e9] text-[#0a0a0a] font-bold px-12 py-6 rounded-full text-xl hover:scale-105 hover:shadow-[0_0_50px_-10px_rgba(14,165,233,0.6)] active:scale-95 active:shadow-[inset_0_4px_8px_rgba(0,0,0,0.5)] transition-all duration-200"
