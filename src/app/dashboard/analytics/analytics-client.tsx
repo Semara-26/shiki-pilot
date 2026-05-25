@@ -690,11 +690,11 @@ export function AnalyticsClient({
 
       {/* Row 2: Top Products + Distribution */}
       <div className="grid grid-cols-1 gap-4 md:gap-6 md:grid-cols-2">
-        <div className="w-full min-h-[300px] h-[300px] md:h-[320px]">
+        <div className="w-full flex">
           <TopProductsBarChart
             data={topProductsData}
             title="PRODUK TERLARIS (UNIT TERJUAL)"
-            className="h-full"
+            className="w-full"
           />
         </div>
         {/* Tidak ada height constraint agar legend bisa tampil penuh dan scroll */}

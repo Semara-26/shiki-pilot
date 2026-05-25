@@ -4,8 +4,10 @@ import { useState, useRef, useEffect, memo } from "react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import ReactMarkdown from "react-markdown";
+import { toast } from "sonner";
 import { Loader2, TrashIcon } from "lucide-react";
 import { DashboardHeader } from "@/src/components/dashboard-header";
+import { Button } from "@/src/components/ui/button";
 import { saveMessage } from "@/src/lib/actions/chat";
 
 export type UIMessageLike = {
@@ -263,7 +265,7 @@ export function ChatClient({ chatId, initialMessages }: ChatClientProps) {
     null,
   );
 
-  const { messages, sendMessage, status, error } = useChat({
+  const { messages, sendMessage, status, error, setMessages } = useChat({
     transport: new DefaultChatTransport({ api: "/api/chat" }),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any -- UIMessageLike compatible with UIMessage at runtime
     messages: initialMessages as any,
@@ -274,6 +276,11 @@ export function ChatClient({ chatId, initialMessages }: ChatClientProps) {
       await saveMessage(chatId, "assistant", text);
     },
   });
+
+  const handleClearChat = () => {
+    if (messages.length === 0) return;
+    setMessages([]);
+  };
 
   const isLoading = status === "streaming" || status === "submitted";
 
@@ -379,11 +386,20 @@ export function ChatClient({ chatId, initialMessages }: ChatClientProps) {
 
   return (
     <div className="flex h-full flex-col overflow-hidden bg-white dark:bg-[#0a0a0a] text-foreground">
-      <div className="flex-none">
+      <div className="flex-none flex justify-between items-center pr-4">
         <DashboardHeader
           breadcrumbs="TERMINAL"
-          title="COMMUNICATION // AI ASSISTANT"
+          title="AI ASSISTANT"
         />
+        <button
+          onClick={handleClearChat}
+          disabled={messages.length === 0}
+          className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-lg border border-zinc-800 bg-zinc-900/50 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 transition-all duration-200 shrink-0"
+          title="Bersihkan Chat"
+        >
+          <TrashIcon className="w-3.5 h-3.5" />
+          Bersihkan Chat
+        </button>
       </div>
 
       <div className="flex flex-1 flex-col min-h-0 bg-white dark:bg-[#0a0a0a]">

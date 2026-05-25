@@ -76,11 +76,11 @@ export default function Home() {
         {/* Foreground Content */}
         <div className="relative z-10 flex flex-col items-center justify-center text-center gap-8 py-20 px-6">
           <h1 className="relative z-10 font-hero-h1-mobile md:font-hero-h1 text-hero-h1-mobile md:text-hero-h1 text-text-primary text-center max-w-5xl">
-            <span className="bg-gradient-to-b from-white/90 to-white/30 bg-clip-text text-transparent drop-shadow-sm">
+            <span className="text-transparent bg-clip-text bg-gradient-to-b from-white/70 via-white/10 to-white/40 [-webkit-text-stroke:1.5px_rgba(255,255,255,0.5)] [text-shadow:0_8px_16px_rgba(255,255,255,0.15)] drop-shadow-sm">
               Jualan Lebih Cepat.
             </span>
             <br />
-            <span className="bg-gradient-to-r from-[#0284c7] to-[#38bdf8] bg-clip-text text-transparent">
+            <span className="text-transparent bg-clip-text bg-gradient-to-b from-[#38bdf8]/70 via-[#0284c7]/20 to-[#38bdf8]/40 [-webkit-text-stroke:1.5px_rgba(56,189,248,0.5)] [text-shadow:0_8px_16px_rgba(56,189,248,0.2)] drop-shadow-sm">
               Manajemen Lebih Cerdas.
             </span>
           </h1>

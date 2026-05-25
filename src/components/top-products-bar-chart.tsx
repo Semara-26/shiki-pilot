@@ -142,40 +142,32 @@ export function TopProductsBarChart({
           {title}
         </p>
       )}
-      {/* Tambahan bottom margin besar agar ruang multiline label tidak terpotong */}
-      <div className="mt-4 w-full flex-1 min-h-0">
+      <div className="mt-4 w-full flex-1 min-h-[400px]">
         <ResponsiveContainer width="100%" height="100%" minWidth={0}>
-          {/* Layout default (vertikal bar) agar XAxis menjadi sumbu nama produk */}
+          {/* Layout vertical (horizontal bars) */}
           <BarChart
-            data={data}
-            margin={{ top: 16, right: 24, left: 0, bottom: 72 }}
+            data={data.slice(0, 15)}
+            layout="vertical"
+            margin={{ top: 10, right: 32, left: 110, bottom: 0 }}
           >
             <CartesianGrid
               strokeDasharray="3 3"
               stroke={isDark ? GRID_DARK : GRID_LIGHT}
               strokeOpacity={0.5}
-              vertical={false}
+              horizontal={false}
+              vertical={true}
             />
-            {/* XAxis = nama produk, menggunakan custom tick multiline agar tidak tumpang-tindih */}
-            <XAxis
-              dataKey="name"
-              interval={0}
-              tickLine={false}
-              axisLine={{ stroke: isDark ? GRID_DARK : GRID_LIGHT }}
-              // Custom tick render: bungkus teks panjang ke baris baru (angle: 0, horizontal)
-              tick={(props) => (
-                <MultilineXTick
-                  {...props}
-                  fill={isDark ? TICK_DARK : TICK_LIGHT}
-                />
-              )}
-            />
-            {/* YAxis = nilai numerik (unit terjual) */}
+            {/* XAxis = nilai numerik (unit terjual) */}
+            <XAxis type="number" hide />
+            {/* YAxis = nama produk */}
             <YAxis
-              tick={{ fill: isDark ? TICK_DARK : TICK_LIGHT, fontSize: 11 }}
+              dataKey="name"
+              type="category"
+              width={110}
+              tickMargin={10}
+              tick={{ fill: isDark ? TICK_DARK : TICK_LIGHT, fontSize: 12 }}
               tickLine={false}
               axisLine={false}
-              tickFormatter={(v) => String(Math.round(Number(v)))}
             />
             <Tooltip
               content={<ChartTooltip />}
@@ -184,14 +176,15 @@ export function TopProductsBarChart({
             <Bar
               dataKey="value"
               fill={barColor}
-              radius={[4, 4, 0, 0]}
+              radius={[0, 4, 4, 0]}
               name="Qty"
+              barSize={24}
               animationDuration={1000}
             >
-              {/* Label value di atas bar */}
+              {/* Label value di kanan bar */}
               <LabelList
                 dataKey="value"
-                position="top"
+                position="right"
                 fill="#888888"
                 fontSize={11}
               />
