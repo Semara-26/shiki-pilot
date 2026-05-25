@@ -12,7 +12,7 @@ export default function Home() {
         <div className="max-w-[1440px] w-full mx-auto px-6 lg:px-12 flex justify-between items-center h-20">
           <Link href="/" className="flex items-center">
             <img
-              src="/logo-new-svg.svg"
+              src="/logo-new-png.png"
               alt="ShikiPilot Logo"
               className="w-10 h-10 object-contain"
             />
@@ -466,7 +466,7 @@ export default function Home() {
           <div className="flex flex-col gap-4 mb-10 md:mb-0">
             <div className="flex items-center">
               <img
-                src="/logo-new-svg.svg"
+                src="/logo-new-png.png"
                 alt="ShikiPilot Logo"
                 className="h-10 w-10 object-contain"
               />
@@ -484,19 +484,25 @@ export default function Home() {
             </div>
             <div className="flex gap-4">
               <Link
-                href="#"
+                href="https://www.instagram.com/semaradana_kadek/"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="w-12 h-12 flex items-center justify-center rounded-2xl bg-white/5 border border-white/10 hover:bg-primary/20 text-text-muted hover:text-[#0ea5e9] transition-all duration-300"
               >
                 <Instagram className="w-5 h-5" />
               </Link>
               <Link
-                href="#"
+                href="https://www.linkedin.com/in/kadek-semaradana-322b7128a/"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="w-12 h-12 flex items-center justify-center rounded-2xl bg-white/5 border border-white/10 hover:bg-primary/20 text-text-muted hover:text-[#0ea5e9] transition-all duration-300"
               >
                 <Linkedin className="w-5 h-5" />
               </Link>
               <Link
-                href="#"
+                href="https://github.com/Semara-26"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="w-12 h-12 flex items-center justify-center rounded-2xl bg-white/5 border border-white/10 hover:bg-primary/20 text-text-muted hover:text-[#0ea5e9] transition-all duration-300"
               >
                 <Github className="w-5 h-5" />

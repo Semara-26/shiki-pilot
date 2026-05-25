@@ -4,8 +4,7 @@ import { useState, useRef, useEffect, memo } from "react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import ReactMarkdown from "react-markdown";
-import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Loader2, TrashIcon } from "lucide-react";
 import { DashboardHeader } from "@/src/components/dashboard-header";
 import { saveMessage } from "@/src/lib/actions/chat";
 
@@ -44,14 +43,7 @@ type ToolPartState =
   | "approval-requested"
   | "approval-responded";
 
-interface ToolPart {
-  type: string; // 'tool-updateStockThreshold' atau 'dynamic-tool'
-  toolCallId: string;
-  toolName?: string; // di dynamic-tool
-  state: ToolPartState;
-  input?: Record<string, unknown>; // args ada di sini, bukan .args
-  output?: unknown;
-}
+
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────────────
 

@@ -96,7 +96,7 @@ export function Sidebar() {
         >
           <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-md">
             <Image
-              src="/logo-new-svg.svg"
+              src="/logo-new-png.png"
               alt="ShikiPilot"
               width={80}
               height={80}

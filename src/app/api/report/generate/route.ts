@@ -18,16 +18,16 @@ export async function GET(req: Request) {
     }
 
     const { searchParams } = new URL(req.url);
-    const period = (searchParams.get("period") ?? "monthly") as
-      | "daily"
-      | "weekly"
-      | "monthly";
+    const startDate = searchParams.get("startDate");
+    const endDate = searchParams.get("endDate");
     const format = searchParams.get("format") ?? "csv";
 
     // Validasi parameter
-    if (!["daily", "weekly", "monthly"].includes(period)) {
+    if (!startDate || !endDate) {
       return new Response(
-        JSON.stringify({ error: "Parameter period tidak valid." }),
+        JSON.stringify({
+          error: "Parameter startDate dan endDate wajib diisi.",
+        }),
         {
           status: 400,
           headers: { "Content-Type": "application/json" },
@@ -58,7 +58,7 @@ export async function GET(req: Request) {
       });
     }
 
-    const result = await generateReportData(userStore.id, period);
+    const result = await generateReportData(userStore.id, startDate, endDate);
 
     if (!result.success || !result.csvContent) {
       return new Response(JSON.stringify({ error: result.message }), {

@@ -21,7 +21,7 @@ export async function createBulkTransactions(
   items: BulkTransactionItem[],
   // cashReceived: jumlah uang diterima (untuk QRIS = grandTotal, untuk cash = input kasir)
   // Diterima sebagai parameter untuk konsistensi API, siap dipakai saat kolom DB tersedia
-  cashReceived?: number,
+  _cashReceived?: number,
 ): Promise<BulkTransactionResult> {
   try {
     const { userId } = await auth();

@@ -7,12 +7,10 @@
  */
 
 import { Suspense } from "react";
-import { auth } from "@clerk/nextjs/server";
 import Link from "next/link";
 import { AlertTriangle, Settings2 } from "lucide-react";
 
 import {
-  getStoreForDashboard,
   getDashboardMetrics,
   getRecentProducts,
   getAllProductsForChart,

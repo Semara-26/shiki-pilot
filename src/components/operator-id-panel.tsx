@@ -32,7 +32,7 @@ interface OperatorIdPanelProps {
   onClose: () => void;
 }
 
-export function OperatorIdPanel({ isOpen, onClose }: OperatorIdPanelProps) {
+export function OperatorIdPanel({ isOpen }: OperatorIdPanelProps) {
   const { theme, setTheme } = useTheme();
   const { user, isLoaded } = useUser();
   const { signOut } = useClerk();
@@ -43,7 +43,7 @@ export function OperatorIdPanel({ isOpen, onClose }: OperatorIdPanelProps) {
   const [isPrefsOpen, setIsPrefsOpen] = useState(
     searchParams.get("setup") === "wa",
   );
-  const [initialPrefTab, setInitialPrefTab] = useState<
+  const [initialPrefTab] = useState<
     "ACCOUNT" | "STORE INFO"
   >(searchParams.get("setup") === "wa" ? "STORE INFO" : "ACCOUNT");
   const [isDocOpen, setIsDocOpen] = useState(false);

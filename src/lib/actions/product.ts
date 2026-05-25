@@ -631,7 +631,8 @@ export async function checkProductStock(
  */
 export async function getSalesAnalytics(
   storeId: string,
-  period: "daily" | "weekly" | "monthly",
+  startDate: string,
+  endDate: string,
 ): Promise<{
   success: boolean;
   message: string;
@@ -644,14 +645,6 @@ export async function getSalesAnalytics(
   };
 }> {
   try {
-    // Menentukan interval waktu berdasarkan period
-    const intervalMap = {
-      daily: "1 day",
-      weekly: "7 days",
-      monthly: "30 days",
-    };
-    const interval = intervalMap[period];
-
     // Query 1: Total pendapatan & jumlah transaksi dalam periode (Atomic DB Aggregation)
     const revenueResult = await db.execute(
       sql`
@@ -660,7 +653,7 @@ export async function getSalesAnalytics(
           COUNT(t.id) AS total_transactions
         FROM transactions t
         WHERE t.store_id = ${storeId}
-          AND t.created_at >= NOW() - ${interval}::interval
+          AND t.created_at BETWEEN ${startDate}::timestamp AND ${endDate}::timestamp + interval '1 day' - interval '1 microsecond'
       `,
     );
 
@@ -673,7 +666,7 @@ export async function getSalesAnalytics(
         FROM transactions t
         JOIN products p ON t.product_id = p.id
         WHERE t.store_id = ${storeId}
-          AND t.created_at >= NOW() - ${interval}::interval
+          AND t.created_at BETWEEN ${startDate}::timestamp AND ${endDate}::timestamp + interval '1 day' - interval '1 microsecond'
         GROUP BY p.name
         ORDER BY total_qty DESC
         LIMIT 1
@@ -689,11 +682,7 @@ export async function getSalesAnalytics(
       (topProduct?.product_name as string) ?? "Belum ada transaksi";
     const topProductQty = Number(topProduct?.total_qty ?? 0);
 
-    const periodLabel = {
-      daily: "Hari Ini",
-      weekly: "7 Hari Terakhir",
-      monthly: "30 Hari Terakhir",
-    }[period];
+    const periodLabel = `${startDate} hingga ${endDate}`;
 
     return {
       success: true,
@@ -711,6 +700,257 @@ export async function getSalesAnalytics(
     return {
       success: false,
       message: "Gagal mengambil data analitik. Terjadi kesalahan pada server.",
+    };
+  }
+}
+
+export async function getAdvancedAnalytics(
+  storeId: string,
+  startDate: string,
+  endDate: string,
+  granularity: "daily" | "weekly" | "monthly" = "monthly",
+): Promise<{
+  success: boolean;
+  message: string;
+  data?: {
+    summary: {
+      totalRevenue: number;
+      topProduct: string;
+      topProductsList: Array<{ name: string; qty: number; revenue: number }>;
+      bottomProductsList: Array<{ name: string; qty: number; revenue: number }>;
+    };
+    growth: string;
+    trends: Array<{ period: string; revenue: number }>;
+    period: string;
+  };
+}> {
+  try {
+    const revenuePromise = db.execute(
+      sql`
+        SELECT
+          COALESCE(SUM(t.total_price), 0) AS total_revenue
+        FROM transactions t
+        WHERE t.store_id = ${storeId}
+          AND t.created_at BETWEEN ${startDate}::timestamp AND ${endDate}::timestamp + interval '1 day' - interval '1 microsecond'
+      `,
+    );
+
+    const topProductPromise = db.execute(
+      sql`
+        SELECT
+          p.name AS product_name,
+          SUM(t.quantity) AS total_qty
+        FROM transactions t
+        JOIN products p ON t.product_id = p.id
+        WHERE t.store_id = ${storeId}
+          AND t.created_at BETWEEN ${startDate}::timestamp AND ${endDate}::timestamp + interval '1 day' - interval '1 microsecond'
+        GROUP BY p.name
+        ORDER BY total_qty DESC
+        LIMIT 1
+      `,
+    );
+
+    const topProductsListPromise = db.execute(
+      sql`
+        SELECT
+          p.name AS product_name,
+          SUM(t.quantity) AS total_qty,
+          SUM(t.total_price) AS total_revenue
+        FROM transactions t
+        JOIN products p ON t.product_id = p.id
+        WHERE t.store_id = ${storeId}
+          AND t.created_at BETWEEN ${startDate}::timestamp AND ${endDate}::timestamp + interval '1 day' - interval '1 microsecond'
+        GROUP BY p.name
+        ORDER BY total_qty DESC
+        LIMIT 5
+      `,
+    );
+
+    const bottomProductsListPromise = db.execute(
+      sql`
+        SELECT
+          p.name AS product_name,
+          SUM(t.quantity) AS total_qty,
+          SUM(t.total_price) AS total_revenue
+        FROM transactions t
+        JOIN products p ON t.product_id = p.id
+        WHERE t.store_id = ${storeId}
+          AND t.created_at BETWEEN ${startDate}::timestamp AND ${endDate}::timestamp + interval '1 day' - interval '1 microsecond'
+        GROUP BY p.name
+        ORDER BY total_qty ASC
+        LIMIT 5
+      `,
+    );
+
+    let timeFormatStr = "YYYY-MM";
+    if (granularity === "daily") timeFormatStr = "YYYY-MM-DD";
+    else if (granularity === "weekly") timeFormatStr = "IYYY-IW";
+
+    const trendsPromise = db.execute(
+      sql`
+        SELECT 
+          TO_CHAR(t.created_at, ${sql.raw(`'${timeFormatStr}'`)}) as period, 
+          COALESCE(SUM(t.total_price), 0) as revenue 
+        FROM transactions t 
+        WHERE t.store_id = ${storeId} 
+          AND t.created_at BETWEEN ${startDate}::timestamp AND ${endDate}::timestamp + interval '1 day' - interval '1 microsecond' 
+        GROUP BY TO_CHAR(t.created_at, ${sql.raw(`'${timeFormatStr}'`)}) 
+        ORDER BY period ASC
+      `,
+    );
+
+    const [
+      revenueResult,
+      topProductResult,
+      topProductsListResult,
+      bottomProductsListResult,
+      trendsResult,
+    ] = await Promise.all([
+      revenuePromise,
+      topProductPromise,
+      topProductsListPromise,
+      bottomProductsListPromise,
+      trendsPromise,
+    ]);
+
+    const revenue = revenueResult[0];
+    const topProduct = topProductResult[0];
+
+    const totalRevenue = Number(revenue?.total_revenue ?? 0);
+    const topProductName =
+      (topProduct?.product_name as string) ?? "Belum ada transaksi";
+
+    const topProductsList = topProductsListResult.map((row) => ({
+      name: row.product_name as string,
+      qty: Number(row.total_qty ?? 0),
+      revenue: Number(row.total_revenue ?? 0),
+    }));
+
+    const bottomProductsList = bottomProductsListResult.map((row) => ({
+      name: row.product_name as string,
+      qty: Number(row.total_qty ?? 0),
+      revenue: Number(row.total_revenue ?? 0),
+    }));
+
+    const trends = trendsResult.map((t) => {
+      let periodLabel = t.period as string;
+
+      if (granularity === "weekly" && periodLabel.includes("-")) {
+        try {
+          const parts = periodLabel.split("-");
+          const year = parseInt(parts[0], 10);
+          const week = parseInt(parts[1].replace("W", ""), 10);
+
+          const jan4 = new Date(year, 0, 4);
+          const jan4Day = jan4.getDay() || 7;
+          const week1Start = new Date(year, 0, 4 - jan4Day + 1);
+          const weekStart = new Date(
+            week1Start.getTime() + (week - 1) * 7 * 24 * 60 * 60 * 1000,
+          );
+          const weekEnd = new Date(
+            weekStart.getTime() + 6 * 24 * 60 * 60 * 1000,
+          );
+
+          const months = [
+            "Januari",
+            "Februari",
+            "Maret",
+            "April",
+            "Mei",
+            "Juni",
+            "Juli",
+            "Agustus",
+            "September",
+            "Oktober",
+            "November",
+            "Desember",
+          ];
+
+          const startStr = `${weekStart.getDate()} ${months[weekStart.getMonth()]}`;
+          const endStr = `${weekEnd.getDate()} ${months[weekEnd.getMonth()]} ${weekEnd.getFullYear()}`;
+          periodLabel = `${startStr} - ${endStr}`;
+        } catch {}
+      } else if (granularity === "monthly" && periodLabel.includes("-")) {
+        try {
+          const parts = periodLabel.split("-");
+          const months = [
+            "Januari",
+            "Februari",
+            "Maret",
+            "April",
+            "Mei",
+            "Juni",
+            "Juli",
+            "Agustus",
+            "September",
+            "Oktober",
+            "November",
+            "Desember",
+          ];
+          periodLabel = `${months[parseInt(parts[1], 10) - 1]} ${parts[0]}`;
+        } catch {}
+      } else if (granularity === "daily" && periodLabel.includes("-")) {
+        try {
+          const parts = periodLabel.split("-");
+          const months = [
+            "Januari",
+            "Februari",
+            "Maret",
+            "April",
+            "Mei",
+            "Juni",
+            "Juli",
+            "Agustus",
+            "September",
+            "Oktober",
+            "November",
+            "Desember",
+          ];
+          periodLabel = `${parseInt(parts[2], 10)} ${months[parseInt(parts[1], 10) - 1]} ${parts[0]}`;
+        } catch {}
+      }
+
+      return {
+        period: periodLabel,
+        revenue: Number(t.revenue ?? 0),
+      };
+    });
+
+    let growth = "0%";
+    if (trends.length >= 2) {
+      const lastMonth = trends[trends.length - 1].revenue;
+      const prevMonth = trends[trends.length - 2].revenue;
+      if (prevMonth > 0) {
+        const percentage = ((lastMonth - prevMonth) / prevMonth) * 100;
+        growth = `${percentage > 0 ? "+" : ""}${percentage.toFixed(1)}%`;
+      } else if (lastMonth > 0) {
+        growth = "+100%";
+      }
+    }
+
+    const periodLabel = `${startDate} hingga ${endDate}`;
+
+    return {
+      success: true,
+      message: `Analitik lanjutan berhasil diambil untuk periode ${periodLabel}.`,
+      data: {
+        summary: {
+          totalRevenue,
+          topProduct: topProductName,
+          topProductsList,
+          bottomProductsList,
+        },
+        growth,
+        trends,
+        period: periodLabel,
+      },
+    };
+  } catch (err) {
+    console.error("getAdvancedAnalytics error:", err);
+    return {
+      success: false,
+      message:
+        "Gagal mengambil data analitik lanjutan. Terjadi kesalahan pada server.",
     };
   }
 }
@@ -782,7 +1022,8 @@ export async function getStockRiskProducts(storeId: string): Promise<{
  */
 export async function generateReportData(
   storeId: string,
-  period: "daily" | "weekly" | "monthly",
+  startDate: string,
+  endDate: string,
 ): Promise<{
   success: boolean;
   csvContent?: string;
@@ -790,13 +1031,6 @@ export async function generateReportData(
   message: string;
 }> {
   try {
-    const intervalMap = {
-      daily: "1 day",
-      weekly: "7 days",
-      monthly: "30 days",
-    };
-    const interval = intervalMap[period];
-
     const rows = await db.execute(
       sql`
         SELECT
@@ -808,7 +1042,7 @@ export async function generateReportData(
         FROM transactions t
         JOIN products p ON t.product_id = p.id
         WHERE t.store_id = ${storeId}
-          AND t.created_at >= NOW() - ${interval}::interval
+          AND t.created_at BETWEEN ${startDate}::timestamp AND ${endDate}::timestamp + interval '1 day' - interval '1 microsecond'
         ORDER BY t.created_at DESC
       `,
     );
@@ -844,12 +1078,8 @@ export async function generateReportData(
 
     const csvContent =
       "\uFEFF" + [header, ...dataRows, grandTotalRow].join("\n");
-    const periodLabel = {
-      daily: "Harian",
-      weekly: "Mingguan",
-      monthly: "Bulanan",
-    }[period];
-    const filename = `Laporan_${periodLabel}_ShikiPilot_${new Date().toISOString().slice(0, 10)}.csv`;
+    const periodLabel = `${startDate}_sd_${endDate}`;
+    const filename = `Laporan_${periodLabel}_ShikiPilot.csv`;
 
     return {
       success: true,
