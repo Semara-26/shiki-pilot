@@ -171,6 +171,15 @@ const config: Config = {
       boxShadow: {
         neo: "4px 4px 0px 0px rgba(0,0,0,1)",
       },
+      keyframes: {
+        shimmer: {
+          "0%": { backgroundPosition: "-200% 0" },
+          "100%": { backgroundPosition: "200% 0" },
+        },
+      },
+      animation: {
+        shimmer: "shimmer 1.8s linear infinite",
+      },
     },
   },
   // eslint-disable-next-line @typescript-eslint/no-require-imports

@@ -7,8 +7,8 @@ import ReactMarkdown from "react-markdown";
 import { toast } from "sonner";
 import { Loader2, TrashIcon } from "lucide-react";
 import { DashboardHeader } from "@/src/components/dashboard-header";
-import { Button } from "@/src/components/ui/button";
 import { saveMessage } from "@/src/lib/actions/chat";
+import { PhantomSkeleton } from "@/src/components/ui/phantom-skeleton";
 
 export type UIMessageLike = {
   id: string;
@@ -44,8 +44,6 @@ type ToolPartState =
   | "output-available"
   | "approval-requested"
   | "approval-responded";
-
-
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────────────
 
@@ -147,6 +145,14 @@ const ToolThinkingBubble = memo(function ToolThinkingBubble({
                   {isFinished ? `Selesai: Berhasil` : loadingTexts[textIndex]}
                 </span>
               </div>
+
+              {!isFinished && (
+                <div className="mt-3 flex flex-col gap-2 w-full pr-4">
+                  <PhantomSkeleton className="h-4 w-full rounded-sm" />
+                  <PhantomSkeleton className="h-4 w-[90%] rounded-sm" />
+                  <PhantomSkeleton className="h-4 w-[75%] rounded-sm" />
+                </div>
+              )}
 
               {/* Tampilkan result teks jika ada untuk respon kilat tanpa LLM */}
               {resultText && (
@@ -387,10 +393,7 @@ export function ChatClient({ chatId, initialMessages }: ChatClientProps) {
   return (
     <div className="flex h-full flex-col overflow-hidden bg-white dark:bg-[#0a0a0a] text-foreground">
       <div className="flex-none flex justify-between items-center pr-4">
-        <DashboardHeader
-          breadcrumbs="TERMINAL"
-          title="AI ASSISTANT"
-        />
+        <DashboardHeader breadcrumbs="TERMINAL" title="AI ASSISTANT" />
         <button
           onClick={handleClearChat}
           disabled={messages.length === 0}

@@ -27,44 +27,15 @@ import { GrowthChart } from "@/src/components/growth-chart";
 import { AssetDonutChart } from "@/src/components/asset-donut-chart";
 import { EventLog } from "@/src/components/event-log";
 
-// ─── Skeleton helpers (reuse from loading.tsx patterns) ───────────────────────
-
-export function MetricsSkeleton() {
-  return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-      {[1, 2, 3, 4].map((i) => (
-        <div key={i} className="animate-pulse rounded-md bg-secondary/50 p-4">
-          <div className="mb-2 h-3 w-20 rounded-md bg-secondary/70" />
-          <div className="h-8 w-24 rounded-md bg-secondary/70" />
-        </div>
-      ))}
-    </div>
-  );
-}
-
-export function TableSkeleton() {
-  return (
-    <div className="animate-pulse rounded-md bg-secondary/50">
-      <div className="border-b border-border/50 px-4 py-4">
-        <div className="h-4 w-full rounded-md bg-secondary/70" />
-      </div>
-      {[1, 2, 3, 4, 5].map((i) => (
-        <div key={i} className="flex gap-4 border-b border-border/30 px-4 py-4">
-          <div className="h-4 w-12 rounded-md bg-secondary/70" />
-          <div className="h-4 flex-1 max-w-[200px] rounded-md bg-secondary/70" />
-          <div className="h-4 w-16 rounded-md bg-secondary/70" />
-          <div className="h-4 w-16 rounded-md bg-secondary/70" />
-        </div>
-      ))}
-    </div>
-  );
-}
-
-export function ChartSkeleton() {
-  return (
-    <div className="animate-pulse rounded-md bg-secondary/50 h-full min-h-[300px]" />
-  );
-}
+// ─── Skeleton helpers — dari PhantomSkeleton presets ─────────────────────────
+// Import untuk digunakan dalam komponen di file ini
+import {
+  MetricsSkeleton,
+  TableSkeleton,
+  ChartSkeleton,
+} from "@/src/components/ui/phantom-skeleton";
+// Re-export agar bisa dipakai oleh file lain (page.tsx, dll)
+export { MetricsSkeleton, TableSkeleton, ChartSkeleton };
 
 // ─── 1. MetricsSection — 4 kartu angka paling atas ───────────────────────────
 

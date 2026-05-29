@@ -453,7 +453,10 @@ export default function Home() {
           <h2 className="font-section-h2-mobile md:font-section-h2 text-section-h2-mobile md:text-section-h2 mb-10 max-w-4xl mx-auto">
             Siap Jadi UMKM Next Level?
             <br />
-            Mulai Hari Ini dengan <span className="bg-gradient-to-r from-[#0284c7] to-[#38bdf8] bg-clip-text text-transparent">ShikiPilot.</span>
+            Mulai Hari Ini dengan{" "}
+            <span className="bg-gradient-to-r from-[#0284c7] to-[#38bdf8] bg-clip-text text-transparent">
+              ShikiPilot.
+            </span>
           </h2>
           <Link
             className="inline-flex items-center justify-center bg-[#0ea5e9] text-[#0a0a0a] font-bold px-12 py-6 rounded-full text-xl hover:scale-105 hover:shadow-[0_0_50px_-10px_rgba(14,165,233,0.6)] active:scale-95 active:shadow-[inset_0_4px_8px_rgba(0,0,0,0.5)] transition-all duration-200"

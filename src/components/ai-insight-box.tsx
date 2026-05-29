@@ -3,6 +3,7 @@
 import { useState, useCallback } from "react";
 import { Sparkles, RefreshCw } from "lucide-react";
 import { cn } from "@/src/lib/utils";
+import { PhantomSkeleton } from "@/src/components/ui/phantom-skeleton";
 
 export interface ChartDataSummary {
   revenueOverTime?: { name: string; value: number }[];
@@ -168,9 +169,9 @@ export function AiInsightBox({
       {/* Output */}
       {isLoading && (
         <div className="space-y-2">
-          <div className="h-4 w-full animate-pulse rounded bg-gray-200 dark:bg-white/10" />
-          <div className="h-4 max-w-[90%] animate-pulse rounded bg-gray-200 dark:bg-white/10" />
-          <div className="h-4 max-w-[70%] animate-pulse rounded bg-gray-200 dark:bg-white/10" />
+          <PhantomSkeleton className="h-4 w-full" />
+          <PhantomSkeleton className="h-4 max-w-[90%]" />
+          <PhantomSkeleton className="h-4 max-w-[70%]" />
         </div>
       )}
       {!isLoading && insight && (

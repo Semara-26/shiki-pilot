@@ -43,9 +43,9 @@ export function OperatorIdPanel({ isOpen }: OperatorIdPanelProps) {
   const [isPrefsOpen, setIsPrefsOpen] = useState(
     searchParams.get("setup") === "wa",
   );
-  const [initialPrefTab] = useState<
-    "ACCOUNT" | "STORE INFO"
-  >(searchParams.get("setup") === "wa" ? "STORE INFO" : "ACCOUNT");
+  const [initialPrefTab] = useState<"ACCOUNT" | "STORE INFO">(
+    searchParams.get("setup") === "wa" ? "STORE INFO" : "ACCOUNT",
+  );
   const [isDocOpen, setIsDocOpen] = useState(false);
   const [localOverrides, setLocalOverrides] = useState<
     Partial<{
