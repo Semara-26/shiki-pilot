@@ -74,41 +74,55 @@ export default function Home() {
         </div>
       </header>
 
-      {/* 2. Hero Section (Asymmetrical Stack) */}
-      <section className="w-full max-w-none px-0 relative pt-hero-top-padding pb-32">
+      {/* 2. Hero Section (Responsive Split-Layout) */}
+      <section
+        className="relative w-full min-h-screen flex items-center bg-cover bg-no-repeat bg-[position:82%_center] md:bg-right lg:bg-center"
+        style={{
+          backgroundImage: "url('/banner hero section.png')",
+        }}
+      >
         {/* Atmospheric Glow */}
-        <div className="absolute top-0 left-0 w-[800px] h-[800px] bg-cyan-glow rounded-full blur-[120px] -z-10 opacity-30 pointer-events-none"></div>
+        <div className="absolute top-0 left-0 w-[800px] h-[800px] bg-cyan-glow rounded-full blur-[120px] -z-10 opacity-30 pointer-events-none" />
 
-        {/* Hero Background Image */}
+        {/* Mobile-only overlay: agar teks tetap terbaca saat menimpa ilustrasi */}
+        <div className="absolute inset-0 bg-zinc-950/60 md:bg-transparent pointer-events-none" />
+
+        {/* Gradient bawah: selalu aktif agar transisi ke section berikutnya mulus */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0a]/20 via-transparent to-[#0a0a0a] pointer-events-none" />
+
+        {/* Konten: centered di mobile, geser kiri di desktop */}
+        <div className="container mx-auto px-6 md:px-8 lg:px-12 relative z-10 pt-32 pb-32 flex flex-col items-center text-center md:items-start md:text-left">
+          <div className="max-w-xl lg:max-w-2xl flex flex-col gap-8">
+            {/* Headline */}
+            <h1 className="font-jakarta leading-[1.05] tracking-tight">
+              <span className="block text-4xl sm:text-5xl md:text-6xl font-extrabold text-zinc-50 drop-shadow-md">
+                Jualan Lebih Cepat.
+              </span>
+              <span className="mt-2 block text-4xl sm:text-5xl md:text-6xl font-extrabold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent drop-shadow-md">
+                Manajemen Lebih Cerdas.
+              </span>
+            </h1>
+
+            {/* CTA Button */}
+            <div className="flex justify-center md:justify-start">
+              <Link
+                href="/dashboard"
+                className="inline-flex items-center justify-center bg-[#0ea5e9] text-[#0a0a0a] font-bold px-10 py-5 rounded-full text-lg hover:scale-105 hover:shadow-[0_0_50px_-10px_rgba(14,165,233,0.6)] active:scale-95 active:shadow-[inset_0_4px_8px_rgba(0,0,0,0.5)] transition-all duration-200"
+              >
+                Buka Dashboard (Gratis)
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        {/* Trigger onLoad untuk splash screen (gambar dirender tapi tidak terlihat) */}
         <img
           src="/banner hero section.png"
-          alt="Hero Banner"
-          className="absolute inset-0 z-0 w-full h-[80vh] md:h-[90vh] object-cover object-[25%_center] md:object-[70%_center] opacity-80"
+          alt=""
+          aria-hidden
+          className="absolute w-0 h-0 opacity-0 pointer-events-none"
           onLoad={() => setIsHeroLoaded(true)}
         />
-
-        {/* Gradient Masking overlay */}
-        <div className="absolute inset-0 z-0 bg-gradient-to-b from-[#0a0a0a]/30 via-[#0a0a0a]/60 to-[#0a0a0a]"></div>
-
-        {/* Foreground Content */}
-        <div className="relative z-10 flex flex-col items-center justify-center text-center gap-8 py-20 px-6">
-          <h1 className="relative z-10 font-hero-h1-mobile md:font-hero-h1 text-hero-h1-mobile md:text-hero-h1 text-text-primary text-center max-w-5xl">
-            <span className="text-transparent bg-clip-text bg-gradient-to-b from-white/70 via-white/10 to-white/40 [-webkit-text-stroke:1.5px_rgba(255,255,255,0.5)] [text-shadow:0_8px_16px_rgba(255,255,255,0.15)] drop-shadow-sm">
-              Jualan Lebih Cepat.
-            </span>
-            <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-b from-[#38bdf8]/70 via-[#0284c7]/20 to-[#38bdf8]/40 [-webkit-text-stroke:1.5px_rgba(56,189,248,0.5)] [text-shadow:0_8px_16px_rgba(56,189,248,0.2)] drop-shadow-sm">
-              Manajemen Lebih Cerdas.
-            </span>
-          </h1>
-
-          <Link
-            className="relative z-10 inline-flex items-center justify-center bg-[#0ea5e9] text-[#0a0a0a] font-bold px-10 py-5 rounded-full text-lg hover:scale-105 hover:shadow-[0_0_50px_-10px_rgba(14,165,233,0.6)] active:scale-95 active:shadow-[inset_0_4px_8px_rgba(0,0,0,0.5)] transition-all duration-200"
-            href="/dashboard"
-          >
-            Buka Dashboard (Gratis)
-          </Link>
-        </div>
       </section>
 
       {/* 3. Problem/Agitation (Bento Grid Asymmetrical) */}

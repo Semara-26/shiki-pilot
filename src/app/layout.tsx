@@ -2,13 +2,14 @@ import type { Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
 import { ThemeProvider } from "next-themes";
 import { Toaster } from "sonner";
-import { Poppins } from "next/font/google";
+import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 
-const poppins = Poppins({
+const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-poppins",
+  weight: ["400", "500", "600", "700", "800"],
+  variable: "--font-jakarta",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -39,7 +40,7 @@ export default function RootLayout({
             rel="stylesheet"
           />
         </head>
-        <body className={`${poppins.variable} font-sans antialiased`}>
+        <body className={`${jakarta.variable} font-jakarta antialiased`}>
           <ThemeProvider attribute="class" defaultTheme="dark">
             <Toaster
               theme="dark"

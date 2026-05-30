@@ -10,15 +10,16 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ["var(--font-poppins)", "sans-serif"],
-        "hero-h1-mobile": ["Poppins", "sans-serif"],
-        "step-number": ["Poppins", "sans-serif"],
-        body: ["Poppins", "sans-serif"],
-        "section-h2-mobile": ["Poppins", "sans-serif"],
-        "section-h2": ["Poppins", "sans-serif"],
+        sans: ["var(--font-jakarta)", "sans-serif"],
+        jakarta: ["var(--font-jakarta)", "sans-serif"],
+        "hero-h1-mobile": ["var(--font-jakarta)", "sans-serif"],
+        "step-number": ["var(--font-jakarta)", "sans-serif"],
+        body: ["var(--font-jakarta)", "sans-serif"],
+        "section-h2-mobile": ["var(--font-jakarta)", "sans-serif"],
+        "section-h2": ["var(--font-jakarta)", "sans-serif"],
         "label-mono": ["JetBrains Mono", "monospace"],
-        "hero-subheadline": ["Poppins", "sans-serif"],
-        "hero-h1": ["Poppins", "sans-serif"],
+        "hero-subheadline": ["var(--font-jakarta)", "sans-serif"],
+        "hero-h1": ["var(--font-jakarta)", "sans-serif"],
       },
       fontSize: {
         "hero-h1-mobile": [
