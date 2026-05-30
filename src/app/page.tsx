@@ -1,12 +1,28 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { FileText, Users, Instagram, Linkedin, Github } from "lucide-react";
 import { motion } from "framer-motion";
+import { SplashScreen } from "@/src/components/splash-screen";
 
 export default function Home() {
+  const [isHeroLoaded, setIsHeroLoaded] = useState(false);
+
+  useEffect(() => {
+    // Fallback: paksa splash screen hilang maksimal 3 detik,
+    // berguna jika event onLoad gagal terpicu (misal gambar sudah ter-cache)
+    const timer = setTimeout(() => {
+      setIsHeroLoaded(true);
+    }, 3000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <main className="overflow-x-hidden bg-[#0a0a0a] text-text-primary selection:bg-primary/30 selection:text-primary font-sans">
+      {/* Splash Screen: muncul saat hero image belum selesai dimuat */}
+      <SplashScreen isHeroLoaded={isHeroLoaded} />
       {/* 1. Header (Shared Component: TopNavBar) */}
       <header className="fixed top-0 w-full z-50 bg-background/80 backdrop-blur-xl border-b border-white/10">
         <div className="max-w-[1440px] w-full mx-auto px-6 lg:px-12 flex justify-between items-center h-20">
@@ -68,6 +84,7 @@ export default function Home() {
           src="/banner hero section.png"
           alt="Hero Banner"
           className="absolute inset-0 z-0 w-full h-[80vh] md:h-[90vh] object-cover object-[25%_center] md:object-[70%_center] opacity-80"
+          onLoad={() => setIsHeroLoaded(true)}
         />
 
         {/* Gradient Masking overlay */}
@@ -268,8 +285,8 @@ export default function Home() {
                 Login Sekali Klik
               </h3>
               <p className="text-text-secondary font-body text-body relative z-10 text-sm">
-                Gunakan akun Google atau nomor WhatsApp, tanpa perlu ingat
-                password rumit.
+                Gunakan akun Google atau Github, tanpa perlu ingat password
+                rumit.
               </p>
             </div>
             {/* Step 2 */}
@@ -420,9 +437,8 @@ export default function Home() {
                 </span>
               </summary>
               <div className="px-8 pb-6 text-text-secondary">
-                Sangat aman. Kami menggunakan enkripsi standar industri
-                perbankan untuk melindungi data transaksi dan inventaris toko
-                Anda.
+                Sangat aman. Kami menggunakan enkripsi standar industri untuk
+                melindungi data transaksi dan inventaris toko Anda.
               </div>
             </details>
             <details className="group border border-white/10 rounded-[2rem] bg-white/5 overflow-hidden">

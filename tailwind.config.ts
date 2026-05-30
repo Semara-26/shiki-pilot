@@ -176,9 +176,24 @@ const config: Config = {
           "0%": { backgroundPosition: "-200% 0" },
           "100%": { backgroundPosition: "200% 0" },
         },
+        "fake-progress": {
+          "0%": { width: "0%" },
+          "40%": { width: "55%" },
+          "70%": { width: "72%" },
+          "90%": { width: "80%" },
+          "100%": { width: "80%" },
+        },
+        "slow-ping": {
+          "0%": { transform: "scale(1)", opacity: "0.6" },
+          "70%": { transform: "scale(1.8)", opacity: "0" },
+          "100%": { transform: "scale(1.8)", opacity: "0" },
+        },
       },
       animation: {
         shimmer: "shimmer 1.8s linear infinite",
+        "fake-progress":
+          "fake-progress 2.5s cubic-bezier(0.4, 0, 0.2, 1) forwards",
+        "slow-ping": "slow-ping 2s ease-out infinite",
       },
     },
   },
