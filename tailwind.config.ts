@@ -188,12 +188,26 @@ const config: Config = {
           "70%": { transform: "scale(1.8)", opacity: "0" },
           "100%": { transform: "scale(1.8)", opacity: "0" },
         },
+        "svg-trace": {
+          "0%": { strokeDashoffset: "600", opacity: "1" },
+          "70%": { strokeDashoffset: "0", opacity: "1" },
+          "85%": { strokeDashoffset: "0", opacity: "0" },
+          "100%": { strokeDashoffset: "600", opacity: "0" },
+        },
+        "fade-cycle": {
+          "0%": { opacity: "0", transform: "translateY(4px)" },
+          "15%": { opacity: "1", transform: "translateY(0)" },
+          "80%": { opacity: "1", transform: "translateY(0)" },
+          "100%": { opacity: "0", transform: "translateY(-4px)" },
+        },
       },
       animation: {
         shimmer: "shimmer 1.8s linear infinite",
         "fake-progress":
           "fake-progress 2.5s cubic-bezier(0.4, 0, 0.2, 1) forwards",
         "slow-ping": "slow-ping 2s ease-out infinite",
+        "svg-trace": "svg-trace 3s ease-in-out infinite",
+        "fade-cycle": "fade-cycle 2.5s ease-in-out both",
       },
     },
   },
