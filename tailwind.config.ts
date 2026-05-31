@@ -201,6 +201,14 @@ const config: Config = {
           "80%": { opacity: "1", transform: "translateY(0)" },
           "100%": { opacity: "0", transform: "translateY(-4px)" },
         },
+        fadeIn: {
+          "0%": { opacity: "0" },
+          "100%": { opacity: "1" },
+        },
+        zoomIn: {
+          "0%": { opacity: "0", transform: "scale(0.95)" },
+          "100%": { opacity: "1", transform: "scale(1)" },
+        },
       },
       animation: {
         shimmer: "shimmer 1.8s linear infinite",
@@ -209,6 +217,8 @@ const config: Config = {
         "slow-ping": "slow-ping 2s ease-out infinite",
         "svg-trace": "svg-trace 3s ease-in-out infinite",
         "fade-cycle": "fade-cycle 2.5s ease-in-out both",
+        fadeIn: "fadeIn 0.2s ease-out",
+        zoomIn: "zoomIn 0.3s ease-out forwards",
       },
     },
   },

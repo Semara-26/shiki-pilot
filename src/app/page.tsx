@@ -5,6 +5,7 @@ import Link from "next/link";
 import { FileText, Users, Instagram, Linkedin, Github } from "lucide-react";
 import { motion } from "framer-motion";
 import { SplashScreen } from "@/src/components/splash-screen";
+import { PainPointsSection } from "@/src/components/pain-points-section";
 
 export default function Home() {
   const [isHeroLoaded, setIsHeroLoaded] = useState(false);
@@ -125,70 +126,8 @@ export default function Home() {
         />
       </section>
 
-      {/* 3. Problem/Agitation (Bento Grid Asymmetrical) */}
-      <section className="py-section-v-padding max-w-[1440px] w-full mx-auto px-6 lg:px-12 relative z-0">
-        <div className="absolute top-[-10%] right-[-5%] w-[300px] md:w-[500px] h-[300px] md:h-[500px] bg-[#0ea5e9]/10 rounded-full blur-[100px] md:blur-[150px] -z-10 pointer-events-none"></div>
-        <div className="absolute bottom-[-10%] left-[-5%] w-[300px] md:w-[500px] h-[300px] md:h-[500px] bg-[#0ea5e9]/10 rounded-full blur-[100px] md:blur-[150px] -z-10 pointer-events-none"></div>
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.6 }}
-        >
-          <h2 className="font-section-h2-mobile md:font-section-h2 text-section-h2-mobile md:text-section-h2 mb-16 text-center">
-            Tinggalkan Cara Lama.
-            <br />
-            <span className="text-text-muted">
-              Masalah UMKM Selesai di Sini.
-            </span>
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Card 1 (Span 6 / col-span-2) */}
-            <div className="bg-gradient-to-r from-white/10 via-[#0a0a0a]/80 to-transparent border border-white/10 rounded-3xl p-8 md:col-span-2 min-h-[300px] flex flex-col md:flex-row items-center justify-between relative overflow-hidden">
-              <div className="md:w-1/2 relative z-10">
-                <h3 className="text-3xl font-bold mb-4">
-                  Misteri Stok Gaib yang Bikin Tekor
-                </h3>
-                <p className="text-text-secondary font-body text-body">
-                  Di pembukuan ketulis sisa 20, tapi pas dicari di rak ternyata
-                  sisa 5. ShikiPilot otomatis ngunci dan lacak setiap mutasi
-                  barang...
-                </p>
-              </div>
-              {/* Image Stok Gaib with Mix-Blend Magic */}
-              <img
-                src="/ilustrasi stok gaib.png"
-                alt="Stok Gaib"
-                className="absolute -bottom-10 -right-10 w-[80%] md:w-[60%] object-contain mix-blend-screen opacity-90 z-0"
-              />
-            </div>
-            {/* Card 2 (Span 3) */}
-            <div className="bg-white/5 border border-white/10 rounded-3xl p-8 min-h-[200px] relative overflow-hidden">
-              <FileText className="text-white/10 w-16 h-16 absolute top-4 right-4 z-0" />
-              <div className="mt-auto relative z-10">
-                <h3 className="text-xl font-bold mb-4">
-                  Begadang Demi Laporan? Gak Lagi.
-                </h3>
-                <p className="text-text-secondary font-body text-body text-sm">
-                  Gak usah pusing ngumpulin nota lecek tiap malam minggu...
-                </p>
-              </div>
-            </div>
-            {/* Card 3 (Span 3) */}
-            <div className="bg-white/5 border border-white/10 rounded-3xl p-8 min-h-[200px] relative overflow-hidden">
-              <Users className="text-white/10 w-16 h-16 absolute top-4 right-4 z-0" />
-              <div className="mt-auto relative z-10">
-                <h3 className="text-xl font-bold mb-4">
-                  Antrean Panjang Bikin Pelanggan Kabur
-                </h3>
-                <p className="text-text-secondary font-body text-body text-sm">
-                  Kasir manual yang lambat bikin pembeli gak sabar...
-                </p>
-              </div>
-            </div>
-          </div>
-        </motion.div>
-      </section>
+      {/* 3. Problem/Agitation (Pain Points Bento Grid & Interactive Modal) */}
+      <PainPointsSection />
 
       {/* 4. Value Proposition (Z-Pattern / Asymmetrical Split) */}
       <section
