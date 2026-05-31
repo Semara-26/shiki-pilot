@@ -2,10 +2,12 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { FileText, Users, Instagram, Linkedin, Github } from "lucide-react";
+import { Instagram, Linkedin, Github } from "lucide-react";
 import { motion } from "framer-motion";
 import { SplashScreen } from "@/src/components/splash-screen";
 import { PainPointsSection } from "@/src/components/pain-points-section";
+import { FeaturesSection } from "@/src/components/features-section";
+import { HowItWorksSection } from "@/src/components/how-it-works-section";
 
 export default function Home() {
   const [isHeroLoaded, setIsHeroLoaded] = useState(false);
@@ -129,160 +131,11 @@ export default function Home() {
       {/* 3. Problem/Agitation (Pain Points Bento Grid & Interactive Modal) */}
       <PainPointsSection />
 
-      {/* 4. Value Proposition (Z-Pattern / Asymmetrical Split) */}
-      <section
-        id="features"
-        className="py-section-v-padding max-w-[1440px] w-full mx-auto px-6 lg:px-12 relative border-t border-white/10 z-0"
-      >
-        <div className="absolute top-[-10%] left-[-5%] w-[300px] md:w-[500px] h-[300px] md:h-[500px] bg-[#0ea5e9]/10 rounded-full blur-[100px] md:blur-[150px] -z-10 pointer-events-none"></div>
-        <div className="absolute bottom-[-10%] right-[-5%] w-[300px] md:w-[500px] h-[300px] md:h-[500px] bg-[#0ea5e9]/10 rounded-full blur-[100px] md:blur-[150px] -z-10 pointer-events-none"></div>
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.6 }}
-        >
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
-            {/* Left Text (40%) */}
-            <div className="lg:col-span-5 flex flex-col gap-6">
-              <span className="font-label-mono text-label-mono text-primary uppercase tracking-widest">
-                Fitur Unggulan
-              </span>
-              <h2 className="font-section-h2-mobile md:font-section-h2 text-section-h2-mobile md:text-section-h2">
-                Ngobrol Sama Data Jualanmu.
-              </h2>
-              <p className="font-body text-body text-text-secondary">
-                Tinggalkan dashboard rumit. Tanya stok, minta laporan, atau cek
-                omzet semudah chatingan sama teman via WhatsApp. AI kami
-                mengerti bahasa sehari-hari.
-              </p>
-            </div>
-            {/* Right Visual (60% Bleeding) */}
-            <div className="lg:col-span-7 relative min-h-[400px] lg:min-h-[500px] flex flex-col justify-end w-[110%] lg:w-[120%] -right-[5%] lg:-right-[10%]">
-              <div className="w-full h-full bg-white/5 border border-white/10 rounded-[2rem] p-8 flex flex-col justify-end relative">
-                {/* Fake WhatsApp UI */}
-                <div className="relative z-10 w-full min-h-[350px] bg-[#0a0a0a]/80 backdrop-blur-md p-6 flex flex-col gap-4 border border-white/10 rounded-xl">
-                  <div className="flex items-center gap-4 border-b border-white/10 pb-4 mb-4">
-                    <div className="w-12 h-12 rounded-full bg-[#0ea5e9] flex items-center justify-center">
-                      <span
-                        className="material-symbols-outlined text-[#0a0a0a]"
-                        style={{ fontVariationSettings: '"FILL" 1' }}
-                      >
-                        smart_toy
-                      </span>
-                    </div>
-                    <div>
-                      <div className="font-bold">ShikiPilot AI</div>
-                      <div className="text-xs text-[#0ea5e9]">Online</div>
-                    </div>
-                  </div>
-                  {/* User Bubble */}
-                  <div className="self-end mr-8 md:mr-20 bg-[#005c4b] text-[#e9edef] border border-white/10 p-4 rounded-2xl rounded-tr-none max-w-[80%]">
-                    <p className="font-body text-body text-sm">
-                      Produk apa aja yang tinggal dikit?
-                    </p>
-                  </div>
-                  {/* AI Bubble */}
-                  <div className="self-start bg-[#202c33] text-[#e9edef] border border-primary/30 p-4 rounded-2xl rounded-tl-none max-w-[80%]">
-                    <p className="font-body text-body text-sm mb-2">
-                      Tunggu sebentar ya Bos... Ini beberapa produk yang stoknya
-                      masuk kategori kritis:
-                    </p>
-                    <ul className="list-disc pl-4 text-sm text-text-secondary space-y-1">
-                      <li>
-                        Kerupuk Tuna Pedas{" "}
-                        <span className="text-error font-bold">(sisa 9)</span>
-                      </li>
-                      <li>
-                        Kopi Susu Literan{" "}
-                        <span className="text-error font-bold">(sisa 2)</span>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </motion.div>
-      </section>
+      {/* 4. Features (Interactive Tabs) */}
+      <FeaturesSection />
 
-      {/* 5. How It Works (Hairline Minimalist) */}
-      <section
-        id="how-it-works"
-        className="py-section-v-padding max-w-[1440px] w-full mx-auto px-6 lg:px-12 border-t border-white/10 relative z-0"
-      >
-        <div className="absolute top-[-10%] right-[-5%] w-[300px] md:w-[500px] h-[300px] md:h-[500px] bg-[#0ea5e9]/10 rounded-full blur-[100px] md:blur-[150px] -z-10 pointer-events-none"></div>
-        <div className="absolute bottom-[-10%] left-[-5%] w-[300px] md:w-[500px] h-[300px] md:h-[500px] bg-[#0ea5e9]/10 rounded-full blur-[100px] md:blur-[150px] -z-10 pointer-events-none"></div>
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.6 }}
-        >
-          <h2 className="font-section-h2-mobile md:font-section-h2 text-section-h2-mobile md:text-section-h2 mb-20 text-center">
-            Jalan Pintas Ke Berhasil.
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-0">
-            {/* Step 1 */}
-            <div className="border-t border-b md:border-b-0 md:border-r border-white/10 p-12 relative flex flex-col items-center text-center">
-              <span className="font-step-number text-step-number text-white/5 absolute -top-10 -left-4 z-0 pointer-events-none">
-                01
-              </span>
-              <span
-                className="material-symbols-outlined text-primary text-5xl mb-6 relative z-10"
-                style={{ fontVariationSettings: '"FILL" 0' }}
-              >
-                login
-              </span>
-              <h3 className="text-2xl font-bold mb-4 relative z-10">
-                Login Sekali Klik
-              </h3>
-              <p className="text-text-secondary font-body text-body relative z-10 text-sm">
-                Gunakan akun Google atau Github, tanpa perlu ingat password
-                rumit.
-              </p>
-            </div>
-            {/* Step 2 */}
-            <div className="border-b md:border-b-0 md:border-r border-white/10 p-12 relative flex flex-col items-center text-center">
-              <span className="font-step-number text-step-number text-white/5 absolute -top-10 -left-4 z-0 pointer-events-none">
-                02
-              </span>
-              <span
-                className="material-symbols-outlined text-primary text-5xl mb-6 relative z-10"
-                style={{ fontVariationSettings: '"FILL" 0' }}
-              >
-                storefront
-              </span>
-              <h3 className="text-2xl font-bold mb-4 relative z-10">
-                Daftarkan Toko
-              </h3>
-              <p className="text-text-secondary font-body text-body relative z-10 text-sm">
-                Masukkan profil singkat usaha dan tambahkan beberapa produk
-                pertama untuk mulai.
-              </p>
-            </div>
-            {/* Step 3 */}
-            <div className="border-b md:border-b-0 border-white/10 p-12 relative flex flex-col items-center text-center">
-              <span className="font-step-number text-step-number text-white/5 absolute -top-10 -left-4 z-0 pointer-events-none">
-                03
-              </span>
-              <span
-                className="material-symbols-outlined text-primary text-5xl mb-6 relative z-10"
-                style={{ fontVariationSettings: '"FILL" 0' }}
-              >
-                chat
-              </span>
-              <h3 className="text-2xl font-bold mb-4 relative z-10">
-                Jualan Otomatis &amp; Pantau via Chat
-              </h3>
-              <p className="text-text-secondary font-body text-body relative z-10 text-sm">
-                Kasir siap digunakan. Pantau semuanya lewat laporan chat
-                WhatsApp tiap akhir hari.
-              </p>
-            </div>
-          </div>
-        </motion.div>
-      </section>
+      {/* 5. How It Works (S-Curve Glowing Stepper) */}
+      <HowItWorksSection />
 
       {/* 6. Pricing */}
       <section
@@ -301,7 +154,7 @@ export default function Home() {
             <h2 className="font-section-h2-mobile md:font-section-h2 text-section-h2-mobile md:text-section-h2 mb-12">
               Satu Paket Sempurna, Selamanya Gratis.
             </h2>
-            <div className="bg-[#0a0a0a] border border-primary/30 rounded-[2rem] p-12 relative overflow-hidden shadow-[0_0_80px_-20px_rgba(14,165,233,0.3)]">
+            <div className="bg-zinc-900/50 backdrop-blur-md border border-white/10 rounded-[2rem] p-12 relative overflow-hidden shadow-[0_0_40px_rgba(34,211,238,0.15)]">
               {/* Inner Glow */}
               <div className="absolute -top-32 -right-32 w-64 h-64 bg-cyan-glow rounded-full blur-[80px]"></div>
               <div className="flex justify-center items-end gap-2 mb-8">
@@ -329,7 +182,7 @@ export default function Home() {
                   >
                     check_circle
                   </span>
-                  Asisten AI WhatsApp (Terbatas)
+                  Asisten AI WhatsApp (Beta Access)
                 </li>
                 <li className="flex items-center gap-3 pb-2">
                   <span
@@ -366,10 +219,24 @@ export default function Home() {
           transition={{ duration: 0.6 }}
         >
           <h2 className="font-section-h2-mobile md:font-section-h2 text-section-h2-mobile md:text-section-h2 mb-16 text-center">
-            Pertanyaan Umum.
+            Sering Ditanyakan Bos UMKM.
           </h2>
           <div className="space-y-4 font-body text-body">
-            <details className="group border border-white/10 rounded-[2rem] bg-white/5 overflow-hidden">
+            <details className="group border border-white/10 rounded-[2rem] bg-white/5 overflow-hidden transition-all duration-300 hover:border-cyan-500/50 hover:bg-zinc-900/80">
+              <summary className="w-full px-8 py-6 text-left flex justify-between items-center font-bold text-lg hover:text-primary transition-colors focus:outline-none cursor-pointer list-none">
+                Kenapa Asisten AI WhatsApp berstatus Beta Access?
+                <span className="material-symbols-outlined group-open:rotate-180 transition-transform">
+                  expand_more
+                </span>
+              </summary>
+              <div className="px-8 pb-6 text-text-secondary">
+                Saat ini sistem AI kami masih dalam tahap pengembangan intensif
+                dan di-host secara lokal untuk memastikan responsivitas serta
+                pembaruan kilat. Oleh karena itu, fitur AI akan aktif menemani
+                Anda selama jam operasional/jam kerja saja.
+              </div>
+            </details>
+            <details className="group border border-white/10 rounded-[2rem] bg-white/5 overflow-hidden transition-all duration-300 hover:border-cyan-500/50 hover:bg-zinc-900/80">
               <summary className="w-full px-8 py-6 text-left flex justify-between items-center font-bold text-lg hover:text-primary transition-colors focus:outline-none cursor-pointer list-none">
                 Saya gaptek dan belum pernah pakai sistem kasir, apa bakal
                 susah?
@@ -382,7 +249,7 @@ export default function Home() {
                 menggunakan WhatsApp, Anda pasti bisa menggunakan ShikiPilot.
               </div>
             </details>
-            <details className="group border border-white/10 rounded-[2rem] bg-white/5 overflow-hidden">
+            <details className="group border border-white/10 rounded-[2rem] bg-white/5 overflow-hidden transition-all duration-300 hover:border-cyan-500/50 hover:bg-zinc-900/80">
               <summary className="w-full px-8 py-6 text-left flex justify-between items-center font-bold text-lg hover:text-primary transition-colors focus:outline-none cursor-pointer list-none">
                 Apakah data jualan saya aman?
                 <span className="material-symbols-outlined group-open:rotate-180 transition-transform">
@@ -394,7 +261,7 @@ export default function Home() {
                 melindungi data transaksi dan inventaris toko Anda.
               </div>
             </details>
-            <details className="group border border-white/10 rounded-[2rem] bg-white/5 overflow-hidden">
+            <details className="group border border-white/10 rounded-[2rem] bg-white/5 overflow-hidden transition-all duration-300 hover:border-cyan-500/50 hover:bg-zinc-900/80">
               <summary className="w-full px-8 py-6 text-left flex justify-between items-center font-bold text-lg hover:text-primary transition-colors focus:outline-none cursor-pointer list-none">
                 Aplikasi ini beneran gratis?
                 <span className="material-symbols-outlined group-open:rotate-180 transition-transform">
@@ -411,7 +278,7 @@ export default function Home() {
       </section>
 
       {/* 8. Final CTA */}
-      <section className="py-32 max-w-[1440px] w-full mx-auto px-6 lg:px-12 text-center relative border-t border-white/10 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#0ea5e9]/20 via-[#0a0a0a] to-[#0a0a0a]">
+      <section className="py-32 max-w-[1440px] w-full mx-auto px-6 lg:px-12 text-center relative border-t border-white/10 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-cyan-950/20 via-zinc-950 to-zinc-950">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-cyan-glow rounded-full blur-[100px] -z-10 pointer-events-none"></div>
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -428,7 +295,7 @@ export default function Home() {
             </span>
           </h2>
           <Link
-            className="inline-flex items-center justify-center bg-[#0ea5e9] text-[#0a0a0a] font-bold px-12 py-6 rounded-full text-xl hover:scale-105 hover:shadow-[0_0_50px_-10px_rgba(14,165,233,0.6)] active:scale-95 active:shadow-[inset_0_4px_8px_rgba(0,0,0,0.5)] transition-all duration-200"
+            className="inline-flex items-center justify-center bg-[#0ea5e9] text-[#0a0a0a] font-bold px-12 py-6 rounded-full text-xl shadow-[0_0_20px_rgba(34,211,238,0.4)] hover:shadow-[0_0_35px_rgba(34,211,238,0.6)] hover:scale-105 hover:-translate-y-1 active:scale-95 active:shadow-[inset_0_4px_8px_rgba(0,0,0,0.5)] transition-all duration-300"
             href="/dashboard"
           >
             Daftar Gratis Sekarang

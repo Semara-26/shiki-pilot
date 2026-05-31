@@ -19,8 +19,7 @@ export type BulkTransactionResult =
 export async function createBulkTransactions(
   storeId: string,
   items: BulkTransactionItem[],
-  // cashReceived: jumlah uang diterima (untuk QRIS = grandTotal, untuk cash = input kasir)
-  // Diterima sebagai parameter untuk konsistensi API, siap dipakai saat kolom DB tersedia
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   _cashReceived?: number,
 ): Promise<BulkTransactionResult> {
   try {

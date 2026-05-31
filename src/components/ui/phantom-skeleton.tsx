@@ -1,6 +1,6 @@
 import { cn } from "@/src/lib/utils";
 
-export interface PhantomSkeletonProps extends React.HTMLAttributes<HTMLDivElement> {}
+export type PhantomSkeletonProps = React.HTMLAttributes<HTMLDivElement>;
 
 /**
  * PhantomSkeleton — Komponen loading skeleton dengan shimmer effect.

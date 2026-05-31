@@ -4,7 +4,6 @@ import { useState, useRef, useEffect, memo } from "react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import ReactMarkdown from "react-markdown";
-import { toast } from "sonner";
 import { Loader2, TrashIcon } from "lucide-react";
 import { DashboardHeader } from "@/src/components/dashboard-header";
 import { saveMessage } from "@/src/lib/actions/chat";
@@ -37,13 +36,6 @@ function getMessageText(parts: unknown[] | undefined): string {
 //   'input-available'  → Argumen sudah lengkap, tool belum dieksekusi
 //   'output-available' → Tool sudah selesai, hasil tersedia
 // Data args ada di part.input, BUKAN part.args.
-
-type ToolPartState =
-  | "input-streaming"
-  | "input-available"
-  | "output-available"
-  | "approval-requested"
-  | "approval-responded";
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────────────
 
