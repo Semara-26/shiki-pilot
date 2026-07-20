@@ -19,6 +19,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Pencil, Trash2, Loader2 } from "lucide-react";
 import { cn } from "@/src/lib/utils";
 import { useState, useTransition, memo, useCallback } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { deleteProduct } from "@/src/actions/product-actions";
 
@@ -40,6 +41,7 @@ export interface ProductRow {
   stock: number;
   imageUrl: string | null;
   description?: string | null;
+  createdAt?: string | Date;
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -74,7 +76,7 @@ const AssetModal = memo(function AssetModal({
   product,
   onClose,
 }: AssetModalProps) {
-  return (
+  const modalContent = (
     <motion.div
       role="dialog"
       aria-modal="true"
@@ -93,7 +95,7 @@ const AssetModal = memo(function AssetModal({
         exit={{ opacity: 0, scale: 0.95, y: 8 }}
         transition={{ type: "spring", stiffness: 320, damping: 26, mass: 0.7 }}
         style={{ willChange: "transform, opacity" }}
-        className="w-full max-w-lg overflow-hidden rounded-md border border-primary/50 bg-secondary/90 p-6 shadow-[0_0_30px_rgba(242,13,13,0.3)] relative"
+        className="w-full max-w-lg overflow-hidden rounded-md border border-primary/50 bg-secondary/90 p-6 shadow-[0_0_30px_rgba(14,165,233,0.3)] relative"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -102,7 +104,7 @@ const AssetModal = memo(function AssetModal({
             id="asset-inspection-title"
             className="font-mono text-sm font-medium uppercase tracking-widest text-muted-foreground"
           >
-            ASSET INSPECTION // #{product.id.substring(0, 8)}
+            DETAIL PRODUK // #{product.id.substring(0, 8)}
           </h2>
           <button
             type="button"
@@ -149,21 +151,35 @@ const AssetModal = memo(function AssetModal({
                         : "bg-destructive/20 text-destructive",
                     )}
                   >
-                    {product.stock > 0 ? "ACTIVE" : "OUT_OF_STOCK"}
+                    {product.stock > 0 ? "TERSEDIA" : "STOK HABIS"}
                   </span>
                 </dd>
                 <dt className="text-muted-foreground uppercase tracking-wider">
-                  Price
+                  Harga
                 </dt>
                 <dd className="tabular-nums text-foreground">
                   {formatRupiah(product.price)}
                 </dd>
                 <dt className="text-muted-foreground uppercase tracking-wider">
-                  Stock
+                  Stok
                 </dt>
                 <dd className="tabular-nums text-foreground">
                   {product.stock}
                 </dd>
+                {product.createdAt && (
+                  <>
+                    <dt className="text-muted-foreground uppercase tracking-wider">
+                      TGL MASUK
+                    </dt>
+                    <dd className="tabular-nums text-foreground">
+                      {new Intl.DateTimeFormat("id-ID", {
+                        day: "2-digit",
+                        month: "short",
+                        year: "numeric",
+                      }).format(new Date(product.createdAt))}
+                    </dd>
+                  </>
+                )}
               </dl>
             </div>
           </div>
@@ -171,7 +187,7 @@ const AssetModal = memo(function AssetModal({
           {product.description != null && product.description !== "" ? (
             <div className="border-t border-border/60 pt-4">
               <dt className="font-mono text-xs font-medium uppercase tracking-widest text-muted-foreground mb-2">
-                Description
+                Deskripsi
               </dt>
               <p className="font-mono text-sm text-foreground leading-relaxed">
                 {product.description}
@@ -182,6 +198,9 @@ const AssetModal = memo(function AssetModal({
       </motion.div>
     </motion.div>
   );
+
+  if (typeof document === "undefined") return null;
+  return createPortal(modalContent, document.body);
 });
 
 // ─── Single Row — state modal TERISOLASI di sini ──────────────────────────────
@@ -240,7 +259,7 @@ const ProductTableRow = memo(function ProductTableRow({
                 : "bg-destructive/20 text-destructive",
             )}
           >
-            {product.stock > 0 ? "ACTIVE" : "OUT_OF_STOCK"}
+            {product.stock > 0 ? "TERSEDIA" : "STOK HABIS"}
           </span>
         </td>
         <td className="w-[72px] px-4 py-4 align-middle">
@@ -357,23 +376,23 @@ export function ProductsTable({
                   ID
                 </th>
                 <th className="px-4 py-4 text-left text-sm font-bold tracking-wider text-gray-500 dark:text-gray-400">
-                  Product Name
+                  Nama Produk
                 </th>
                 <th className="w-[120px] px-4 py-4 text-left text-sm font-bold tracking-wider text-gray-500 dark:text-gray-400">
                   Status
                 </th>
                 <th className="w-[72px] px-4 py-4 text-left text-sm font-bold tracking-wider text-gray-500 dark:text-gray-400">
-                  Resource
+                  Gambar
                 </th>
                 <th className="px-4 py-4 text-right text-sm font-bold tracking-wider text-gray-500 dark:text-gray-400">
-                  Price
+                  Harga
                 </th>
                 <th className="px-4 py-4 text-right text-sm font-bold tracking-wider text-gray-500 dark:text-gray-400">
-                  Stock
+                  Stok
                 </th>
                 {showActions && (
                   <th className="px-4 py-4 text-right text-sm font-bold tracking-wider text-gray-500 dark:text-gray-400">
-                    ACTIONS
+                    AKSI
                   </th>
                 )}
               </tr>
@@ -392,7 +411,7 @@ export function ProductsTable({
                       colSpan={colCount}
                       className="px-4 py-10 text-center text-gray-500 dark:text-gray-400"
                     >
-                      No products yet.
+                      Belum ada produk.
                     </td>
                   </motion.tr>
                 ) : (

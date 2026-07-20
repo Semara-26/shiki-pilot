@@ -4,7 +4,7 @@ import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { eq, and } from "drizzle-orm";
 import { db } from "@/src/db";
-import { stores, products, eventLogs } from "@/src/db/schema";
+import { stores, products } from "@/src/db/schema";
 
 export type DeleteProductResult = { success?: boolean; error?: string };
 
@@ -41,11 +41,6 @@ export async function deleteProduct(id: string): Promise<DeleteProductResult> {
       await tx
         .delete(products)
         .where(and(eq(products.id, id), eq(products.storeId, userStore.id)));
-      await tx.insert(eventLogs).values({
-        storeId: userStore.id,
-        title: "Asset Terminated",
-        detail: productName,
-      });
     });
 
     revalidatePath("/dashboard/inventory");

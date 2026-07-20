@@ -1,8 +1,8 @@
 import { auth } from "@clerk/nextjs/server";
 import { eq, desc, and, gte } from "drizzle-orm";
 import { db } from "@/src/db";
-import { stores, transactions, products } from "@/src/db/schema";
-import { DashboardHeader } from "@/src/components/dashboard-header";
+import { stores, transactions, transactionItems, products } from "@/src/db/schema";
+import { DashboardHeaderServer } from "@/src/components/dashboard-header-server";
 import { AnalyticsClient } from "./analytics-client";
 
 const DAYS_AGO = 365; // 12 months - support monthly filter
@@ -32,12 +32,13 @@ export default async function AnalyticsPage() {
     const rows = await db
       .select({
         productName: products.name,
-        quantity: transactions.quantity,
-        totalPrice: transactions.totalPrice,
+        quantity: transactionItems.quantity,
+        totalPrice: transactionItems.subtotal,
         createdAt: transactions.createdAt,
       })
       .from(transactions)
-      .innerJoin(products, eq(transactions.productId, products.id))
+      .innerJoin(transactionItems, eq(transactionItems.transactionId, transactions.id))
+      .innerJoin(products, eq(transactionItems.productId, products.id))
       .where(
         and(
           eq(transactions.storeId, userStore.id),
@@ -57,9 +58,9 @@ export default async function AnalyticsPage() {
   return (
     <div className="flex h-full flex-col overflow-hidden bg-white dark:bg-[#0a0a0a]">
       <div className="flex-none">
-        <DashboardHeader
-          breadcrumbs="TERMINAL / ANALYTICS"
-          title="ANALYTICS MODULE // BI"
+        <DashboardHeaderServer
+          storeId={userStore?.id}
+          title="STATISTIK"
         />
       </div>
       <div className="flex flex-1 flex-col overflow-y-auto p-4 md:p-6">

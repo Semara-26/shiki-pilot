@@ -74,7 +74,7 @@ export function TransactionFilters() {
               type="text"
               value={id}
               onChange={(e) => setId(e.target.value)}
-              placeholder="Cari parsial ID..."
+              placeholder="Cari ID Transaksi..."
               className="h-9 w-full rounded-md border border-ink/20 bg-background px-9 py-2 font-mono text-sm text-ink placeholder:text-gray-500 transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary dark:border-white/10 dark:bg-background/50 dark:text-white dark:placeholder:text-gray-400"
             />
           </div>

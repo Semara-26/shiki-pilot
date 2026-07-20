@@ -9,7 +9,7 @@ import { embed, generateObject } from "ai";
 import { google } from "@ai-sdk/google";
 import { createSupabaseClient } from "../supabase/server";
 import { db } from "../../db";
-import { stores, products, eventLogs } from "../../db/schema";
+import { stores, products } from "../../db/schema";
 
 const MAX_IMAGE_SIZE_BYTES = 2 * 1024 * 1024; // 2MB
 const ALLOWED_IMAGE_TYPES = [
@@ -163,11 +163,7 @@ export async function createProduct(
       embedding,
     });
 
-    await db.insert(eventLogs).values({
-      storeId: userStore.id,
-      title: "New Asset Registered",
-      detail: name,
-    });
+
 
     revalidatePath("/dashboard");
     return { success: true };
@@ -298,11 +294,7 @@ export async function updateProduct(
       })
       .where(and(eq(products.id, id), eq(products.storeId, userStore.id)));
 
-    await db.insert(eventLogs).values({
-      storeId: userStore.id,
-      title: "Asset Parameters Updated",
-      detail: name,
-    });
+
 
     revalidatePath("/dashboard/inventory");
     revalidatePath("/dashboard");
@@ -402,11 +394,7 @@ export async function processAiImport(
       })),
     );
 
-    await db.insert(eventLogs).values({
-      storeId: userStore.id,
-      title: "New Assets Registered via AI",
-      detail: `[${validItems.length}] items`,
-    });
+
 
     revalidatePath("/dashboard/inventory");
     revalidatePath("/dashboard");
@@ -600,7 +588,7 @@ export async function checkProductStock(
         eq(products.storeId, storeId),
         ilike(products.name, `%${productName.trim()}%`),
       ),
-      columns: { name: true, stock: true, stockCritical: true },
+      columns: { name: true, stock: true, stockCritical: true, createdAt: true },
     });
 
     if (!target) {
@@ -610,9 +598,13 @@ export async function checkProductStock(
       };
     }
 
+    const formattedDate = target.createdAt 
+      ? new Intl.DateTimeFormat("id-ID", { day: "2-digit", month: "long", year: "numeric" }).format(new Date(target.createdAt))
+      : "Tidak diketahui";
+
     return {
       success: true,
-      message: `Stok produk "${target.name}" saat ini adalah ${target.stock} unit. Batas kritis diatur pada ${target.stockCritical} unit.`,
+      message: `Stok produk "${target.name}" saat ini adalah ${target.stock} unit. Batas kritis diatur pada ${target.stockCritical} unit. Tanggal Ditambahkan: ${formattedDate}.`,
     };
   } catch (err) {
     console.error("checkProductStock error:", err);
@@ -739,9 +731,10 @@ export async function getAdvancedAnalytics(
       sql`
         SELECT
           p.name AS product_name,
-          SUM(t.quantity) AS total_qty
+          SUM(ti.quantity) AS total_qty
         FROM transactions t
-        JOIN products p ON t.product_id = p.id
+        JOIN transaction_items ti ON t.id = ti.transaction_id
+        JOIN products p ON ti.product_id = p.id
         WHERE t.store_id = ${storeId}
           AND t.created_at BETWEEN ${startDate}::timestamp AND ${endDate}::timestamp + interval '1 day' - interval '1 microsecond'
         GROUP BY p.name
@@ -754,10 +747,11 @@ export async function getAdvancedAnalytics(
       sql`
         SELECT
           p.name AS product_name,
-          SUM(t.quantity) AS total_qty,
-          SUM(t.total_price) AS total_revenue
+          SUM(ti.quantity) AS total_qty,
+          SUM(ti.subtotal) AS total_revenue
         FROM transactions t
-        JOIN products p ON t.product_id = p.id
+        JOIN transaction_items ti ON t.id = ti.transaction_id
+        JOIN products p ON ti.product_id = p.id
         WHERE t.store_id = ${storeId}
           AND t.created_at BETWEEN ${startDate}::timestamp AND ${endDate}::timestamp + interval '1 day' - interval '1 microsecond'
         GROUP BY p.name
@@ -770,10 +764,11 @@ export async function getAdvancedAnalytics(
       sql`
         SELECT
           p.name AS product_name,
-          SUM(t.quantity) AS total_qty,
-          SUM(t.total_price) AS total_revenue
+          SUM(ti.quantity) AS total_qty,
+          SUM(ti.subtotal) AS total_revenue
         FROM transactions t
-        JOIN products p ON t.product_id = p.id
+        JOIN transaction_items ti ON t.id = ti.transaction_id
+        JOIN products p ON ti.product_id = p.id
         WHERE t.store_id = ${storeId}
           AND t.created_at BETWEEN ${startDate}::timestamp AND ${endDate}::timestamp + interval '1 day' - interval '1 microsecond'
         GROUP BY p.name
@@ -978,17 +973,17 @@ export async function getStockRiskProducts(storeId: string): Promise<{
         SELECT
           p.name,
           p.stock AS current_stock,
-          COALESCE(SUM(t.quantity)::float / 7, 0) AS daily_velocity
+          COALESCE(SUM(ti.quantity)::float / 7, 0) AS daily_velocity
         FROM products p
-        LEFT JOIN transactions t
-          ON t.product_id = p.id
-          AND t.store_id = ${storeId}
-          AND t.created_at >= NOW() - INTERVAL '7 days'
+        JOIN transaction_items ti ON p.id = ti.product_id
+        JOIN transactions t ON t.id = ti.transaction_id
         WHERE p.store_id = ${storeId}
+          AND t.store_id = ${storeId}
           AND p.stock > 0
+          AND t.created_at >= NOW() - INTERVAL '7 days'
         GROUP BY p.id, p.name, p.stock
-        HAVING COALESCE(SUM(t.quantity)::float / 7, 0) > 0
-        ORDER BY (p.stock / NULLIF(COALESCE(SUM(t.quantity)::float / 7, 0.001), 0)) ASC
+        HAVING COALESCE(SUM(ti.quantity)::float / 7, 0) > 0
+        ORDER BY (p.stock / NULLIF(COALESCE(SUM(ti.quantity)::float / 7, 0.001), 0)) ASC
         LIMIT 5
       `,
     );

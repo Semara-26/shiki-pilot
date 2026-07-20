@@ -385,7 +385,7 @@ export function ChatClient({ chatId, initialMessages }: ChatClientProps) {
   return (
     <div className="flex h-full flex-col overflow-hidden bg-white dark:bg-[#0a0a0a] text-foreground">
       <div className="flex-none flex justify-between items-center pr-4">
-        <DashboardHeader breadcrumbs="TERMINAL" title="AI ASSISTANT" />
+        <DashboardHeader title="ASISTEN AI" hideBell />
         <button
           onClick={handleClearChat}
           disabled={messages.length === 0}

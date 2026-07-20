@@ -1,15 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
+import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from "recharts";
+import { motion } from "framer-motion";
 import { cn } from "@/src/lib/utils";
 
 const NERV_COLORS = [
-  "#0ea5e9", // sky-500 (Primary)
-  "#0284c7", // sky-600
-  "#0369a1", // sky-700
-  "#075985", // sky-800
-  "#0c4a6e", // sky-900
+  "#22d3ee",
+  "#ef4444",
+  "#f97316",
+  "#eab308",
+  "#a855f7",
+  "#ec4899",
 ];
 
 function formatRupiah(value: number): string {
@@ -38,6 +40,41 @@ interface AssetDonutChartProps {
   data: AssetDonutProduct[];
   title?: string;
   className?: string;
+}
+
+interface TooltipProps {
+  active?: boolean;
+  payload?: Array<{
+    name?: string;
+    value?: number;
+    payload?: { percentage?: number };
+  }>;
+}
+
+function DonutTooltip({ active, payload }: TooltipProps) {
+  if (!active || !payload?.length) return null;
+  const item = payload[0];
+  const name = item.name ?? "";
+  const value = (item.value as number) ?? 0;
+  const pct = (item.payload as { percentage?: number })?.percentage;
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ duration: 0.2 }}
+      className="relative z-50 rounded-md border border-white/20 bg-ink p-3 shadow-2xl dark:bg-ink dark:border-white/20"
+    >
+      <p className="mb-1 font-mono text-xs text-white">{name}</p>
+      <p className="font-mono text-base font-semibold tabular-nums text-white">
+        {formatRupiah(value)}
+      </p>
+      {pct != null && (
+        <p className="mt-0.5 font-mono text-xs text-white/80">
+          {pct.toFixed(1)}%
+        </p>
+      )}
+    </motion.div>
+  );
 }
 
 export function AssetDonutChart({
@@ -116,20 +153,22 @@ export function AssetDonutChart({
                       />
                     ))}
                   </Pie>
+                  <Tooltip content={<DonutTooltip />} />
                 </PieChart>
               </ResponsiveContainer>
             </div>
             <div
-              className="pointer-events-none absolute left-1/2 top-1/2 max-w-[140px] -translate-x-1/2 -translate-y-1/2 px-2 text-center"
+              className={cn(
+                "pointer-events-none absolute left-1/2 top-1/2 max-w-[140px] -translate-x-1/2 -translate-y-1/2 px-2 text-center transition-opacity duration-200",
+                hoveredData ? "opacity-0" : "opacity-100"
+              )}
               aria-hidden
             >
               <p className="truncate font-mono text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                {hoveredData ? hoveredData.name : "TOTAL ASET"}
+                TOTAL ASET
               </p>
-              <p className="mt-1 truncate font-mono text-base font-bold tabular-nums text-ink drop-shadow-[0_0_6px_rgba(14,165,233,0.5)] sm:text-lg dark:text-white">
-                {hoveredData
-                  ? formatRupiahShort(hoveredData.value)
-                  : formatRupiahShort(totalValue)}
+              <p className="mt-1 truncate font-mono text-base font-bold tabular-nums text-ink sm:text-lg dark:text-white">
+                {formatRupiahShort(totalValue)}
               </p>
             </div>
           </div>

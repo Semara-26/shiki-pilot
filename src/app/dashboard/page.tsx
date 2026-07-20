@@ -3,11 +3,10 @@ import Link from "next/link";
 import { Suspense } from "react";
 
 import { getStoreForDashboard } from "@/src/lib/dashboard-data";
-import { DashboardHeader } from "@/src/components/dashboard-header";
+import { DashboardHeaderServer } from "@/src/components/dashboard-header-server";
 import { PageContainer } from "@/src/components/page-animation";
 import {
   DashboardSections,
-  DashboardHeaderServer,
   MetricsSkeleton,
   TableSkeleton,
   ChartSkeleton,
@@ -30,7 +29,7 @@ export default async function DashboardPage() {
       <PageContainer className="h-full w-full">
         <div className="flex h-full flex-col overflow-hidden">
           <div className="flex-none">
-            <DashboardHeader breadcrumbs="TERMINAL" title="WELCOME" />
+            <DashboardHeaderServer title="BERANDA" />
           </div>
           <div className="flex-1 overflow-y-auto p-6">
             <div className="flex min-h-full items-center justify-center">
@@ -61,8 +60,8 @@ export default async function DashboardPage() {
       <div className="flex h-full flex-col overflow-hidden">
         {/* Header mengambil data produknya sendiri via DashboardHeaderServer */}
         <div className="flex-none">
-          <Suspense fallback={<DashboardHeader />}>
-            <DashboardHeaderServer storeId={userStore.id} />
+          <Suspense fallback={<DashboardHeaderServer title="BERANDA" />}>
+            <DashboardHeaderServer storeId={userStore.id} title="BERANDA" />
           </Suspense>
         </div>
 
@@ -77,8 +76,7 @@ export default async function DashboardPage() {
               <div className="flex flex-col gap-4 md:gap-6">
                 <MetricsSkeleton />
                 <TableSkeleton />
-                <div className="grid grid-cols-1 gap-4 md:gap-6 lg:grid-cols-3 lg:min-h-[350px]">
-                  <ChartSkeleton />
+                <div className="grid grid-cols-1 gap-4 md:gap-6 lg:grid-cols-2 lg:min-h-[350px]">
                   <ChartSkeleton />
                   <ChartSkeleton />
                 </div>

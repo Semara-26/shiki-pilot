@@ -174,8 +174,8 @@ const config: Config = {
       },
       keyframes: {
         shimmer: {
-          "0%": { backgroundPosition: "-200% 0" },
-          "100%": { backgroundPosition: "200% 0" },
+          "0%": { backgroundPosition: "200% 0" },
+          "100%": { backgroundPosition: "-200% 0" },
         },
         "fake-progress": {
           "0%": { width: "0%" },

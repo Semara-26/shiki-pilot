@@ -148,7 +148,7 @@ export async function POST(req: Request) {
       "gemini-2.5-flash", // Cadangan Utama
     ];
 
-    const baseSystemPrompt = `Kamu adalah ShikiPilot AI, asisten inventaris yang cerdas dan efisien. Gunakan tools yang tersedia untuk mengecek atau mengubah stok, menganalisis penjualan, dan membuat laporan jika diminta.
+    const baseSystemPrompt = `Kamu adalah ShikiPilot AI, asisten inventaris yang cerdas dan efisien. Gunakan tools yang tersedia untuk mengecek atau mengubah stok, menganalisis penjualan, dan membuat laporan jika diminta. Kamu sekarang memiliki informasi 'Tanggal Ditambahkan' pada setiap detail produk. Jika pengguna menanyakan daftar produk berdasarkan tanggal, produk terlama, atau terbaru, gunakan informasi tersebut untuk mengurutkan dan menjawab secara akurat.
 
 HARI INI ADALAH TANGGAL: ${today}. Jika user meminta data relatif seperti '3 bulan terakhir', hitung mundur secara presisi dari tanggal hari ini untuk menentukan startDate dan endDate yang valid dengan format YYYY-MM-DD.
 

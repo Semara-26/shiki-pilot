@@ -117,7 +117,7 @@ function processRevenueOverTime(
       }
     }
     return Array.from({ length: 8 }, (_, i) => ({
-      name: `Week ${i + 1}`,
+      name: `Minggu ${i + 1}`,
       value: buckets.get(`W${i}`) ?? 0,
     }));
   }
@@ -598,7 +598,7 @@ export function AnalyticsClient({
       <div className="rounded-lg border-2 border-ink bg-white p-4 md:p-6 dark:border-white/20 dark:bg-[#0a0a0a]">
         <div className="mb-4 flex flex-col gap-3 md:gap-4 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm font-bold uppercase tracking-widest text-ink dark:text-gray-300">
-            REVENUE OVER TIME
+            TREN PENDAPATAN
           </p>
           <div className="flex flex-wrap items-center gap-2">
             {/* Export Dropdown */}
@@ -663,10 +663,10 @@ export function AnalyticsClient({
                 `}
                 >
                   {f === "daily"
-                    ? "Daily"
+                    ? "Harian"
                     : f === "weekly"
-                      ? "Weekly"
-                      : "Monthly"}
+                      ? "Mingguan"
+                      : "Bulanan"}
                 </button>
               ))}
             </div>

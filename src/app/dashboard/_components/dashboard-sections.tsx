@@ -15,17 +15,15 @@ import {
   getRecentProducts,
   getAllProductsForChart,
   getLowStockProducts,
-  getEventLog,
 } from "@/src/lib/dashboard-data";
 import { getWaStatus } from "@/src/lib/actions/wa";
 
-import { DashboardHeader } from "@/src/components/dashboard-header";
+import { DashboardHeaderServer } from "@/src/components/dashboard-header-server";
 import { MetricsRow, type MetricProduct } from "@/src/components/metrics-row";
 import { ProductsTable } from "@/src/components/products-table";
 import { LowStockAlert } from "@/src/components/low-stock-alert";
 import { GrowthChart } from "@/src/components/growth-chart";
 import { AssetDonutChart } from "@/src/components/asset-donut-chart";
-import { EventLog } from "@/src/components/event-log";
 
 // ─── Skeleton helpers — dari PhantomSkeleton presets ─────────────────────────
 // Import untuk digunakan dalam komponen di file ini
@@ -82,10 +80,10 @@ async function WaAlertSection() {
         </div>
         <div>
           <h4 className="font-mono text-sm font-bold uppercase tracking-tight">
-            System Alert: WhatsApp Disconnected
+            Peringatan: WhatsApp Terputus
           </h4>
           <p className="font-mono text-xs opacity-80">
-            WhatsApp alerts for low stock will not be sent until reconnected.
+            Notifikasi stok habis tidak dapat dikirim. Silakan hubungkan ulang.
           </p>
         </div>
       </div>
@@ -94,7 +92,7 @@ async function WaAlertSection() {
         className="flex items-center gap-2 rounded border border-red-500/50 bg-red-500 px-3 py-1.5 font-mono text-xs font-bold text-white transition-colors hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
       >
         <Settings2 className="h-4 w-4" />
-        RECONNECT NOW
+        HUBUNGKAN SEKARANG
       </Link>
     </div>
   );
@@ -110,13 +108,13 @@ async function RecentAssetsSection({ storeId }: { storeId: string }) {
     <div>
       <div className="mb-3 flex items-center justify-between">
         <p className="font-mono text-xs uppercase tracking-widest text-gray-500 dark:text-gray-400">
-          RECENT ASSETS
+          PRODUK TERBARU
         </p>
         <Link
           href="/dashboard/inventory"
           className="font-mono text-xs text-primary hover:text-primary-hover dark:hover:text-primary/80 hover:underline"
         >
-          View full list →
+          Lihat semua →
         </Link>
       </div>
       <ProductsTable products={recent} />
@@ -127,10 +125,7 @@ async function RecentAssetsSection({ storeId }: { storeId: string }) {
 // ─── 5. ChartsSection — Growth Chart + Donut + Event Log ─────────────────────
 
 async function ChartsSection({ storeId }: { storeId: string }) {
-  const [chartProducts, logItems] = await Promise.all([
-    getAllProductsForChart(storeId),
-    getEventLog(storeId),
-  ]);
+  const chartProducts = await getAllProductsForChart(storeId);
 
   const stockChartData = chartProducts.map((p) => ({
     name: p.name,
@@ -138,23 +133,20 @@ async function ChartsSection({ storeId }: { storeId: string }) {
   }));
 
   return (
-    <div className="grid grid-cols-1 gap-4 md:gap-6 lg:grid-cols-3 lg:min-h-[350px]">
+    <div className="grid grid-cols-1 gap-4 md:gap-6 lg:grid-cols-2 lg:min-h-[350px]">
       <div className="min-h-[300px] w-full lg:h-full">
         <GrowthChart
           data={stockChartData}
-          title="CURRENT STOCK LEVELS"
+          title="GRAFIK SISA STOK"
           className="h-full"
         />
       </div>
       <div className="min-h-[350px] w-full lg:h-full">
         <AssetDonutChart
           data={chartProducts}
-          title="ASSET DISTRIBUTION"
+          title="SEBARAN PRODUK"
           className="h-full"
         />
-      </div>
-      <div className="min-h-[300px] w-full lg:h-full">
-        <EventLog events={logItems} className="h-full" />
       </div>
     </div>
   );
@@ -185,8 +177,7 @@ export async function DashboardSections({ storeId }: { storeId: string }) {
 
       <Suspense
         fallback={
-          <div className="grid grid-cols-1 gap-4 md:gap-6 lg:grid-cols-3 lg:min-h-[350px]">
-            <ChartSkeleton />
+          <div className="grid grid-cols-1 gap-4 md:gap-6 lg:grid-cols-2 lg:min-h-[350px]">
             <ChartSkeleton />
             <ChartSkeleton />
           </div>
@@ -198,16 +189,3 @@ export async function DashboardSections({ storeId }: { storeId: string }) {
   );
 }
 
-// ─── DashboardHeaderServer ────────────────────────────────────────────────────
-// Async wrapper agar DashboardHeader bisa mengambil datanya sendiri
-// tanpa harus dioper dari page.tsx.
-
-export async function DashboardHeaderServer({ storeId }: { storeId: string }) {
-  const products = await getAllProductsForChart(storeId);
-  const headerProducts = products.map((p) => ({
-    id: p.id,
-    name: p.name,
-    stock: p.stock,
-  }));
-  return <DashboardHeader products={headerProducts} />;
-}

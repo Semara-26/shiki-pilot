@@ -40,8 +40,7 @@ export function CreateStoreClient() {
     <div className="flex h-full flex-col overflow-hidden bg-background text-foreground">
       <div className="flex-none">
         <DashboardHeader
-          breadcrumbs="TERMINAL"
-          title="INITIALIZE STORE // SETUP"
+          title="BUAT TOKO BARU"
         />
       </div>
       <div className="flex-1 overflow-y-auto p-6">

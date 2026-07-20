@@ -19,7 +19,7 @@ import { DocumentationModal } from "@/src/components/documentation-modal";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 
-const ROLE_LABEL = "ROLE // SYSTEM_OPERATOR";
+const ROLE_LABEL = "PERAN // OPERATOR_SISTEM";
 const MAX_NAME_LENGTH = 24;
 
 function truncateWithEllipsis(str: string, maxLen: number): string {
@@ -43,8 +43,8 @@ export function OperatorIdPanel({ isOpen }: OperatorIdPanelProps) {
   const [isPrefsOpen, setIsPrefsOpen] = useState(
     searchParams.get("setup") === "wa",
   );
-  const [initialPrefTab] = useState<"ACCOUNT" | "STORE INFO">(
-    searchParams.get("setup") === "wa" ? "STORE INFO" : "ACCOUNT",
+  const [initialPrefTab] = useState<"AKUN" | "INFO TOKO">(
+    searchParams.get("setup") === "wa" ? "INFO TOKO" : "AKUN",
   );
   const [isDocOpen, setIsDocOpen] = useState(false);
   const [localOverrides, setLocalOverrides] = useState<
@@ -57,7 +57,7 @@ export function OperatorIdPanel({ isOpen }: OperatorIdPanelProps) {
   >({});
 
   const userProfile = useMemo(() => {
-    const baseName = user?.fullName ?? "SYSTEM_OPERATOR";
+    const baseName = user?.fullName ?? "OPERATOR_SISTEM";
     const baseEmail = user?.primaryEmailAddress?.emailAddress ?? "";
     const baseAvatar = user?.imageUrl ?? "";
     return {
@@ -85,7 +85,7 @@ export function OperatorIdPanel({ isOpen }: OperatorIdPanelProps) {
   const toggleTheme = () => setTheme(isDark ? "light" : "dark");
 
   const nameForInitials =
-    localOverrides.name ?? user?.fullName ?? "SYSTEM_OPERATOR";
+    localOverrides.name ?? user?.fullName ?? "OPERATOR_SISTEM";
   const initials =
     nameForInitials
       .split(/\s+/)
@@ -102,7 +102,7 @@ export function OperatorIdPanel({ isOpen }: OperatorIdPanelProps) {
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 10, scale: 0.95 }}
           transition={{ duration: 0.2, ease: "easeOut" }}
-          className="fixed bottom-4 left-4 z-[100] w-[320px] max-h-[calc(100vh-3rem)] overflow-y-auto rounded-md border-2 border-ink bg-white shadow-neo backdrop-blur-md dark:border-red-500/30 dark:bg-surface-dark dark:shadow-none origin-bottom-left md:left-[272px]"
+          className="fixed bottom-4 left-4 z-[100] w-[320px] max-h-[calc(100vh-3rem)] overflow-y-auto rounded-md border-2 border-ink bg-white shadow-neo backdrop-blur-md dark:border-primary/30 dark:bg-surface-dark dark:shadow-none origin-bottom-left md:left-[272px]"
         >
           {/* Scanline overlay */}
           <div
@@ -164,7 +164,7 @@ export function OperatorIdPanel({ isOpen }: OperatorIdPanelProps) {
                     <span className="text-ink/90 dark:text-foreground/90">
                       ONLINE
                     </span>
-                    <span>{"// SECURE"}</span>
+                    <span>{"// AMAN"}</span>
                   </div>
                 </div>
               </div>
@@ -181,10 +181,10 @@ export function OperatorIdPanel({ isOpen }: OperatorIdPanelProps) {
                   <Settings className="h-4 w-4 shrink-0 text-gray-500 dark:text-muted-foreground" />
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-bold text-ink dark:text-white">
-                      SYSTEM PREFERENCES
+                      PENGATURAN SISTEM
                     </p>
                     <p className="font-mono text-[10px] text-primary">
-                      CONFIG_SYS_01
+                      KONFIG_SIS_01
                     </p>
                   </div>
                   <ChevronRight className="h-4 w-4 shrink-0 text-gray-500 dark:text-muted-foreground" />
@@ -200,10 +200,10 @@ export function OperatorIdPanel({ isOpen }: OperatorIdPanelProps) {
                   <Monitor className="h-4 w-4 shrink-0 text-gray-500 dark:text-muted-foreground" />
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-bold text-ink dark:text-white">
-                      INTERFACE MODE
+                      TAMPILAN ANTARMUKA
                     </p>
                     <p className="font-mono text-[10px] text-primary">
-                      HUD_OVERLAY_V2
+                      OVERLAY_HUD_V2
                     </p>
                   </div>
                   <div className="flex shrink-0 items-center gap-2">
@@ -213,7 +213,7 @@ export function OperatorIdPanel({ isOpen }: OperatorIdPanelProps) {
                         isDark ? "text-primary" : "text-slate-500",
                       )}
                     >
-                      {isDark ? "DARK" : "LIGHT"}
+                      {isDark ? "GELAP" : "TERANG"}
                     </span>
                     <button
                       type="button"
@@ -247,10 +247,10 @@ export function OperatorIdPanel({ isOpen }: OperatorIdPanelProps) {
                   <FileText className="h-4 w-4 shrink-0 text-gray-500 dark:text-muted-foreground" />
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-bold text-ink dark:text-white">
-                      DOCUMENTATION
+                      DOKUMENTASI
                     </p>
                     <p className="font-mono text-[10px] text-primary">
-                      READ_MANUAL_0X
+                      BACA_PANDUAN_0X
                     </p>
                   </div>
                   <Link2 className="h-4 w-4 shrink-0 text-gray-500 dark:text-muted-foreground" />
@@ -266,7 +266,7 @@ export function OperatorIdPanel({ isOpen }: OperatorIdPanelProps) {
                 className="flex w-full items-center justify-center gap-2 rounded-md border-2 border-ink bg-white py-3 font-mono text-sm font-semibold text-primary transition-colors hover:bg-primary/10 dark:border-primary/50 dark:bg-transparent dark:hover:bg-primary dark:hover:text-primary-foreground"
               >
                 <Power className="h-4 w-4" />
-                TERMINATE SESSION
+                KELUAR DARI AKUN
               </button>
             </div>
 

@@ -29,15 +29,15 @@ export interface UserProfileForPrefs {
 interface SystemPreferencesModalProps {
   isOpen: boolean;
   onClose: () => void;
-  initialTab?: "ACCOUNT" | "STORE INFO" | "SECURITY";
+  initialTab?: "AKUN" | "INFO TOKO" | "KEAMANAN";
   currentProfile?: UserProfileForPrefs;
   onSave?: (data: Partial<UserProfileForPrefs>) => void;
 }
 
 const NAV_TABS = [
-  { id: "account", label: "ACCOUNT", icon: User },
-  { id: "store", label: "STORE INFO", icon: Store },
-  { id: "security", label: "SECURITY", icon: Shield },
+  { id: "account", label: "AKUN", icon: User },
+  { id: "store", label: "INFO TOKO", icon: Store },
+  { id: "security", label: "KEAMANAN", icon: Shield },
 ] as const;
 
 type TabLabel = (typeof NAV_TABS)[number]["label"];
@@ -59,7 +59,7 @@ const INITIAL_FORM_DATA = {
 export function SystemPreferencesModal({
   isOpen,
   onClose,
-  initialTab = "ACCOUNT",
+  initialTab = "AKUN",
   currentProfile,
   onSave,
 }: SystemPreferencesModalProps) {
@@ -242,11 +242,11 @@ export function SystemPreferencesModal({
             </div>
             <div className="min-w-0 flex-1">
               <h3 className="text-sm font-bold text-ink dark:text-white">
-                Avatar Settings
+                Pengaturan Avatar
               </h3>
               <p className="mt-1 text-xs text-gray-600 dark:text-gray-400">
-                Upload a new avatar or synchronize with your Gravatar profile.
-                Recommended size: 400×400px.
+                Unggah avatar baru atau sinkronisasikan dengan profil Gravatar Anda.
+                Ukuran yang disarankan: 400×400px.
               </p>
               <div className="mt-3 flex gap-2">
                 <button
@@ -254,14 +254,14 @@ export function SystemPreferencesModal({
                   onClick={() => fileInputRef.current?.click()}
                   className="rounded-sm bg-primary px-3 py-1.5 font-mono text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90"
                 >
-                  UPLOAD NEW
+                  UNGGAH BARU
                 </button>
                 <button
                   type="button"
                   onClick={handleRemoveAvatar}
                   className="rounded-md border border-red-200 px-4 py-2 font-mono text-xs font-bold text-red-600 transition-all hover:bg-red-50 dark:border-white/20 dark:text-gray-300 dark:hover:bg-white/10"
                 >
-                  REMOVE
+                  HAPUS
                 </button>
               </div>
             </div>
@@ -269,12 +269,12 @@ export function SystemPreferencesModal({
         </section>
         <section className="rounded-md border border-gray-200 bg-gray-50/50 p-4 dark:border-white/10 dark:bg-background/80">
           <h3 className="text-sm font-bold text-ink dark:text-white">
-            Nexus ID Parameters
+            Parameter ID Nexus
           </h3>
           <div className="mt-4 space-y-4">
             <div>
               <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                USERNAME
+                NAMA PENGGUNA
               </label>
               <input
                 id="username"
@@ -282,15 +282,15 @@ export function SystemPreferencesModal({
                 value={formData.username}
                 onChange={handleInputChange}
                 className="mt-1 w-full border-b-2 border-ink bg-white py-2 font-mono text-sm font-medium text-ink outline-none transition-colors placeholder:text-gray-500 focus:border-primary dark:border-white/10 dark:bg-surface-darker dark:text-white dark:placeholder:text-muted-foreground"
-                placeholder="Your display name"
+                placeholder="Nama tampilan Anda"
               />
               <p className="mt-1 font-mono text-[10px] text-gray-600 dark:text-gray-400">
-                Your public display name within the nexus network.
+                Nama tampilan publik Anda di dalam jaringan nexus.
               </p>
             </div>
             <div>
               <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                EMAIL ADDRESS
+                ALAMAT EMAIL
               </label>
               <input
                 id="email"
@@ -313,7 +313,7 @@ export function SystemPreferencesModal({
         <div className="space-y-6">
           <div>
             <h3 className="text-base font-bold uppercase tracking-wide text-ink dark:text-white">
-              STORE CONFIGURATION
+              KONFIGURASI TOKO
             </h3>
             <p className="mt-1 text-xs text-gray-600 dark:text-gray-400">
               Memuat data toko...
@@ -333,20 +333,20 @@ export function SystemPreferencesModal({
       <div className="space-y-6">
         <div>
           <h3 className="text-base font-bold uppercase tracking-wide text-ink dark:text-white">
-            STORE CONFIGURATION
+            KONFIGURASI TOKO
           </h3>
           <p className="mt-1 text-xs text-gray-600 dark:text-gray-400">
-            Manage public-facing enterprise details.
+            Kelola detail perusahaan untuk publik.
           </p>
         </div>
         <section className="rounded-md border border-gray-200 bg-gray-50/50 p-4 dark:border-white/10 dark:bg-background/80">
           <h4 className="text-sm font-bold text-ink dark:text-white">
-            Enterprise Details
+            Detail Perusahaan
           </h4>
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
             <div className="sm:col-span-2">
               <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                STORE NAME
+                NAMA TOKO
               </label>
               <input
                 id="storeName"
@@ -354,12 +354,12 @@ export function SystemPreferencesModal({
                 value={formData.storeName}
                 onChange={handleInputChange}
                 className={inputClass}
-                placeholder="Store name"
+                placeholder="Nama toko"
               />
             </div>
             <div>
               <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                BUSINESS TYPE
+                TIPE BISNIS
               </label>
               <select
                 id="businessType"
@@ -392,7 +392,7 @@ export function SystemPreferencesModal({
             </div>
             <div>
               <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                CONTACT EMAIL
+                EMAIL KONTAK
               </label>
               <input
                 id="contactEmail"
@@ -405,7 +405,7 @@ export function SystemPreferencesModal({
             </div>
             <div className="sm:col-span-2">
               <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                PHONE NUMBER
+                NOMOR TELEPON
               </label>
               <input
                 id="phone"
@@ -418,7 +418,7 @@ export function SystemPreferencesModal({
             </div>
             <div className="sm:col-span-2">
               <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                WHATSAPP NUMBER
+                NOMOR WHATSAPP
               </label>
               <input
                 id="whatsappNumber"
@@ -431,7 +431,7 @@ export function SystemPreferencesModal({
             </div>
             <div className="sm:col-span-2">
               <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                STORE ADDRESS
+                ALAMAT TOKO
               </label>
               <textarea
                 id="address"
@@ -439,7 +439,7 @@ export function SystemPreferencesModal({
                 onChange={handleInputChange}
                 rows={3}
                 className={`${inputClass} min-h-[80px] resize-y`}
-                placeholder="Full address"
+                placeholder="Alamat lengkap"
               />
             </div>
           </div>
@@ -524,20 +524,20 @@ export function SystemPreferencesModal({
       <div className="space-y-6">
         <div>
           <h3 className="text-base font-bold uppercase tracking-wide text-ink dark:text-white">
-            SECURITY PROTOCOLS
+            PROTOKOL KEAMANAN
           </h3>
           <p className="mt-1 text-xs text-gray-600 dark:text-gray-400">
-            Manage authentication and access credentials.
+            Kelola autentikasi dan kredensial akses.
           </p>
         </div>
         <section className="rounded-md border border-gray-200 bg-gray-50/50 p-4 dark:border-white/10 dark:bg-background/80">
           <h4 className="text-sm font-bold text-ink dark:text-white">
-            Password Change
+            Ubah Kata Sandi
           </h4>
           <div className="mt-4 flex flex-col gap-6">
             <div>
               <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-gray-500 transition-colors peer-focus:text-primary dark:text-gray-400">
-                CURRENT PASSWORD
+                KATA SANDI SAAT INI
               </label>
               <div className="relative">
                 <input
@@ -564,7 +564,7 @@ export function SystemPreferencesModal({
             </div>
             <div>
               <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-gray-500 transition-colors peer-focus:text-primary dark:text-gray-400">
-                NEW PASSWORD
+                KATA SANDI BARU
               </label>
               <div className="relative">
                 <input
@@ -591,7 +591,7 @@ export function SystemPreferencesModal({
             </div>
             <div>
               <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-gray-500 transition-colors peer-focus:text-primary dark:text-gray-400">
-                CONFIRM PASSWORD
+                KONFIRMASI KATA SANDI
               </label>
               <div className="relative">
                 <input
@@ -639,11 +639,11 @@ export function SystemPreferencesModal({
 
   function renderTabContent() {
     switch (activeTab) {
-      case "ACCOUNT":
+      case "AKUN":
         return renderAccountTab();
-      case "STORE INFO":
+      case "INFO TOKO":
         return renderStoreInfoTab();
-      case "SECURITY":
+      case "KEAMANAN":
         return renderSecurityTab();
       default:
         return renderAccountTab();
@@ -665,7 +665,7 @@ export function SystemPreferencesModal({
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ type: "spring", stiffness: 300, damping: 28 }}
-            className="flex h-[90vh] w-[95vw] max-h-screen max-w-4xl overflow-hidden rounded-md border-2 border-ink bg-white shadow-neo dark:border-red-500/20 dark:bg-[#0a0a0a] dark:shadow-[0_0_30px_rgba(255,0,0,0.1)] md:h-[600px]"
+            className="flex h-[90vh] w-[95vw] max-h-screen max-w-4xl overflow-hidden rounded-md border-2 border-ink bg-white shadow-neo dark:border-primary/30 dark:bg-[#0a0a0a] dark:shadow-[0_0_30px_rgba(14,165,233,0.1)] md:h-[600px]"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex h-full w-full flex-col md:flex-row">
@@ -678,7 +678,7 @@ export function SystemPreferencesModal({
                     </div>
                     <div>
                       <p className="text-sm font-semibold uppercase tracking-wide text-ink dark:text-foreground">
-                        SYSTEM PREFS
+                        PENGATURAN SISTEM
                       </p>
                       <p className="font-mono text-[10px] text-gray-500 dark:text-muted-foreground">
                         V2.0.4 // ONLINE
@@ -711,7 +711,7 @@ export function SystemPreferencesModal({
                   <p>SERVER: US-EAST-1</p>
                   <p className="mt-1 flex items-center gap-1.5">
                     <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                    CONNECTED
+                    TERHUBUNG
                   </p>
                 </div>
               </aside>
@@ -723,12 +723,12 @@ export function SystemPreferencesModal({
                     <div className="flex items-center gap-3">
                       <div className="h-8 w-0.5 shrink-0 bg-primary" />
                       <h2 className="text-base font-black uppercase tracking-wide text-ink dark:text-white md:text-lg">
-                        USER PROFILE CONFIGURATION
+                        KONFIGURASI PROFIL PENGGUNA
                       </h2>
                     </div>
                     <div className="flex shrink-0 items-center gap-2 rounded border border-primary/40 bg-white px-2 py-1 font-mono text-[10px] text-gray-500 dark:bg-background/80 dark:text-muted-foreground">
                       <Lock className="h-3 w-3" />
-                      ENCRYPTED CONNECTION
+                      KONEKSI TERENKRIPSI
                     </div>
                   </div>
                 </div>
@@ -745,7 +745,7 @@ export function SystemPreferencesModal({
                       onClick={onClose}
                       className="order-2 rounded-sm border-2 border-ink bg-white px-4 py-2 font-mono text-xs font-medium text-ink transition-colors hover:bg-gray-100 dark:border-white/20 dark:bg-background/80 dark:text-foreground dark:hover:bg-white/10 sm:order-1"
                     >
-                      CANCEL CHANGES
+                      BATALKAN PERUBAHAN
                     </button>
                     <button
                       type="button"
@@ -759,7 +759,7 @@ export function SystemPreferencesModal({
                           isSyncing && "animate-spin",
                         )}
                       />
-                      {isSyncing ? "Menyimpan..." : "SYNC DATA"}
+                      {isSyncing ? "Menyimpan..." : "SINKRONISASI DATA"}
                     </button>
                   </div>
                 </div>

@@ -137,7 +137,7 @@ export function AiInsightBox({
           <Sparkles className="h-4 w-4 text-primary" />
         </div>
         <p className="font-mono text-sm font-bold uppercase tracking-widest text-ink dark:text-gray-300">
-          AI Insight
+          WAWASAN AI
         </p>
       </div>
 
@@ -146,7 +146,7 @@ export function AiInsightBox({
         type="button"
         onClick={handleGenerate}
         disabled={isLoading}
-        className="mb-4 flex items-center gap-2 rounded-md border border-primary/50 bg-surface-dark px-4 py-2.5 font-mono text-sm text-white transition-all duration-200 hover:border-primary hover:shadow-[0_0_15px_-5px_rgba(242,13,13,0.5)] disabled:cursor-not-allowed disabled:opacity-50"
+        className="mb-4 flex items-center gap-2 rounded-md border border-primary/50 bg-surface-dark px-4 py-2.5 font-mono text-sm text-white transition-all duration-200 hover:border-primary hover:shadow-[0_0_15px_-5px_rgba(14,165,233,0.5)] disabled:cursor-not-allowed disabled:opacity-50"
       >
         {isLoading ? (
           <>
@@ -156,12 +156,12 @@ export function AiInsightBox({
         ) : hasGenerated ? (
           <>
             <RefreshCw className="h-4 w-4 text-primary" />
-            Regenerate Insight
+            Buat Ulang Wawasan AI
           </>
         ) : (
           <>
             <Sparkles className="h-4 w-4 text-primary" />
-            Generate AI Insight
+            Buat Wawasan AI
           </>
         )}
       </button>

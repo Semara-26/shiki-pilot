@@ -36,7 +36,7 @@ export function DocumentationModal({
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ type: "spring", stiffness: 300, damping: 28 }}
-            className="flex h-[500px] w-full max-w-5xl flex-col overflow-hidden rounded-md border border-primary bg-white shadow-[0_0_25px_rgba(242,13,13,0.25)] dark:bg-[#0a0a0a]"
+            className="flex h-[500px] w-full max-w-5xl flex-col overflow-hidden rounded-md border border-primary bg-white shadow-[0_0_25px_rgba(14,165,233,0.25)] dark:bg-[#0a0a0a]"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}

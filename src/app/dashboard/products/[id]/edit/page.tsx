@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { eq, and } from "drizzle-orm";
 import { db } from "@/src/db";
 import { stores, products } from "@/src/db/schema";
-import { DashboardHeader } from "@/src/components/dashboard-header";
+import { DashboardHeaderServer } from "@/src/components/dashboard-header-server";
 import { PageContainer } from "@/src/components/page-animation";
 import { ProductEditForm } from "./product-edit-form";
 
@@ -59,9 +59,9 @@ export default async function EditProductPage({
     <PageContainer className="h-full w-full">
       <div className="flex h-full flex-col overflow-hidden">
         <div className="flex-none">
-          <DashboardHeader
-            breadcrumbs="TERMINAL / INVENTORY / EDIT ASSET"
-            title="EDIT ASSET"
+          <DashboardHeaderServer
+            storeId={userStore.id}
+            title="EDIT PRODUK"
           />
         </div>
         <div className="flex-1 overflow-y-auto p-6">

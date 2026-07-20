@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { createBulkTransactions } from "@/src/lib/actions/transaction";
 import type { POSProduct } from "./page";
 
+
 function formatRupiah(value: number) {
   return new Intl.NumberFormat("id-ID", {
     style: "currency",
@@ -147,11 +148,39 @@ export function POSClient({ products, storeId }: POSClientProps) {
 
       if (result.success) {
         const methodLabel = paymentType === "cash" ? "Cash" : "QRIS";
-        toast.success("Transaksi berhasil disimpan", {
-          description: `${result.count} item dicatat via ${methodLabel}.`,
-        });
+        const successDescription = `${result.count} item dicatat via ${methodLabel}`;
+
+        // Ambil snapshot keranjang sebelum di-reset untuk kalkulasi sisa stok
+        const soldItems = [...cart];
         setCart([]);
         setCashReceived("");
+
+        // Cari produk yang stoknya kritis pasca transaksi
+        const produkHabis = soldItems
+          .map((item) => ({
+            ...item,
+            remainingStock: item.stock - item.quantity,
+          }))
+          .filter((item) => item.remainingStock <= item.stockCritical);
+
+        if (produkHabis.length > 0) {
+          // KONDISI KRITIS (MERGED)
+          const firstProduct = produkHabis[0];
+          const extraText =
+            produkHabis.length > 1
+              ? ` dan ${produkHabis.length - 1} lainnya`
+              : "";
+
+          toast.warning("Transaksi Berhasil Disimpan", {
+            description: `${successDescription}. ⚠️ Stok ${firstProduct.name}${extraText} sisa ${firstProduct.remainingStock}. Segera restock!`,
+            duration: 8000,
+          });
+        } else {
+          // NORMAL SUCCESS
+          toast.success("Transaksi Berhasil Disimpan", {
+            description: successDescription,
+          });
+        }
       } else {
         toast.error("Gagal menyimpan", { description: result.error });
       }
@@ -221,9 +250,9 @@ export function POSClient({ products, storeId }: POSClientProps) {
   const differenceLabel = activePayment === "cash" ? "Kembalian" : "Kembalian";
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col flex-1 overflow-hidden">
       {/* Area Katalog & Keranjang - native scroll */}
-      <div className="flex flex-col p-4 md:p-6 gap-6">
+      <div className="flex-1 flex flex-col p-4 md:p-6 gap-6 overflow-y-auto">
         {/* Katalog Produk */}
         <div className="shrink-0 border-b-2 border-ink dark:border-white/20 bg-white dark:bg-[#0a0a0a] pb-4">
           <p className="mb-3 font-mono text-xs font-bold uppercase tracking-widest text-ink dark:text-gray-300">
@@ -348,12 +377,12 @@ export function POSClient({ products, storeId }: POSClientProps) {
       </div>
 
       {/* Panel Kalkulator - mengikuti scroll alami halaman */}
-      <div className="border-t-2 border-ink dark:border-white/20 bg-white dark:bg-[#0a0a0a] p-4">
+      <div className="shrink-0 border-t-2 border-ink dark:border-white/20 bg-white dark:bg-[#0a0a0a] p-4">
         <div className="space-y-3">
           {/* Grand Total */}
           <div className="flex items-center justify-between">
             <span className="font-mono text-sm uppercase tracking-wider text-ink dark:text-gray-300">
-              Grand Total
+              TOTAL BELANJA
             </span>
             <span className="font-mono text-2xl font-black tabular-nums text-primary dark:text-[#22d3ee]">
               {formatRupiah(grandTotal)}
@@ -422,8 +451,8 @@ export function POSClient({ products, storeId }: POSClientProps) {
                     {isSubmittingThis
                       ? "⏳ Menyimpan..."
                       : isArmed
-                        ? "✅ Konfirmasi CASH?"
-                        : "💵 CASH"}
+                        ? "✅ Konfirmasi TUNAI?"
+                        : "💵 TUNAI"}
                   </span>
                 </button>
               );

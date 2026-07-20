@@ -45,10 +45,10 @@ const cards: {
   label: string;
   drawerKey: DrawerKey;
 }[] = [
-  { key: "totalValue", label: "ESTIMATED ASSET VALUE", drawerKey: "VALUE" },
-  { key: "totalProducts", label: "PRODUCT TYPES", drawerKey: "TYPES" },
-  { key: "totalStock", label: "TOTAL ITEMS", drawerKey: "ITEMS" },
-  { key: "lowStock", label: "LOW STOCK ALERT", drawerKey: "LOW_STOCK" },
+  { key: "totalValue", label: "ESTIMASI NILAI ASET", drawerKey: "VALUE" },
+  { key: "totalProducts", label: "TIPE PRODUK", drawerKey: "TYPES" },
+  { key: "totalStock", label: "TOTAL ITEM", drawerKey: "ITEMS" },
+  { key: "lowStock", label: "PERINGATAN STOK MENIPIS", drawerKey: "LOW_STOCK" },
 ];
 
 function formatRupiah(value: number): string {
@@ -84,7 +84,7 @@ const MetricCard = memo(function MetricCard({
           onClick();
         }
       }}
-      className="cursor-pointer rounded-md border-2 border-ink bg-white p-4 text-ink transition-colors duration-150 hover:shadow-neo dark:border-white/10 dark:bg-surface-dark dark:text-white dark:hover:border-primary dark:hover:shadow-[0_0_15px_rgba(242,13,13,0.15)]"
+      className="cursor-pointer rounded-md border-2 border-ink bg-white p-4 text-ink transition-colors duration-150 hover:shadow-neo dark:border-white/10 dark:bg-surface-dark dark:text-white dark:hover:border-primary dark:hover:shadow-[0_0_15px_rgba(14,165,233,0.15)]"
     >
       <p className="text-xs font-medium uppercase tracking-widest text-gray-500 dark:text-gray-400">
         {label}
@@ -110,6 +110,7 @@ function DrawerContent({ activeDrawer, products, onClose }: DrawerProps) {
     (acc, p) => acc + p.price * p.stock,
     0,
   );
+  const totalStockSum = products.reduce((acc, p) => acc + p.stock, 0);
   const sortedProducts = [...products].sort(
     (a, b) => b.price * b.stock - a.price * a.stock,
   );
@@ -135,7 +136,7 @@ function DrawerContent({ activeDrawer, products, onClose }: DrawerProps) {
         exit={{ x: "100%", opacity: 0 }}
         transition={{ duration: 0.26, ease: [0.32, 0.72, 0, 1] }}
         style={{ willChange: "transform, opacity" }}
-        className="fixed top-0 right-0 z-50 flex h-full w-full max-w-md flex-col border-l border-primary/50 bg-secondary/95 shadow-[-10px_0_30px_rgba(242,13,13,0.2)]"
+        className="fixed top-0 right-0 z-50 flex h-full w-full max-w-md flex-col border-l border-primary/50 bg-secondary/95 shadow-[-10px_0_30px_rgba(14,165,233,0.2)]"
         role="dialog"
         aria-modal="true"
         aria-labelledby="drawer-title"
@@ -146,10 +147,10 @@ function DrawerContent({ activeDrawer, products, onClose }: DrawerProps) {
             id="drawer-title"
             className="font-mono text-sm font-medium uppercase tracking-widest text-foreground"
           >
-            {activeDrawer === "VALUE" && "ESTIMATED ASSET VALUE // BREAKDOWN"}
-            {activeDrawer === "TYPES" && "PRODUCT TYPES // REGISTER"}
-            {activeDrawer === "ITEMS" && "TOTAL ITEMS // STOCK LOG"}
-            {activeDrawer === "LOW_STOCK" && "LOW STOCK ALERT // REPORT"}
+            {activeDrawer === "VALUE" && "ESTIMASI NILAI ASET // RINCIAN"}
+            {activeDrawer === "TYPES" && "TIPE PRODUK // DAFTAR"}
+            {activeDrawer === "ITEMS" && "TOTAL ITEM // LOG STOK"}
+            {activeDrawer === "LOW_STOCK" && "PERINGATAN STOK MENIPIS // LAPORAN"}
           </h2>
           <button
             type="button"
@@ -167,7 +168,7 @@ function DrawerContent({ activeDrawer, products, onClose }: DrawerProps) {
             <>
               <div className="flex-1 overflow-y-auto pr-2 space-y-2 p-6">
                 {products.length === 0 ? (
-                  <p className="text-muted-foreground">No assets on record.</p>
+                  <p className="text-muted-foreground">Tidak ada aset tercatat.</p>
                 ) : (
                   sortedProducts.map((p) => {
                     const subtotal = p.price * p.stock;
@@ -206,9 +207,9 @@ function DrawerContent({ activeDrawer, products, onClose }: DrawerProps) {
               {products.length > 0 && (
                 <div className="shrink-0 mt-4 pt-4 border-t border-primary/50 flex justify-between items-center px-6 pb-6">
                   <span className="font-mono text-muted-foreground uppercase tracking-wider text-sm">
-                    TOTAL ESTIMATED ASSET
+                    TOTAL ESTIMASI ASET
                   </span>
-                  <span className="font-mono text-lg font-bold text-primary drop-shadow-[0_0_8px_rgba(242,13,13,0.6)]">
+                  <span className="font-mono text-lg font-bold text-primary drop-shadow-[0_0_8px_rgba(14,165,233,0.6)]">
                     {formatRupiah(totalAssetValue)}
                   </span>
                 </div>
@@ -221,7 +222,7 @@ function DrawerContent({ activeDrawer, products, onClose }: DrawerProps) {
               <div className="space-y-2">
                 {lowStockProducts.length === 0 ? (
                   <p className="text-emerald-500/90 font-medium">
-                    ALL SYSTEMS NOMINAL. No low stock detected.
+                    SISTEM AMAN. Tidak ada stok menipis.
                   </p>
                 ) : (
                   lowStockProducts.map((p) => (
@@ -233,7 +234,7 @@ function DrawerContent({ activeDrawer, products, onClose }: DrawerProps) {
                         {p.name}
                       </span>
                       <span className="tabular-nums text-destructive shrink-0">
-                        {p.stock} units
+                        {p.stock} unit
                       </span>
                     </div>
                   ))
@@ -242,12 +243,12 @@ function DrawerContent({ activeDrawer, products, onClose }: DrawerProps) {
             </div>
           )}
 
-          {(activeDrawer === "TYPES" || activeDrawer === "ITEMS") && (
+          {activeDrawer === "TYPES" && (
             <div className="flex-1 overflow-y-auto p-6">
               <div className="space-y-2">
                 {products.length === 0 ? (
                   <p className="text-muted-foreground">
-                    No products on record.
+                    Tidak ada produk tercatat.
                   </p>
                 ) : (
                   products.map((p) => (
@@ -258,14 +259,52 @@ function DrawerContent({ activeDrawer, products, onClose }: DrawerProps) {
                       <span className="text-muted-foreground truncate">
                         {p.name}
                       </span>
-                      <span className="tabular-nums shrink-0">
-                        {p.stock} stok
+                      <span className="tabular-nums shrink-0 text-primary">
+                        {formatRupiah(p.price)}
                       </span>
                     </div>
                   ))
                 )}
               </div>
             </div>
+          )}
+
+          {activeDrawer === "ITEMS" && (
+            <>
+              <div className="flex-1 overflow-y-auto p-6">
+                <div className="space-y-2">
+                  {products.length === 0 ? (
+                    <p className="text-muted-foreground">
+                      Tidak ada produk tercatat.
+                    </p>
+                  ) : (
+                    [...products].sort((a, b) => a.stock - b.stock).map((p) => (
+                      <div
+                        key={p.id}
+                        className="flex justify-between gap-4 border-b border-border/40 py-2 text-foreground"
+                      >
+                        <span className="text-muted-foreground truncate">
+                          {p.name}
+                        </span>
+                        <span className="tabular-nums shrink-0">
+                          {p.stock} stok
+                        </span>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+              {products.length > 0 && (
+                <div className="shrink-0 mt-4 pt-4 border-t border-primary/50 flex justify-between items-center px-6 pb-6">
+                  <span className="font-mono text-muted-foreground uppercase tracking-wider text-sm">
+                    TOTAL STOK FISIK
+                  </span>
+                  <span className="font-mono text-lg font-bold text-primary drop-shadow-[0_0_8px_rgba(14,165,233,0.6)]">
+                    {totalStockSum} Item
+                  </span>
+                </div>
+              )}
+            </>
           )}
         </div>
       </motion.div>

@@ -21,8 +21,8 @@ export default async function ChatPage() {
       <div className="flex h-full flex-col overflow-hidden bg-white dark:bg-[#0a0a0a] text-foreground">
         <div className="flex-none">
           <DashboardHeader
-            breadcrumbs="TERMINAL"
-            title="COMMUNICATION // AI ASSISTANT"
+            title="ASISTEN AI"
+            hideBell
           />
         </div>
         <div className="flex flex-1 items-center justify-center p-4">

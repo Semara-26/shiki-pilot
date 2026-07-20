@@ -4,7 +4,7 @@ import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { eq, sql, and, gte, inArray } from "drizzle-orm";
 import { db } from "@/src/db";
-import { stores, transactions, products } from "@/src/db/schema";
+import { stores, transactions, transactionItems, products } from "@/src/db/schema";
 
 export type BulkTransactionItem = {
   productId: string;
@@ -73,22 +73,40 @@ export async function createBulkTransactions(
     }
 
     // SECURITY F-04: totalPrice dihitung dari harga DB — tidak mempercayai nilai yang dikirim client
-    const records = items.map((item) => {
+    // Hitung total harga keranjang
+    const totalCartPrice = items.reduce((acc, item) => {
       const product = currentStocks.find((p) => p.id === item.productId)!;
-      return {
-        storeId,
-        productId: item.productId,
-        quantity: item.quantity,
-        totalPrice: product.price * item.quantity,
-        type: "out" as const,
-        paymentType: item.paymentType,
-      };
-    });
+      return acc + product.price * item.quantity;
+    }, 0);
+
+    const receiptId =
+      "#TRX-" + Math.random().toString(36).substring(2, 9).toUpperCase();
 
     // --- Gunakan db.transaction() agar insert transaksi + update stok bersifat atomik ---
     await db.transaction(async (tx) => {
-      // Step 1: Catat semua transaksi penjualan
-      await tx.insert(transactions).values(records);
+      // Step 1: Catat transaksi Header
+      const [header] = await tx
+        .insert(transactions)
+        .values({
+          receiptId,
+          storeId,
+          totalPrice: totalCartPrice,
+          type: "out",
+          paymentType: items[0]?.paymentType || "cash",
+        })
+        .returning({ id: transactions.id });
+
+      // Step 2: Catat item transaksi (Detail)
+      const detailRecords = items.map((item) => {
+        const product = currentStocks.find((p) => p.id === item.productId)!;
+        return {
+          transactionId: header.id,
+          productId: item.productId,
+          quantity: item.quantity,
+          subtotal: product.price * item.quantity,
+        };
+      });
+      await tx.insert(transactionItems).values(detailRecords);
 
       // Step 2: Kurangi stok tiap produk sesuai quantity yang dibeli
       for (const item of items) {
@@ -162,7 +180,7 @@ export async function createBulkTransactions(
     revalidatePath("/dashboard/pos");
     revalidatePath("/dashboard/inventory");
     revalidatePath("/dashboard/analytics");
-    return { success: true, count: records.length };
+    return { success: true, count: items.length };
   } catch (err) {
     // SECURITY F-07: Log detail error di server, kembalikan pesan generik ke client
     console.error("createBulkTransactions error:", err);

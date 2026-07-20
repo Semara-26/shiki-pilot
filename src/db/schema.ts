@@ -85,18 +85,15 @@ export const eventLogs = pgTable("event_logs", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
-// 6. Tabel Transactions (Penjualan / Barang Keluar)
+// 6. Tabel Transactions (Header)
 export const transactions = pgTable(
   "transactions",
   {
     id: uuid("id").defaultRandom().primaryKey(),
+    receiptId: text("receipt_id").notNull().unique(),
     storeId: uuid("store_id")
       .references(() => stores.id, { onDelete: "cascade" })
       .notNull(),
-    productId: uuid("product_id")
-      .references(() => products.id, { onDelete: "cascade" })
-      .notNull(),
-    quantity: integer("quantity").notNull(),
     totalPrice: integer("total_price").notNull(),
     type: text("type").notNull().default("out"),
     paymentType: text("payment_type", { enum: ["cash", "qris_statis"] })
@@ -106,6 +103,25 @@ export const transactions = pgTable(
   },
   (table) => ({
     storeIdx: index("transaction_store_idx").on(table.storeId),
-    productIdx: index("transaction_product_idx").on(table.productId),
+  }),
+);
+
+// 7. Tabel Transaction Items (Detail)
+export const transactionItems = pgTable(
+  "transaction_items",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    transactionId: uuid("transaction_id")
+      .references(() => transactions.id, { onDelete: "cascade" })
+      .notNull(),
+    productId: uuid("product_id")
+      .references(() => products.id, { onDelete: "cascade" })
+      .notNull(),
+    quantity: integer("quantity").notNull(),
+    subtotal: integer("subtotal").notNull(),
+  },
+  (table) => ({
+    transactionIdx: index("item_transaction_idx").on(table.transactionId),
+    productIdx: index("item_product_idx").on(table.productId),
   }),
 );

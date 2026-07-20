@@ -1,11 +1,11 @@
 import { auth } from "@clerk/nextjs/server";
 import Link from "next/link";
-import { eq, desc, and, gte, lte, sql } from "drizzle-orm";
+import { eq, desc, and, gte, lte, sql, inArray } from "drizzle-orm";
 import { db } from "@/src/db";
-import { stores, transactions, products } from "@/src/db/schema";
-import { DashboardHeader } from "@/src/components/dashboard-header";
+import { stores, transactions, transactionItems, products } from "@/src/db/schema";
+import { DashboardHeaderServer } from "@/src/components/dashboard-header-server";
 import { PageContainer } from "@/src/components/page-animation";
-import { TransactionsTable } from "@/src/components/transactions-table";
+import { TransactionsTable, TransactionRow } from "@/src/components/transactions-table";
 import { TransactionFilters } from "@/src/components/transaction-filters";
 
 export const dynamic = "force-dynamic";
@@ -25,7 +25,7 @@ export default async function TransactionsPage(props: {
 
   if (searchParams?.id) {
     const safeId = searchParams.id.slice(0, 100); // SECURITY: Batasi max 100 karakter untuk mencegah Query DoS
-    conditions.push(sql`${transactions.id}::text ILIKE ${"%" + safeId + "%"}`);
+    conditions.push(sql`${transactions.receiptId}::text ILIKE ${"%" + safeId + "%"}`);
   }
 
   // SECURITY: Validasi ketat format YYYY-MM-DD untuk mencegah Invalid Date crash (Unhandled Exception)
@@ -45,33 +45,44 @@ export default async function TransactionsPage(props: {
     }
   }
 
-  const transactionsList =
-    userStore?.id != null
+  const headers = userStore?.id != null
       ? await db
-          .select({
-            id: transactions.id,
-            quantity: transactions.quantity,
-            totalPrice: transactions.totalPrice,
-            type: transactions.type,
-            paymentType: transactions.paymentType,
-            createdAt: transactions.createdAt,
-            productId: transactions.productId,
-            productName: products.name,
-            productPrice: products.price,
-          })
+          .select()
           .from(transactions)
-          .leftJoin(products, eq(transactions.productId, products.id))
           .where(and(...conditions))
           .orderBy(desc(transactions.createdAt))
       : [];
+
+  const headerIds = headers.map(h => h.id);
+  const items = headerIds.length > 0
+      ? await db
+          .select({
+             transactionId: transactionItems.transactionId,
+             productName: products.name,
+             quantity: transactionItems.quantity,
+             subtotal: transactionItems.subtotal,
+          })
+          .from(transactionItems)
+          .leftJoin(products, eq(transactionItems.productId, products.id))
+          .where(inArray(transactionItems.transactionId, headerIds))
+      : [];
+
+  const transactionsList: TransactionRow[] = headers.map(h => ({
+     id: h.id,
+     receiptId: h.receiptId,
+     totalPrice: h.totalPrice,
+     type: h.type,
+     paymentType: h.paymentType,
+     createdAt: h.createdAt,
+     items: items.filter(i => i.transactionId === h.id),
+  }));
 
   if (!userStore) {
     return (
       <PageContainer className="h-full w-full">
         <div className="flex h-full flex-col overflow-hidden">
           <div className="flex-none">
-            <DashboardHeader
-              breadcrumbs="TERMINAL / TRANSACTIONS"
+            <DashboardHeaderServer
               title="RIWAYAT TRANSAKSI"
             />
           </div>
@@ -97,8 +108,8 @@ export default async function TransactionsPage(props: {
     <PageContainer className="h-full w-full">
       <div className="flex h-full flex-col overflow-hidden">
         <div className="flex-none">
-          <DashboardHeader
-            breadcrumbs="TERMINAL / TRANSACTIONS"
+          <DashboardHeaderServer
+            storeId={userStore.id}
             title="RIWAYAT TRANSAKSI"
           />
         </div>

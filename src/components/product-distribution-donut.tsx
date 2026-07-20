@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from "recharts";
 import { useTheme } from "next-themes";
 import { motion } from "framer-motion";
@@ -73,6 +74,7 @@ export function ProductDistributionDonut({
   title = "KONTRIBUSI PENDAPATAN",
   className,
 }: ProductDistributionDonutProps) {
+  const [isHovered, setIsHovered] = useState(false);
   const { resolvedTheme } = useTheme();
   const isDark = resolvedTheme === "dark";
   const labelColor = isDark ? "#e5e7eb" : "#374151";
@@ -111,7 +113,7 @@ export function ProductDistributionDonut({
         </div>
       ) : (
         <div className="flex flex-col gap-4">
-          <div className="w-full min-h-[320px] h-[320px] shrink-0">
+          <div className="relative w-full min-h-[320px] h-[320px] shrink-0">
             <ResponsiveContainer width="100%" height="100%" minWidth={0}>
               <PieChart>
                 <Pie
@@ -122,67 +124,8 @@ export function ProductDistributionDonut({
                   outerRadius={90}
                   paddingAngle={2}
                   stroke="transparent"
-                  label={(props) => {
-                    const { x, y, textAnchor, percent, cx, cy, index } =
-                      props as {
-                        x?: number;
-                        y?: number;
-                        textAnchor?: string;
-                        percent?: number;
-                        cx?: number;
-                        cy?: number;
-                        index?: number;
-                      };
-                    const showPct = (percent ?? 0) >= 0.03;
-                    const centerLabel =
-                      index === 0 ? (
-                        <text
-                          x={cx}
-                          y={cy}
-                          textAnchor="middle"
-                          dominantBaseline="central"
-                          style={{ fontFamily: "monospace" }}
-                        >
-                          <tspan
-                            x={cx}
-                            dy="-0.5em"
-                            fill={isDark ? "#9ca3af" : "#6b7280"}
-                            fontSize={14}
-                          >
-                            TOTAL
-                          </tspan>
-                          <tspan
-                            x={cx}
-                            dy="1.6em"
-                            fill={isDark ? "#ffffff" : "#111827"}
-                            fontSize={18}
-                            fontWeight="bold"
-                          >
-                            {totalDisplay}
-                          </tspan>
-                        </text>
-                      ) : null;
-                    return (
-                      <>
-                        {centerLabel}
-                        {showPct && (
-                          <text
-                            x={x}
-                            y={y}
-                            textAnchor={
-                              (textAnchor as "start" | "middle" | "end") ??
-                              "middle"
-                            }
-                            fill={labelColor}
-                            fontSize={11}
-                          >
-                            {((percent ?? 0) * 100).toFixed(0)}%
-                          </text>
-                        )}
-                      </>
-                    );
-                  }}
-                  labelLine={{ stroke: labelColor, strokeWidth: 1 }}
+                  onMouseEnter={() => setIsHovered(true)}
+                  onMouseLeave={() => setIsHovered(false)}
                 >
                   {chartData.map((_, i) => (
                     <Cell key={i} fill={NERV_COLORS[i % NERV_COLORS.length]} />
@@ -191,6 +134,20 @@ export function ProductDistributionDonut({
                 <Tooltip content={<DonutTooltip />} />
               </PieChart>
             </ResponsiveContainer>
+            <div
+              className={cn(
+                "pointer-events-none absolute left-1/2 top-1/2 max-w-[140px] -translate-x-1/2 -translate-y-1/2 px-2 text-center transition-opacity duration-200",
+                isHovered ? "opacity-0" : "opacity-100"
+              )}
+              aria-hidden
+            >
+              <p className="truncate font-mono text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                TOTAL
+              </p>
+              <p className="mt-1 truncate font-mono text-base font-bold tabular-nums text-ink sm:text-lg dark:text-white">
+                {totalDisplay}
+              </p>
+            </div>
           </div>
           {/* Custom Legend: dibungkus dalam container scrollable agar semua item muat
               tanpa memaksa komponen naik / terpotong di layar kecil */}

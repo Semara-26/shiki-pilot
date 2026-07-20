@@ -29,12 +29,7 @@ export type DashboardProduct = {
   createdAt: Date;
 };
 
-export type EventLogItem = {
-  id: string;
-  title: string;
-  detail?: string;
-  date: string; // ISO string
-};
+
 
 export type DashboardMetrics = {
   totalValue: number;
@@ -151,25 +146,4 @@ export const getLowStockProducts = unstable_cache(
   { revalidate: 30, tags: ["dashboard-low-stock"] },
 );
 
-// ─── 6. Event log (aktivitas terbaru, limit 8) ────────────────────────────────
-// Cache 30 detik karena log cepat berubah
 
-export const getEventLog = unstable_cache(
-  async (storeId: string): Promise<EventLogItem[]> => {
-    const rows = await db.query.eventLogs.findMany({
-      where: eq(eventLogs.storeId, storeId),
-      orderBy: [desc(eventLogs.createdAt)],
-      columns: { id: true, title: true, detail: true, createdAt: true },
-      limit: 8,
-    });
-
-    return rows.map((row) => ({
-      id: row.id,
-      title: row.title,
-      detail: row.detail ?? undefined,
-      date: new Date(row.createdAt).toISOString(),
-    }));
-  },
-  ["dashboard-event-log"],
-  { revalidate: 30, tags: ["dashboard-event-log"] },
-);

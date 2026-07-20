@@ -11,6 +11,7 @@ export type POSProduct = {
   name: string;
   price: number;
   stock: number;
+  stockCritical: number; // dibutuhkan oleh DashboardHeader bell icon
 };
 
 export default async function POSPage() {
@@ -26,7 +27,7 @@ export default async function POSPage() {
     userStore?.id != null
       ? await db.query.products.findMany({
           where: eq(products.storeId, userStore.id),
-          columns: { id: true, name: true, price: true, stock: true },
+          columns: { id: true, name: true, price: true, stock: true, stockCritical: true },
         })
       : [];
 
@@ -35,8 +36,7 @@ export default async function POSPage() {
       <div className="flex h-full flex-col overflow-hidden bg-white dark:bg-[#0a0a0a]">
         <div className="flex-none">
           <DashboardHeader
-            breadcrumbs="TERMINAL"
-            title="KERANJANG PINTAR // POS"
+            title="KASIR"
           />
         </div>
         <div className="flex flex-1 items-center justify-center p-6">
@@ -60,11 +60,11 @@ export default async function POSPage() {
   }
 
   return (
-    <div className="flex h-[100dvh] flex-col overflow-y-auto bg-paper dark:bg-ink pb-16 lg:h-full">
+    <div className="flex h-[100dvh] flex-col overflow-hidden bg-paper dark:bg-ink lg:h-full">
       <div className="flex-none">
         <DashboardHeader
-          breadcrumbs="TERMINAL / POS"
-          title="KERANJANG PINTAR // MICRO-POS"
+          title="KASIR"
+          products={productsList}
         />
       </div>
       <POSClient products={productsList} storeId={userStore.id} />

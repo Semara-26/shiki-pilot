@@ -28,12 +28,12 @@ const motionLinkProps = {
 };
 
 const navItems = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutGrid, exact: true },
-  { href: "/dashboard/inventory", label: "Inventaris", icon: Package },
-  { href: "/dashboard/pos", label: "Kasir (POS)", icon: ShoppingCart },
-  { href: "/dashboard/transactions", label: "Transaksi", icon: Receipt },
-  { href: "/dashboard/analytics", label: "Analitik", icon: BarChart3 },
-  { href: "/dashboard/chat", label: "AI Asisten", icon: MessageSquare },
+  { href: "/dashboard", label: "Beranda", icon: LayoutGrid, exact: true },
+  { href: "/dashboard/inventory", label: "Stok Barang", icon: Package },
+  { href: "/dashboard/pos", label: "Kasir", icon: ShoppingCart },
+  { href: "/dashboard/transactions", label: "Riwayat Transaksi", icon: Receipt },
+  { href: "/dashboard/analytics", label: "Statistik", icon: BarChart3 },
+  { href: "/dashboard/chat", label: "Asisten AI", icon: MessageSquare },
   { href: "/dashboard/products/new", label: "Tambah Produk", icon: PlusCircle },
 ];
 

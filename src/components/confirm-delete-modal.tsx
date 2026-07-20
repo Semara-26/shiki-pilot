@@ -35,7 +35,7 @@ export function ConfirmDeleteModal({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 10 }}
             transition={{ type: "spring", stiffness: 300, damping: 28 }}
-            className="bg-white dark:bg-[#0a0a0a] border-2 border-ink dark:border-red-500/50 shadow-neo dark:shadow-[0_0_30px_rgba(255,0,0,0.2)] max-w-md w-full p-6 rounded-lg"
+            className="bg-white dark:bg-[#0a0a0a] border-2 border-ink dark:border-primary/50 shadow-neo dark:shadow-[0_0_30px_rgba(14,165,233,0.2)] max-w-md w-full p-6 rounded-lg"
             onClick={(e) => e.stopPropagation()}
           >
             <h2

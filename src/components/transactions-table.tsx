@@ -1,36 +1,27 @@
 "use client";
 
-/**
- * TransactionsTable — Refactored for Performance
- *
- * Optimisasi:
- * 1. State modal (selectedTx + isOpen) DIPINDAH ke komponen TransactionRow
- *    terpisah — membuka struk hanya me-re-render 1 baris, bukan seluruh tabel.
- * 2. Modal (ReceiptModal) dipisah jadi komponen tersendiri + memo untuk
- *    mencegah re-render saat data baris lain berubah.
- * 3. Animasi hanya pakai transform + opacity (GPU-composited) + will-change.
- *    Hapus transition-all yang memicu layout recalculation.
- * 4. staggerChildren pada tbody dihapus karena bisa menyebabkan jank saat
- *    daftar panjang — diganti animasi flat per-baris yang lebih ringan.
- */
-
 import { AnimatePresence, motion } from "framer-motion";
 import { cn } from "@/src/lib/utils";
 import { useState, memo, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { Receipt, X } from "lucide-react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
+export interface TransactionItemRow {
+  productName: string | null;
+  quantity: number;
+  subtotal: number;
+}
+
 export interface TransactionRow {
   id: string;
-  quantity: number;
+  receiptId: string;
   totalPrice: number;
   type: string;
   paymentType: string;
   createdAt: Date;
-  productId: string;
-  productName: string | null;
-  productPrice: number | null;
+  items: TransactionItemRow[];
 }
 
 interface TransactionsTableProps {
@@ -71,11 +62,7 @@ const ReceiptModal = memo(function ReceiptModal({
   tx,
   onClose,
 }: ReceiptModalProps) {
-  const unitPrice =
-    tx.productPrice ??
-    (tx.quantity > 0 ? Math.round(tx.totalPrice / tx.quantity) : 0);
-
-  return (
+  const modalContent = (
     <motion.div
       role="dialog"
       aria-modal="true"
@@ -94,11 +81,11 @@ const ReceiptModal = memo(function ReceiptModal({
         exit={{ opacity: 0, scale: 0.95, y: 8 }}
         transition={{ type: "spring", stiffness: 320, damping: 26, mass: 0.7 }}
         style={{ willChange: "transform, opacity" }}
-        className="w-full max-w-md overflow-hidden rounded-md border border-primary/50 bg-secondary/90 p-6 shadow-[0_0_30px_rgba(14,165,233,0.3)] relative"
+        className="w-full max-w-md max-h-[85vh] flex flex-col overflow-hidden rounded-md border border-primary/50 bg-secondary/90 p-6 shadow-[0_0_30px_rgba(14,165,233,0.3)] relative"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="mb-5 flex items-start justify-between gap-4">
+        <div className="mb-5 flex items-start justify-between gap-4 flex-shrink-0">
           <div className="flex items-center gap-2">
             <Receipt className="h-4 w-4 shrink-0 text-primary" />
             <h2
@@ -107,7 +94,7 @@ const ReceiptModal = memo(function ReceiptModal({
             >
               Struk Digital&nbsp;
               <span className="text-foreground">
-                #{tx.id.substring(0, 8).toUpperCase()}
+                {tx.receiptId}
               </span>
             </h2>
           </div>
@@ -121,10 +108,10 @@ const ReceiptModal = memo(function ReceiptModal({
           </button>
         </div>
 
-        <div className="mb-5 border-t border-dashed border-primary/30" />
+        <div className="mb-5 border-t border-dashed border-primary/30 flex-shrink-0" />
 
         {/* Timestamp */}
-        <div className="mb-5 flex items-center justify-between gap-2">
+        <div className="mb-5 flex items-center justify-between gap-2 flex-shrink-0">
           <span className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
             Waktu Transaksi
           </span>
@@ -134,12 +121,12 @@ const ReceiptModal = memo(function ReceiptModal({
         </div>
 
         {/* Product table */}
-        <div className="mb-5">
+        <div className="mb-5 flex-1 min-h-0 flex flex-col">
           <p className="mb-3 font-mono text-xs font-medium uppercase tracking-widest text-muted-foreground">
             Detail Pembelian
           </p>
-          <div className="rounded border border-white/10 bg-black/20 overflow-hidden">
-            <div className="grid grid-cols-[1fr_3rem_auto] gap-x-3 border-b border-white/10 bg-black/20 px-4 py-2">
+          <div className="rounded border border-white/10 bg-black/20 flex flex-col overflow-hidden">
+            <div className="grid grid-cols-[1fr_3rem_auto] gap-x-3 border-b border-white/10 bg-black/20 px-4 py-2 flex-shrink-0">
               <span className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
                 Produk
               </span>
@@ -147,31 +134,43 @@ const ReceiptModal = memo(function ReceiptModal({
                 Qty
               </span>
               <span className="font-mono text-xs uppercase tracking-wider text-muted-foreground text-right">
-                Harga Satuan
+                Harga
               </span>
             </div>
-            <div className="grid grid-cols-[1fr_3rem_auto] gap-x-3 px-4 py-3">
-              <span className="font-mono text-sm text-foreground truncate">
-                {tx.productName ?? (
-                  <span className="italic text-muted-foreground">
-                    Produk Dihapus
-                  </span>
-                )}
-              </span>
-              <span className="font-mono text-sm tabular-nums text-foreground text-right">
-                {tx.quantity}x
-              </span>
-              <span className="font-mono text-sm tabular-nums text-foreground text-right">
-                {formatRupiah(unitPrice)}
-              </span>
+            <div className="overflow-y-auto px-4 py-2 space-y-2 max-h-[40vh] custom-scrollbar">
+              {tx.items.map((item, index) => {
+                const unitPrice = item.quantity > 0 ? Math.round(item.subtotal / item.quantity) : 0;
+                return (
+                  <div key={index} className="grid grid-cols-[1fr_3rem_auto] gap-x-3 py-1">
+                    <div className="flex flex-col truncate">
+                      <span className="font-mono text-sm text-foreground truncate">
+                        {item.productName ?? (
+                          <span className="italic text-muted-foreground">
+                            Produk Dihapus
+                          </span>
+                        )}
+                      </span>
+                      <span className="font-mono text-[10px] text-muted-foreground truncate">
+                        {formatRupiah(unitPrice)}/pcs
+                      </span>
+                    </div>
+                    <span className="font-mono text-sm tabular-nums text-foreground text-right pt-0.5">
+                      {item.quantity}x
+                    </span>
+                    <span className="font-mono text-sm tabular-nums text-foreground text-right pt-0.5">
+                      {formatRupiah(item.subtotal)}
+                    </span>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
 
-        <div className="mb-4 border-t border-dashed border-primary/30" />
+        <div className="mb-4 border-t border-dashed border-primary/30 flex-shrink-0" />
 
         {/* Metode Pembayaran */}
-        <div className="mb-4 flex items-center justify-between">
+        <div className="mb-4 flex items-center justify-between flex-shrink-0">
           <span className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
             Metode Pembayaran
           </span>
@@ -181,13 +180,13 @@ const ReceiptModal = memo(function ReceiptModal({
             </span>
           ) : (
             <span className="inline-flex items-center gap-1 rounded-full border border-gray-500/40 bg-gray-500/10 px-2.5 py-0.5 font-mono text-xs font-semibold text-gray-400">
-              💵 Cash
+              💵 TUNAI
             </span>
           )}
         </div>
 
         {/* Total */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between flex-shrink-0">
           <span className="font-mono text-sm uppercase tracking-widest text-muted-foreground">
             Total Pembayaran
           </span>
@@ -197,7 +196,7 @@ const ReceiptModal = memo(function ReceiptModal({
         </div>
 
         {/* Footer stamp */}
-        <div className="mt-6 flex justify-center">
+        <div className="mt-6 flex justify-center flex-shrink-0">
           <span className="font-mono text-xs tracking-[0.3em] uppercase text-muted-foreground/40">
             — ShikiPilot —
           </span>
@@ -205,6 +204,9 @@ const ReceiptModal = memo(function ReceiptModal({
       </motion.div>
     </motion.div>
   );
+
+  if (typeof document === "undefined") return null;
+  return createPortal(modalContent, document.body);
 });
 
 // ─── TransactionTableRow — state modal TERISOLASI di sini ─────────────────────
@@ -220,6 +222,8 @@ const TransactionTableRow = memo(function TransactionTableRow({
 
   const open = useCallback(() => setIsOpen(true), []);
   const close = useCallback(() => setIsOpen(false), []);
+
+  const totalQuantity = tx.items.reduce((acc, item) => acc + item.quantity, 0);
 
   return (
     <>
@@ -244,17 +248,15 @@ const TransactionTableRow = memo(function TransactionTableRow({
           {formatDateTime(tx.createdAt)}
         </td>
         <td className="px-4 py-4 font-semibold text-ink dark:text-white">
-          #{tx.id.substring(0, 8).toUpperCase()}
+          {tx.receiptId}
         </td>
         <td className="px-4 py-4 font-semibold text-ink dark:text-white">
-          {tx.productName ?? (
-            <span className="italic text-gray-400 dark:text-gray-500">
-              Produk Dihapus
-            </span>
-          )}
+          {tx.items.length === 1 && tx.items[0].productName 
+            ? tx.items[0].productName 
+            : `${tx.items.length} Jenis Produk`}
         </td>
         <td className="px-4 py-4 text-right tabular-nums font-semibold text-ink dark:text-white">
-          {tx.quantity}
+          {totalQuantity} Item
         </td>
         <td className="px-4 py-4">
           {tx.paymentType === "qris_statis" ? (
@@ -263,7 +265,7 @@ const TransactionTableRow = memo(function TransactionTableRow({
             </span>
           ) : (
             <span className="inline-flex items-center gap-1 rounded-full border border-gray-500/40 bg-gray-500/10 px-2.5 py-0.5 font-mono text-xs font-semibold text-gray-400">
-              💵 Cash
+              💵 TUNAI
             </span>
           )}
         </td>
@@ -304,7 +306,7 @@ export function TransactionsTable({
                 ID Transaksi
               </th>
               <th className="px-4 py-4 text-left text-sm font-bold tracking-wider text-gray-500 dark:text-gray-400">
-                Nama Produk
+                Ringkasan Item
               </th>
               <th className="px-4 py-4 text-right text-sm font-bold tracking-wider text-gray-500 dark:text-gray-400">
                 Jumlah Item

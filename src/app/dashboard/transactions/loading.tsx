@@ -1,5 +1,5 @@
-import TableSkeleton from "@/src/components/skeletons/TableSkeleton";
+import TransactionsSkeleton from "@/src/components/skeletons/TransactionsSkeleton";
 
 export default function TransactionsLoading() {
-  return <TableSkeleton />;
+  return <TransactionsSkeleton />;
 }

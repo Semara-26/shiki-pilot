@@ -3,7 +3,7 @@ import Link from "next/link";
 import { eq, ilike, and } from "drizzle-orm";
 import { db } from "@/src/db";
 import { stores, products } from "@/src/db/schema";
-import { DashboardHeader } from "@/src/components/dashboard-header";
+import { DashboardHeaderServer } from "@/src/components/dashboard-header-server";
 import { ProductsTable } from "@/src/components/products-table";
 import { PageContainer } from "@/src/components/page-animation";
 import { AiImportButton } from "./ai-import-button";
@@ -38,6 +38,7 @@ export default async function InventoryPage(props: {
             stock: true,
             imageUrl: true,
             description: true,
+            createdAt: true,
           },
         })
       : [];
@@ -47,9 +48,8 @@ export default async function InventoryPage(props: {
       <PageContainer className="w-full">
         <div className="flex flex-col">
           <div className="flex-none">
-            <DashboardHeader
-              breadcrumbs="TERMINAL / INVENTORY"
-              title="FULL ASSET LIST"
+            <DashboardHeaderServer
+              title="STOK BARANG"
             />
           </div>
           <div className="p-6">
@@ -74,9 +74,9 @@ export default async function InventoryPage(props: {
     <PageContainer className="w-full">
       <div className="flex flex-col">
         <div className="flex-none">
-          <DashboardHeader
-            breadcrumbs="TERMINAL / INVENTORY"
-            title="FULL ASSET LIST"
+          <DashboardHeaderServer
+            storeId={userStore.id}
+            title="STOK BARANG"
           />
         </div>
         <div className="p-6">

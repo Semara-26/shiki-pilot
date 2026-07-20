@@ -5,7 +5,7 @@ import { google } from "@ai-sdk/google";
 import { z } from "zod";
 import { eq, ilike, and, gte } from "drizzle-orm";
 import { db } from "../../../db";
-import { stores, products, transactions } from "../../../db/schema";
+import { stores, products, transactions, transactionItems } from "../../../db/schema";
 import { checkWaRateLimit } from "../../../lib/rate-limit";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -106,6 +106,7 @@ async function handleCheckStock(
       stock: products.stock,
       price: products.price,
       stockCritical: products.stockCritical,
+      createdAt: products.createdAt,
     })
     .from(products)
     .where(
@@ -115,9 +116,17 @@ async function handleCheckStock(
       ),
     );
 
+  const formattedResults = results.map(r => ({
+    name: r.name,
+    stock: r.stock,
+    price: r.price,
+    stockCritical: r.stockCritical,
+    created_at: r.createdAt ? new Intl.DateTimeFormat('id-ID', { day: '2-digit', month: 'long', year: 'numeric' }).format(new Date(r.createdAt)) : undefined
+  }));
+
   const dbData =
-    results.length > 0
-      ? JSON.stringify(results)
+    formattedResults.length > 0
+      ? JSON.stringify(formattedResults)
       : `Produk "${keyword}" tidak ditemukan.`;
 
   console.log("[checkStock] Data didapat, merangkai jawaban akhir...");
@@ -371,10 +380,12 @@ async function handleCheckSalesReport(
   const salesData = await db
     .select({
       transaction: transactions,
+      item: transactionItems,
       productName: products.name,
     })
     .from(transactions)
-    .leftJoin(products, eq(transactions.productId, products.id))
+    .innerJoin(transactionItems, eq(transactionItems.transactionId, transactions.id))
+    .leftJoin(products, eq(transactionItems.productId, products.id))
     .where(
       and(
         eq(transactions.storeId, store.id),
@@ -386,9 +397,11 @@ async function handleCheckSalesReport(
   let totalItemsSold = 0;
   const itemSalesMap: Record<string, number> = {};
 
+  // Note: because we joined with items, totalRevenue will be duplicated if we sum transaction.totalPrice naively.
+  // We should sum item.subtotal for revenue to be safe or group by transaction.
   salesData.forEach((row) => {
-    totalRevenue += Number(row.transaction.totalPrice || 0);
-    const qty = Number(row.transaction.quantity || 0);
+    totalRevenue += Number(row.item.subtotal || 0);
+    const qty = Number(row.item.quantity || 0);
     totalItemsSold += qty;
     const pName = row.productName || "Produk Tidak Diketahui";
     itemSalesMap[pName] = (itemSalesMap[pName] || 0) + qty;
