@@ -83,7 +83,9 @@ const UpdateStockArgsSchema = z.object({
   products: z
     .array(StockItemSchema)
     .max(20, "Maksimal 20 produk per pesan")
-    .describe("Daftar produk yang akan diupdate stoknya (maks. 20 item)"),
+    .describe(
+      "Daftar produk yang akan diupdate stoknya. Kamu WAJIB membungkus data produk dalam array 'products', meskipun hanya ada 1 produk."
+    ),
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -187,9 +189,21 @@ async function handleUpdateStock(
       Object.values(rawArgs).find(Array.isArray);
 
     // Fallback ke [] (bukan [rawArgs]) jika tidak ada array ditemukan
-    itemsToProcess = Array.isArray(rawItems)
-      ? (rawItems as z.infer<typeof StockItemSchema>[])
-      : [];
+    if (Array.isArray(rawItems)) {
+      itemsToProcess = rawItems as z.infer<typeof StockItemSchema>[];
+    } else if (
+      rawArgs.name ||
+      rawArgs.product_name ||
+      rawArgs.nama_produk ||
+      rawArgs.quantity !== undefined ||
+      rawArgs.operation
+    ) {
+      // Jika AI mengirimkan flat object tanpa array, bungkus secara otomatis
+      console.log("[updateStock] Auto-wrapping flat object into array");
+      itemsToProcess = [rawArgs as unknown as z.infer<typeof StockItemSchema>];
+    } else {
+      itemsToProcess = [];
+    }
   }
 
   // Terapkan limit 20 item di sini juga sebagai safety net
