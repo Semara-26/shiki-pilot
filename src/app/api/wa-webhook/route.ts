@@ -395,6 +395,11 @@ async function handleAddNewProduct(
 ): Promise<string> {
   console.log("[addNewProduct] Raw AI Args:", JSON.stringify(args, null, 2));
 
+  // Normalisasi argument SEBELUM masuk ke Zod
+  args.nama_produk = args.nama_produk || args.product_name || args.name || args.produk;
+  args.harga = args.harga ?? args.price;
+  args.stok_awal = args.stok_awal ?? args.initial_stock ?? args.stok ?? args.stock;
+
   let finalProductName = args.nama_produk;
   let finalPrice = args.harga;
   let finalStock = args.stok_awal !== undefined ? args.stok_awal : 0;
