@@ -12,7 +12,7 @@ import { checkWaRateLimit } from "../../../lib/rate-limit";
 // AI Fallback Wrapper
 // ─────────────────────────────────────────────────────────────────────────────
 async function generateTextWithFallback(
-  options: Omit<Parameters<typeof generateText>[0], "model"> & { messages: any[] },
+  options: Omit<Parameters<typeof generateText>[0], "model"> & { messages?: any[] },
 ) {
   const modelPipeline = ["gemini-flash-latest", "gemini-2.5-flash"];
   let lastError;
@@ -20,6 +20,7 @@ async function generateTextWithFallback(
     try {
       return await generateText({
         ...options,
+        messages: options.messages ?? [],
         model: google(modelName),
       } as any);
     } catch (err: any) {
