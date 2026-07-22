@@ -14,14 +14,18 @@ import { checkWaRateLimit } from "../../../lib/rate-limit";
 type Store = { id: string; name: string; whatsappNumber: string | null };
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Helper: Normalize nomor WA (strip non-digit, 0xxx → 62xxx)
+// Helper: Normalize nomor WA (strip non-digit, 0xxx → 62xxx khusus Indonesia)
+// Nomor internasional / virtual (@lid) dibiarkan apa adanya setelah strip.
 // ─────────────────────────────────────────────────────────────────────────────
 function normalizePhone(phone: string): string {
   if (!phone) return "";
-  let cleaned = phone.replace(/\D/g, "");
+  // Hapus semua karakter non-angka (termasuk @s.whatsapp.net, @lid, '+', dll)
+  const cleaned = phone.replace(/\D/g, "");
+  // Konversi format lokal Indonesia saja: 08xxx → 628xxx
   if (cleaned.startsWith("0")) {
-    cleaned = "62" + cleaned.substring(1);
+    return "62" + cleaned.substring(1);
   }
+  // Nomor internasional / virtual (misal 243...) dikembalikan apa adanya
   return cleaned;
 }
 
@@ -508,16 +512,30 @@ export async function POST(req: NextRequest) {
     `[WA Webhook] Mencari toko... Raw: ${rawSender} | Normalized: ${normalizedSender}`,
   );
 
-  const suffix = normalizedSender.slice(-10);
-
-  const store = await db.query.stores.findFirst({
-    where: ilike(stores.whatsappNumber, `%${suffix}`),
+  // ── Strategi lookup 2 lapis ─────────────────────────────────────────────
+  // Pass 1: Exact match pada normalizedSender (mendukung nomor internasional)
+  let store = await db.query.stores.findFirst({
+    where: ilike(stores.whatsappNumber, normalizedSender),
     columns: { id: true, name: true, whatsappNumber: true },
   });
 
+  // Pass 2: Fallback suffix 10 digit — untuk nomor yang tersimpan dalam format
+  // berbeda (misal DB berisi 081xxx tapi pengirim mengirim 6281xxx)
+  if (!store) {
+    const suffix = normalizedSender.slice(-10);
+    store = await db.query.stores.findFirst({
+      where: ilike(stores.whatsappNumber, `%${suffix}`),
+      columns: { id: true, name: true, whatsappNumber: true },
+    });
+    if (store) {
+      console.log(`[WA Webhook] Toko ditemukan via suffix fallback (${suffix})`);
+    }
+  }
+  // ────────────────────────────────────────────────────────────────────────
+
   if (!store) {
     console.warn(
-      `[WA Webhook] Tidak ada toko terdaftar untuk nomor: ${normalizedSender} (suffix: ${suffix})`,
+      `[WA Webhook] Tidak ada toko terdaftar untuk nomor: ${normalizedSender}`,
     );
 
     // ── Cek apakah ini perintah LINK# ──────────────────────────────────────
