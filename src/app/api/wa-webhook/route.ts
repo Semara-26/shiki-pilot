@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextRequest, NextResponse } from "next/server";
-import { generateText, tool } from "ai";
+import { generateText, generateObject, tool } from "ai";
 import { google } from "@ai-sdk/google";
 import { z } from "zod";
 import { eq, ilike, and, gte } from "drizzle-orm";
@@ -130,16 +130,16 @@ const UpdateStockArgsSchema = z.object({
 });
 
 const NewProductSchema = z.object({
-  product_name: z
+  nama_produk: z
     .string()
-    .describe("Nama produk baru. DILARANG KERAS menerjemahkan nama key JSON. Wajib gunakan 'product_name'."),
-  price: z
+    .describe("Nama produk baru yang akan ditambahkan ke toko."),
+  harga: z
     .number()
-    .describe("Harga produk baru (angka). DILARANG KERAS menerjemahkan nama key JSON. Wajib gunakan 'price'."),
-  initial_stock: z
+    .describe("Harga produk baru (angka bulat tanpa Rp atau titik)."),
+  stok_awal: z
     .number()
     .default(0)
-    .describe("Stok awal produk (angka). DILARANG KERAS menerjemahkan nama key JSON. Wajib gunakan 'initial_stock'."),
+    .describe("Jumlah stok awal produk."),
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -395,9 +395,9 @@ async function handleAddNewProduct(
 ): Promise<string> {
   console.log("[addNewProduct] Raw AI Args:", JSON.stringify(args, null, 2));
 
-  let finalProductName = args.product_name;
-  let finalPrice = args.price;
-  let finalStock = args.initial_stock !== undefined ? args.initial_stock : 0;
+  let finalProductName = args.nama_produk;
+  let finalPrice = args.harga;
+  let finalStock = args.stok_awal !== undefined ? args.stok_awal : 0;
 
   const parsed = NewProductSchema.safeParse(args);
   
@@ -405,9 +405,9 @@ async function handleAddNewProduct(
     console.log("[addNewProduct] Zod validation failed, attempting manual extraction:", parsed.error.format());
     
     // Manual Extraction Fallback
-    finalProductName = args.product_name || args.nama_produk || args.name || args.produk || finalProductName;
-    finalPrice = args.price ?? args.harga ?? finalPrice;
-    finalStock = args.initial_stock ?? args.stok_awal ?? args.stok ?? args.stock ?? finalStock;
+    finalProductName = args.nama_produk || args.product_name || args.name || args.produk || finalProductName;
+    finalPrice = args.harga ?? args.price ?? finalPrice;
+    finalStock = args.stok_awal ?? args.initial_stock ?? args.stok ?? args.stock ?? finalStock;
     
     // Parse angka jika dikirim sebagai string (contoh: "20rb" -> 20000, "50 pcs" -> 50)
     if (typeof finalPrice === "string") {
@@ -424,12 +424,29 @@ async function handleAddNewProduct(
     }
     
     if (!finalProductName || finalPrice === undefined || isNaN(finalPrice)) {
-      return "Maaf Bos, format data produk baru tidak lengkap. Tolong sebutkan nama produk, harga, dan stok awalnya ya.";
+      try {
+        console.log("[addNewProduct] Menggunakan generateObject AI untuk mengekstrak paksa dari messageText...");
+        const fallbackExtraction = await generateObject({
+          model: google("gemini-2.5-flash"),
+          schema: NewProductSchema,
+          prompt: `Ekstrak informasi produk baru dari pesan berikut.\n\nPesan: "${messageText}"\n\nSyarat: nama_produk (wajib), harga (wajib angka murni, misal 20rb jadi 20000), stok_awal (default 0).`,
+        });
+        finalProductName = fallbackExtraction.object.nama_produk;
+        finalPrice = fallbackExtraction.object.harga;
+        finalStock = fallbackExtraction.object.stok_awal;
+        console.log("[addNewProduct] generateObject berhasil mengekstrak:", fallbackExtraction.object);
+      } catch (err) {
+        console.error("[addNewProduct] generateObject juga gagal:", err);
+      }
+
+      if (!finalProductName || finalPrice === undefined || isNaN(finalPrice)) {
+        return "Maaf Bos, format data produk baru tidak lengkap. Tolong sebutkan nama produk, harga, dan stok awalnya ya.";
+      }
     }
   } else {
-    finalProductName = parsed.data.product_name;
-    finalPrice = parsed.data.price;
-    finalStock = parsed.data.initial_stock;
+    finalProductName = parsed.data.nama_produk;
+    finalPrice = parsed.data.harga;
+    finalStock = parsed.data.stok_awal;
   }
 
   try {
