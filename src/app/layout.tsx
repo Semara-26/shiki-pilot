@@ -40,7 +40,7 @@ export default function RootLayout({
             rel="stylesheet"
           />
         </head>
-        <body className={`${jakarta.variable} font-jakarta antialiased`}>
+        <body suppressHydrationWarning className={`${jakarta.variable} font-jakarta antialiased`}>
           <ThemeProvider attribute="class" defaultTheme="dark">
             <Toaster
               position="top-center"
