@@ -20,17 +20,20 @@ export type StoreInfoForPrefs = {
 };
 
 const updateStoreInfoSchema = z.object({
-  name: z.string().min(1, "Nama toko wajib diisi").max(100).optional(),
+  name: z.string().min(1, "Nama toko wajib diisi").max(100, "Nama toko maksimal 100 karakter").optional(),
   businessType: z.string().max(50).optional().nullable(),
-  contactEmail: z.union([z.string().email(), z.literal("")]).optional(),
+  contactEmail: z.union([z.string().email("Alamat email tidak valid"), z.literal("")]).optional(),
   phone: z.string().max(30).optional().nullable(),
   whatsappNumber: z
     .string()
-    .min(10)
-    .max(15)
-    .regex(/^(08|62)\d+$/)
+    .min(10, "Nomor WhatsApp minimal 10 digit")
+    .max(20, "Nomor WhatsApp maksimal 20 digit")
+    .regex(
+      /^\d+$/,
+      "Nomor WhatsApp tidak valid. Pastikan hanya berisi angka tanpa simbol (+, -, spasi)."
+    )
     .optional(),
-  address: z.string().min(10).max(500).optional(),
+  address: z.string().min(10, "Alamat minimal 10 karakter").max(500, "Alamat maksimal 500 karakter").optional(),
 });
 
 const createStoreSchema = z.object({
@@ -41,10 +44,10 @@ const createStoreSchema = z.object({
   whatsapp_number: z
     .string()
     .min(10, "Nomor WhatsApp minimal 10 digit")
-    .max(15, "Nomor WhatsApp maksimal 15 digit")
+    .max(20, "Nomor WhatsApp maksimal 20 digit")
     .regex(
-      /^(08|62)\d+$/,
-      "Nomor WhatsApp hanya boleh berisi angka dan wajib diawali 08 atau 62",
+      /^\d+$/,
+      "Nomor WhatsApp tidak valid. Pastikan hanya berisi angka tanpa simbol (+, -, spasi).",
     ),
   address: z.string().min(10, "Alamat minimal 10 karakter"),
   description: z

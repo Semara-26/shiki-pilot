@@ -548,9 +548,13 @@ export async function POST(req: NextRequest) {
         );
       }
 
+      // Sanitasi: ambil hanya angka dari rawSender agar tidak ada karakter
+      // non-numerik (misal "@s.whatsapp.net") yang tersimpan ke database.
+      const sanitizedSender = rawSender.replace(/\D/g, "");
+
       await db
         .update(stores)
-        .set({ whatsappNumber: rawSender })
+        .set({ whatsappNumber: sanitizedSender })
         .where(eq(stores.id, targetStore.id));
 
       console.log(
