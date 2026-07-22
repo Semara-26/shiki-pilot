@@ -70,12 +70,20 @@ async function sendWaReply(to: string, text: string) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 const StockItemSchema = z.object({
-  name: z.string().describe("Nama produk"),
-  quantity: z.number().describe("Jumlah stok (angka)"),
+  name: z
+    .string()
+    .describe(
+      "Nama produk. DILARANG KERAS menerjemahkan nama key JSON. Wajib gunakan 'name'."
+    ),
+  quantity: z
+    .number()
+    .describe(
+      "Jumlah stok (angka). DILARANG KERAS menerjemahkan nama key JSON. Wajib gunakan 'quantity'."
+    ),
   operation: z
     .enum(["add", "subtract", "set"])
     .describe(
-      'Pilih: "add" (tambah), "subtract" (kurangi), atau "set" (ganti)',
+      "Pilih: 'add' (tambah), 'subtract' (kurangi), atau 'set' (ganti). DILARANG KERAS menerjemahkan nama key JSON. Wajib gunakan 'operation'."
     ),
 });
 
@@ -196,7 +204,9 @@ async function handleUpdateStock(
       rawArgs.product_name ||
       rawArgs.nama_produk ||
       rawArgs.quantity !== undefined ||
-      rawArgs.operation
+      rawArgs.operation ||
+      rawArgs.jenis_operasi ||
+      rawArgs.aksi
     ) {
       // Jika AI mengirimkan flat object tanpa array, bungkus secara otomatis
       console.log("[updateStock] Auto-wrapping flat object into array");
@@ -236,6 +246,8 @@ async function handleUpdateStock(
     const rawOp =
       (item as any).operation ||
       (item as any).operasi ||
+      (item as any).jenis_operasi ||
+      (item as any).aksi ||
       (item as any).type ||
       (item as any).action;
 
