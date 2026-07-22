@@ -2,6 +2,8 @@ import { getOrCreateChat, getChatHistory } from "@/src/lib/actions/chat";
 import { ChatClient, type UIMessageLike } from "./chat-client";
 import { DashboardHeader } from "@/src/components/dashboard-header";
 
+export const dynamic = 'force-dynamic';
+
 function dbMessagesToUIMessages(
   rows: { id: string; role: string; content: string }[],
 ): UIMessageLike[] {
