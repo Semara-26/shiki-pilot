@@ -668,25 +668,11 @@ export async function POST(req: NextRequest) {
     `[WA Webhook] Mencari toko... Raw: ${rawSender} | Normalized: ${normalizedSender}`,
   );
 
-  // ── Strategi lookup 2 lapis ─────────────────────────────────────────────
-  // Pass 1: Exact match pada normalizedSender (mendukung nomor internasional)
+  // ── Cari toko berdasarkan JID ───────────────────────────────────────────
   let store = await db.query.stores.findFirst({
-    where: ilike(stores.whatsappNumber, normalizedSender),
-    columns: { id: true, name: true, whatsappNumber: true },
+    where: eq(stores.whatsappJid, normalizedSender),
+    columns: { id: true, name: true, whatsappNumber: true, whatsappJid: true },
   });
-
-  // Pass 2: Fallback suffix 10 digit — untuk nomor yang tersimpan dalam format
-  // berbeda (misal DB berisi 081xxx tapi pengirim mengirim 6281xxx)
-  if (!store) {
-    const suffix = normalizedSender.slice(-10);
-    store = await db.query.stores.findFirst({
-      where: ilike(stores.whatsappNumber, `%${suffix}`),
-      columns: { id: true, name: true, whatsappNumber: true },
-    });
-    if (store) {
-      console.log(`[WA Webhook] Toko ditemukan via suffix fallback (${suffix})`);
-    }
-  }
   // ────────────────────────────────────────────────────────────────────────
 
   if (!store) {
@@ -722,13 +708,14 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      // Sanitasi: ambil hanya angka dari rawSender agar tidak ada karakter
-      // non-numerik (misal "@s.whatsapp.net") yang tersimpan ke database.
       const sanitizedSender = rawSender.replace(/\D/g, "");
 
       await db
         .update(stores)
-        .set({ whatsappNumber: sanitizedSender })
+        .set({ 
+          whatsappJid: sanitizedSender,
+          whatsappNumber: linkedNormalized 
+        })
         .where(eq(stores.id, targetStore.id));
 
       console.log(
