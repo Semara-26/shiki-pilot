@@ -39,6 +39,7 @@ export interface ProductRow {
   name: string;
   price: number;
   stock: number;
+  stockCritical: number;
   imageUrl: string | null;
   description?: string | null;
   createdAt?: string | Date;
@@ -165,6 +166,12 @@ const AssetModal = memo(function AssetModal({
                 </dt>
                 <dd className="tabular-nums text-foreground">
                   {product.stock}
+                </dd>
+                <dt className="text-muted-foreground uppercase tracking-wider">
+                  Batas Aman
+                </dt>
+                <dd className="tabular-nums text-foreground">
+                  {product.stockCritical}
                 </dd>
                 {product.createdAt && (
                   <>

@@ -36,6 +36,7 @@ export default async function InventoryPage(props: {
             name: true,
             price: true,
             stock: true,
+            stockCritical: true,
             imageUrl: true,
             description: true,
             createdAt: true,
