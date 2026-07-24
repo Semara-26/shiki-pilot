@@ -5,6 +5,8 @@ import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { toast } from "sonner";
 import { getStoreByUserId, updateStoreInfo } from "@/src/lib/actions/store";
+import { upsertProfile } from "@/src/lib/actions/profile";
+import { useProfile } from "@/src/components/profile-context";
 import { getWaStatus } from "@/src/lib/actions/wa";
 import {
   User,
@@ -63,11 +65,13 @@ export function SystemPreferencesModal({
   currentProfile,
   onSave,
 }: SystemPreferencesModalProps) {
+  const { refreshProfile, setProfileOptimistic } = useProfile();
   const [activeTab, setActiveTab] = useState<TabLabel>(initialTab as TabLabel);
   const [formData, setFormData] = useState(INITIAL_FORM_DATA);
   const [isSyncing, setIsSyncing] = useState(false);
   const [isLoadingStore, setIsLoadingStore] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string>("");
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [waStatus, setWaStatus] = useState<{
     connected: boolean;
@@ -142,6 +146,7 @@ export function SystemPreferencesModal({
         URL.revokeObjectURL(avatarUrl);
       }
       setAvatarUrl(URL.createObjectURL(file));
+      setAvatarFile(file);
     }
     e.target.value = "";
   };
@@ -151,6 +156,7 @@ export function SystemPreferencesModal({
       URL.revokeObjectURL(avatarUrl);
     }
     setAvatarUrl("");
+    setAvatarFile(null);
   };
 
   const handleInputChange = (
@@ -165,6 +171,7 @@ export function SystemPreferencesModal({
   const handleSyncData = async () => {
     setIsSyncing(true);
     try {
+      // 1. Simpan info toko
       const storeResult = await updateStoreInfo(null, {
         name: formData.storeName || undefined,
         businessType: formData.businessType || null,
@@ -175,8 +182,32 @@ export function SystemPreferencesModal({
       });
 
       if (storeResult.error) {
-        toast.error("Gagal menyimpan", { description: storeResult.error });
+        toast.error("Gagal menyimpan info toko", { description: storeResult.error });
         return;
+      }
+
+      // 2. Simpan profil pengguna (nama + avatar) ke DB
+      const displayName = formData.username.trim();
+      if (displayName) {
+        // Optimistic update seketika agar UI langsung berubah
+        setProfileOptimistic({
+          displayName,
+          ...(avatarUrl && !avatarUrl.startsWith("blob:") ? { avatarUrl } : {}),
+        });
+
+        const profileResult = await upsertProfile(displayName, avatarFile ?? undefined);
+        if (!profileResult.success) {
+          toast.error("Gagal menyimpan profil", { description: profileResult.error });
+          return;
+        }
+
+        // Jika ada avatar baru yang berhasil diupload, update optimistic dengan URL final dari storage
+        if (profileResult.avatarUrl) {
+          setProfileOptimistic({ avatarUrl: profileResult.avatarUrl });
+        }
+
+        // Refresh context dari DB untuk sinkronisasi penuh
+        await refreshProfile();
       }
 
       onSave?.({
@@ -186,6 +217,7 @@ export function SystemPreferencesModal({
         storeName: formData.storeName,
       });
 
+      setAvatarFile(null);
       toast.success("Data tersimpan", {
         description: "Profil dan info toko telah disinkronkan.",
       });

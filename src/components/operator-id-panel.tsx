@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { createPortal } from "react-dom";
 import { useUser, useClerk } from "@clerk/nextjs";
 import { useTheme } from "next-themes";
@@ -18,6 +18,7 @@ import { SystemPreferencesModal } from "@/src/components/system-preferences-moda
 import { DocumentationModal } from "@/src/components/documentation-modal";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { useProfile } from "@/src/components/profile-context";
 
 const ROLE_LABEL = "PERAN // OPERATOR_SISTEM";
 const MAX_NAME_LENGTH = 24;
@@ -36,6 +37,7 @@ export function OperatorIdPanel({ isOpen }: OperatorIdPanelProps) {
   const { theme, setTheme } = useTheme();
   const { user, isLoaded } = useUser();
   const { signOut } = useClerk();
+  const { profile } = useProfile();
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -47,32 +49,15 @@ export function OperatorIdPanel({ isOpen }: OperatorIdPanelProps) {
     searchParams.get("setup") === "wa" ? "INFO TOKO" : "AKUN",
   );
   const [isDocOpen, setIsDocOpen] = useState(false);
-  const [localOverrides, setLocalOverrides] = useState<
-    Partial<{
-      name: string;
-      email: string;
-      avatar: string;
-      storeName: string;
-    }>
-  >({});
 
-  const userProfile = useMemo(() => {
-    const baseName = user?.fullName ?? "OPERATOR_SISTEM";
-    const baseEmail = user?.primaryEmailAddress?.emailAddress ?? "";
-    const baseAvatar = user?.imageUrl ?? "";
-    return {
-      name: localOverrides.name ?? baseName,
-      email: localOverrides.email ?? baseEmail,
-      role: ROLE_LABEL,
-      avatar: localOverrides.avatar ?? baseAvatar,
-      storeName: localOverrides.storeName ?? "",
-    };
-  }, [
-    user?.fullName,
-    user?.primaryEmailAddress?.emailAddress,
-    user?.imageUrl,
-    localOverrides,
-  ]);
+  // Prioritas: profil dari DB > data Clerk
+  const userProfile = {
+    name: profile.displayName ?? user?.fullName ?? "OPERATOR_SISTEM",
+    email: user?.primaryEmailAddress?.emailAddress ?? "",
+    role: ROLE_LABEL,
+    avatar: profile.avatarUrl ?? user?.imageUrl ?? "",
+    storeName: "",
+  };
 
   useEffect(() => {
     if (searchParams.get("setup") === "wa") {
@@ -84,8 +69,7 @@ export function OperatorIdPanel({ isOpen }: OperatorIdPanelProps) {
   const isDark = theme !== "light";
   const toggleTheme = () => setTheme(isDark ? "light" : "dark");
 
-  const nameForInitials =
-    localOverrides.name ?? user?.fullName ?? "OPERATOR_SISTEM";
+  const nameForInitials = userProfile.name;
   const initials =
     nameForInitials
       .split(/\s+/)
@@ -291,9 +275,6 @@ export function OperatorIdPanel({ isOpen }: OperatorIdPanelProps) {
         onClose={() => setIsPrefsOpen(false)}
         initialTab={initialPrefTab}
         currentProfile={userProfile}
-        onSave={(newData) =>
-          setLocalOverrides((prev) => ({ ...prev, ...newData }))
-        }
       />
       <DocumentationModal
         isOpen={isDocOpen}

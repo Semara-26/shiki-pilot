@@ -21,6 +21,7 @@ import {
 import { cn } from "@/src/lib/utils";
 import { OperatorIdPanel } from "@/src/components/operator-id-panel";
 import { useSidebar } from "@/src/components/sidebar-context";
+import { useProfile } from "@/src/components/profile-context";
 
 const motionLinkProps = {
   whileHover: { scale: 1.02 },
@@ -62,13 +63,20 @@ export function SidebarTrigger() {
 export function Sidebar() {
   const pathname = usePathname();
   const { user, isLoaded } = useUser();
+  const { profile } = useProfile();
   const sidebar = useSidebar();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
 
-  const displayName = user?.fullName
+  // Prioritas: DB profile > Clerk data
+  const displayName = profile.displayName
+    ? truncateWithEllipsis(profile.displayName, MAX_NAME_LENGTH)
+    : user?.fullName
     ? truncateWithEllipsis(user.fullName, MAX_NAME_LENGTH)
     : "SYSTEM_OPERATOR";
+
+  // Avatar: gunakan dari DB jika ada, fallback ke Clerk
+  const avatarSrc = profile.avatarUrl || user?.imageUrl || null;
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -175,9 +183,9 @@ export function Sidebar() {
           <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-md border border-gray-200 bg-white dark:border-white/10 dark:bg-white/10">
             {!isLoaded ? (
               <span className="h-4 w-4 animate-pulse rounded bg-gray-200 dark:bg-white/20" />
-            ) : user?.imageUrl ? (
+            ) : avatarSrc ? (
               <img
-                src={user.imageUrl}
+                src={avatarSrc}
                 alt=""
                 className="h-full w-full object-cover"
               />

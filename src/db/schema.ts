@@ -125,3 +125,13 @@ export const transactionItems = pgTable(
     productIdx: index("item_product_idx").on(table.productId),
   }),
 );
+
+// 8. Tabel Profiles (Profil Pengguna Permanen)
+export const profiles = pgTable("profiles", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: text("user_id").notNull().unique(),
+  displayName: text("display_name"),
+  avatarUrl: text("avatar_url"),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
