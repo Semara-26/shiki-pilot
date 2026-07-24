@@ -41,11 +41,23 @@ export async function upsertProfile(
 
   let finalAvatarUrl: string | undefined;
 
+  const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+  const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
+
   // Upload avatar jika ada file baru
   if (avatarFile && avatarFile.size > 0) {
+    if (avatarFile.size > MAX_FILE_SIZE) {
+      return { success: false, error: "Ukuran file maksimal 5MB." };
+    }
+    if (!ALLOWED_TYPES.includes(avatarFile.type)) {
+      return { success: false, error: "Tipe file tidak didukung. Gunakan JPG, PNG, atau WEBP." };
+    }
+
     try {
       const supabase = createSupabaseClient();
-      const ext = avatarFile.name.split(".").pop() ?? "jpg";
+      // Sanitize extension (only alphanumeric)
+      const rawExt = avatarFile.name.split(".").pop() ?? "jpg";
+      const ext = rawExt.replace(/[^a-zA-Z0-9]/g, "").toLowerCase() || "jpg";
       const filePath = `${userId}/avatar.${ext}`;
 
       const arrayBuffer = await avatarFile.arrayBuffer();
