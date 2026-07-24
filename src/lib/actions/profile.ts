@@ -4,7 +4,7 @@ import { auth } from "@clerk/nextjs/server";
 import { eq } from "drizzle-orm";
 import { db } from "@/src/db";
 import { profiles } from "@/src/db/schema";
-import { createSupabaseClient } from "@/src/lib/supabase/server";
+import { createSupabaseAdmin } from "@/src/lib/supabase/server";
 
 export interface UserProfile {
   displayName: string | null;
@@ -54,7 +54,8 @@ export async function upsertProfile(
     }
 
     try {
-      const supabase = createSupabaseClient();
+      // Menggunakan Admin Client agar proses upload Server-Side tidak terblokir RLS
+      const supabase = createSupabaseAdmin();
       // Sanitize extension (only alphanumeric)
       const rawExt = avatarFile.name.split(".").pop() ?? "jpg";
       const ext = rawExt.replace(/[^a-zA-Z0-9]/g, "").toLowerCase() || "jpg";
