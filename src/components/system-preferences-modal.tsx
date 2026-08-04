@@ -697,7 +697,7 @@ export function SystemPreferencesModal({
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ type: "spring", stiffness: 300, damping: 28 }}
-            className="flex h-[90vh] w-[95vw] max-h-screen max-w-4xl overflow-hidden rounded-md border-2 border-ink bg-white shadow-neo dark:border-primary/30 dark:bg-[#0a0a0a] dark:shadow-[0_0_30px_rgba(14,165,233,0.1)] md:h-[600px]"
+            className="flex h-[90vh] w-[95vw] max-h-screen max-w-4xl overflow-hidden rounded-md border-2 border-ink bg-white shadow-neo dark:border-white/10 dark:bg-[#0a0a0a] dark:shadow-xl dark:shadow-black/50 md:h-[600px]"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex h-full w-full flex-col md:flex-row">

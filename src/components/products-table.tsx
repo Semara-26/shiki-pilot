@@ -96,7 +96,7 @@ const AssetModal = memo(function AssetModal({
         exit={{ opacity: 0, scale: 0.95, y: 8 }}
         transition={{ type: "spring", stiffness: 320, damping: 26, mass: 0.7 }}
         style={{ willChange: "transform, opacity" }}
-        className="w-full max-w-lg overflow-hidden rounded-md border border-primary/50 bg-secondary/90 p-6 shadow-[0_0_30px_rgba(14,165,233,0.3)] relative"
+        className="w-full max-w-lg overflow-hidden rounded-md border border-white/10 bg-secondary/90 p-6 shadow-xl shadow-black/50 relative"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
