@@ -102,9 +102,9 @@ export function DashboardHeader({
                       damping: 25,
                       mass: 0.8,
                     }}
-                    className="absolute right-0 top-full z-50 mt-4 w-80 rounded-md border border-primary/50 bg-secondary/95 shadow-[0_0_20px_rgba(14,165,233,0.2)] backdrop-blur-md"
+                    className="absolute right-0 top-full z-50 mt-4 w-80 rounded-md border border-white/10 bg-secondary/95 shadow-xl shadow-black/50 backdrop-blur-md"
                   >
-                    <div className="border-b border-primary/30 px-4 py-3">
+                    <div className="border-b border-white/10 px-4 py-3">
                       <p className="font-mono text-xs text-muted-foreground uppercase tracking-widest">
                         PERINGATAN SISTEM
                       </p>

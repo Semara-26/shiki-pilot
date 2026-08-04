@@ -136,7 +136,7 @@ function DrawerContent({ activeDrawer, products, onClose }: DrawerProps) {
         exit={{ x: "100%", opacity: 0 }}
         transition={{ duration: 0.26, ease: [0.32, 0.72, 0, 1] }}
         style={{ willChange: "transform, opacity" }}
-        className="fixed top-0 right-0 z-50 flex h-full w-full max-w-md flex-col border-l border-primary/50 bg-secondary/95 shadow-[-10px_0_30px_rgba(14,165,233,0.2)]"
+        className="fixed top-0 right-0 z-50 flex h-full w-full max-w-md flex-col border-l border-white/10 bg-secondary/95 shadow-2xl shadow-black/50"
         role="dialog"
         aria-modal="true"
         aria-labelledby="drawer-title"
