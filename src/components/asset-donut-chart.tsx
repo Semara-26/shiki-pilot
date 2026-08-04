@@ -134,7 +134,7 @@ export function AssetDonutChart({
               <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                 <PieChart>
                   <Pie
-                    data={chartData}
+                    data={sortedByValue}
                     dataKey="value"
                     nameKey="name"
                     innerRadius={60}
@@ -142,11 +142,11 @@ export function AssetDonutChart({
                     paddingAngle={1}
                     stroke="transparent"
                     onMouseEnter={(_, index) =>
-                      setHoveredData(chartData[index])
+                      setHoveredData(sortedByValue[index])
                     }
                     onMouseLeave={() => setHoveredData(null)}
                   >
-                    {chartData.map((_, index) => (
+                    {sortedByValue.map((_, index) => (
                       <Cell
                         key={`cell-${index}`}
                         fill={NERV_COLORS[index % NERV_COLORS.length]}

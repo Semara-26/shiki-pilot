@@ -36,8 +36,13 @@ export async function getWaStatus() {
       connected: data.connected ?? false,
       qr: data.qr ?? null,
     };
-  } catch (err) {
-    console.error("WA Gateway check error:", err);
+  } catch (err: any) {
+    // Suppress verbose fetch failed/ECONNREFUSED logs if gateway is intentionally offline
+    if (err.cause?.code === "ECONNREFUSED" || err.message?.includes("fetch failed")) {
+      console.warn(`[WA Gateway] Offline (Connection Refused to ${process.env.WA_GATEWAY_URL})`);
+    } else {
+      console.error("WA Gateway check error:", err);
+    }
     return {
       connected: false,
       error: "Server tidak bisa terhubung ke Gateway (Offline).",

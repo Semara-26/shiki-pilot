@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 
 const MICRO_COPY = [
   "Menyiapkan ruang kerja...",
@@ -14,26 +14,6 @@ interface SplashScreenProps {
 
 export function SplashScreen({ isHeroLoaded }: SplashScreenProps) {
   const [isMounted, setIsMounted] = useState(true);
-  const [copyIndex, setCopyIndex] = useState(0);
-  const [copyVisible, setCopyVisible] = useState(true);
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  // Progressive micro-copy: ganti teks tiap 2.5 detik dengan fade
-  useEffect(() => {
-    intervalRef.current = setInterval(() => {
-      // Fade out
-      setCopyVisible(false);
-      setTimeout(() => {
-        setCopyIndex((prev) => (prev + 1) % MICRO_COPY.length);
-        // Fade in
-        setCopyVisible(true);
-      }, 400);
-    }, 2500);
-
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-    };
-  }, []);
 
   // Unmount setelah fade-out selesai agar animasi SVG tidak berjalan di background
   useEffect(() => {
@@ -41,7 +21,6 @@ export function SplashScreen({ isHeroLoaded }: SplashScreenProps) {
       // Beri waktu 700ms untuk transisi opacity selesai, baru unmount
       const unmountTimer = setTimeout(() => {
         setIsMounted(false);
-        if (intervalRef.current) clearInterval(intervalRef.current);
       }, 750);
       return () => clearTimeout(unmountTimer);
     }
@@ -109,12 +88,20 @@ export function SplashScreen({ isHeroLoaded }: SplashScreenProps) {
       </p>
 
       {/* ── Progressive Micro-Copy ─────────────────────────────────── */}
-      <p
-        className="mt-1.5 text-xs text-zinc-500 tracking-widest uppercase select-none transition-opacity duration-400 ease-in-out"
-        style={{ opacity: copyVisible ? 1 : 0 }}
-      >
-        {MICRO_COPY[copyIndex]}
-      </p>
+      <div className="mt-1.5 relative h-4 w-full flex items-center justify-center">
+        {MICRO_COPY.map((text, i) => (
+          <p
+            key={i}
+            className="absolute text-xs text-zinc-500 tracking-widest uppercase select-none opacity-0"
+            style={{
+              animation: `micro-copy-fade 7.5s infinite`,
+              animationDelay: `${i * 2.5}s`,
+            }}
+          >
+            {text}
+          </p>
+        ))}
+      </div>
 
       {/* ── Active Shimmer Loading Bar ─────────────────────────────── */}
       <div className="mt-8 h-1 w-48 overflow-hidden rounded-full bg-zinc-800">
@@ -141,6 +128,13 @@ export function SplashScreen({ isHeroLoaded }: SplashScreenProps) {
           70%  { stroke-dashoffset: 0;   opacity: 1; }
           85%  { stroke-dashoffset: 0;   opacity: 0; }
           100% { stroke-dashoffset: 327; opacity: 0; }
+        }
+        @keyframes micro-copy-fade {
+          0%   { opacity: 0; }
+          5%   { opacity: 1; }
+          28%  { opacity: 1; }
+          33%  { opacity: 0; }
+          100% { opacity: 0; }
         }
       `}</style>
     </div>

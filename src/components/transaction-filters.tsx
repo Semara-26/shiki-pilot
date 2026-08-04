@@ -86,7 +86,7 @@ export function TransactionFilters() {
             htmlFor="tx-start"
             className="block mb-1.5 font-mono text-[10px] font-bold uppercase tracking-wider text-muted-foreground"
           >
-            START DATE
+            TANGGAL AWAL
           </label>
           <div className="relative">
             <Calendar className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
@@ -106,7 +106,7 @@ export function TransactionFilters() {
             htmlFor="tx-end"
             className="block mb-1.5 font-mono text-[10px] font-bold uppercase tracking-wider text-muted-foreground"
           >
-            END DATE
+            TANGGAL AKHIR
           </label>
           <div className="relative">
             <Calendar className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
@@ -129,7 +129,7 @@ export function TransactionFilters() {
               onClick={clearFilters}
               className="h-9 px-3 rounded font-mono text-xs font-medium text-muted-foreground hover:bg-secondary/80 hover:text-foreground transition-colors"
             >
-              CLEAR
+              RESET
             </button>
           )}
           <button
@@ -137,7 +137,7 @@ export function TransactionFilters() {
             onClick={handleApplyFilter}
             className="h-9 rounded-md shrink-0 bg-primary px-4 font-mono text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
           >
-            APPLY FILTER
+            TERAPKAN FILTER
           </button>
         </div>
       </div>
