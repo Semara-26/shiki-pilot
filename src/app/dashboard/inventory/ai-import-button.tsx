@@ -121,7 +121,7 @@ export function AiImportButton() {
 
                 {/* Body */}
                 <div className="space-y-4 p-6">
-                  <p className="font-mono text-xs text-gray-400">
+                  <p className="font-mono text-sm text-gray-400">
                     Ketik atau paste daftar barang dari WhatsApp di sini. Format
                     bebas (misal: Kerupuk pedas 15rb stok 50). AI kami akan
                     merapikannya.

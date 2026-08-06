@@ -60,7 +60,7 @@ function SalesTooltipContent({ active, payload }: SalesTooltipContentProps) {
       transition={{ duration: 0.2, ease: "easeOut" }}
       className="rounded-md border border-ink/30 bg-white p-3 shadow-lg dark:border-white/20 dark:bg-[#0a0a0a]"
     >
-      <p className="mb-1 font-mono text-xs text-ink dark:text-gray-300">
+      <p className="mb-1 font-mono text-sm text-ink dark:text-gray-300">
         {name}
       </p>
       <p className="font-mono text-lg font-semibold tabular-nums text-ink dark:text-gray-100">

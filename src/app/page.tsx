@@ -69,7 +69,7 @@ export default function Home() {
           <div className="flex items-center space-x-4">
             <Link
               href="/dashboard"
-              className="bg-[#0ea5e9] text-[#0a0a0a] px-4 py-2 md:px-6 md:py-2 text-sm md:text-base rounded-full font-bold transition-all duration-200 hover:scale-105 active:scale-95 active:shadow-[inset_0_4px_8px_rgba(0,0,0,0.5)] whitespace-nowrap"
+              className="bg-[#0ea5e9] text-[#0a0a0a] px-4 py-2 md:px-6 md:py-2 text-sm md:text-sm rounded-full font-bold transition-all duration-200 hover:scale-105 active:scale-95 active:shadow-[inset_0_4px_8px_rgba(0,0,0,0.5)] whitespace-nowrap"
             >
               Meluncur ke Dashboard
             </Link>

@@ -234,7 +234,7 @@ export default function NewProductForm() {
                       : undefined
                   }
                 />
-                <p className="mt-1.5 font-mono text-xs text-muted-foreground/70">
+                <p className="mt-1.5 font-mono text-sm text-muted-foreground/70">
                   AI dan WhatsApp akan mengingatkan Anda jika stok menyentuh
                   angka ini. Default: 10.
                 </p>

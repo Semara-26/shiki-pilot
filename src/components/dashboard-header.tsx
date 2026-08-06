@@ -105,7 +105,7 @@ export function DashboardHeader({
                     className="absolute right-0 top-full z-50 mt-4 w-80 rounded-md border border-white/10 bg-secondary/95 shadow-xl shadow-black/50 backdrop-blur-md"
                   >
                     <div className="border-b border-white/10 px-4 py-3">
-                      <p className="font-mono text-xs text-muted-foreground uppercase tracking-widest">
+                      <p className="font-mono text-sm text-muted-foreground uppercase tracking-widest">
                         PERINGATAN SISTEM
                       </p>
                     </div>
@@ -114,7 +114,7 @@ export function DashboardHeader({
                         lowStockProducts.map((p) => (
                           <li key={p.id}>
                             <div
-                              className="w-full px-4 py-3 font-mono text-xs transition-colors hover:bg-primary/10"
+                              className="w-full px-4 py-3 font-mono text-sm transition-colors hover:bg-primary/10"
                               role="presentation"
                             >
                               <span className="text-destructive">
@@ -126,7 +126,7 @@ export function DashboardHeader({
                       ) : (
                         <li>
                           <div
-                            className="w-full px-4 py-3 font-mono text-xs transition-colors hover:bg-primary/10"
+                            className="w-full px-4 py-3 font-mono text-sm transition-colors hover:bg-primary/10"
                             role="presentation"
                           >
                           <span className="text-emerald-500">

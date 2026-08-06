@@ -86,7 +86,7 @@ const MetricCard = memo(function MetricCard({
       }}
       className="cursor-pointer rounded-md border-2 border-ink bg-white p-4 text-ink transition-colors duration-150 hover:shadow-neo dark:border-white/10 dark:bg-surface-dark dark:text-white dark:hover:border-primary dark:hover:shadow-[0_0_15px_rgba(14,165,233,0.15)]"
     >
-      <p className="text-xs font-medium uppercase tracking-widest text-gray-500 dark:text-gray-400">
+      <p className="text-sm font-medium uppercase tracking-widest text-gray-500 dark:text-gray-400">
         {label}
       </p>
       <p className="mt-2 font-mono text-2xl font-semibold tracking-tight text-ink md:text-3xl dark:text-white">
@@ -191,7 +191,7 @@ function DrawerContent({ activeDrawer, products, onClose }: DrawerProps) {
                             {p.name}
                           </div>
                           <div className="flex items-center justify-between gap-2">
-                            <div className="whitespace-nowrap text-xs text-muted-foreground">
+                            <div className="whitespace-nowrap text-sm text-muted-foreground">
                               {p.stock} × {formatRupiah(p.price)}
                             </div>
                             <div className="shrink-0 whitespace-nowrap text-right text-primary">

@@ -22,6 +22,7 @@ import { useState, useTransition, memo, useCallback } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { deleteProduct } from "@/src/actions/product-actions";
+import { toast } from "sonner";
 
 // ── Lazy-load modals — tidak masuk DOM saat tidak diperlukan ──────────────────
 const ConfirmDeleteModal = dynamic(
@@ -146,7 +147,7 @@ const AssetModal = memo(function AssetModal({
                 <dd>
                   <span
                     className={cn(
-                      "inline-block rounded px-2 py-0.5 text-xs font-medium uppercase",
+                      "inline-block rounded px-2 py-0.5 text-sm font-medium uppercase",
                       product.stock > 0
                         ? "bg-chart-2/20 text-chart-2"
                         : "bg-destructive/20 text-destructive",
@@ -193,7 +194,7 @@ const AssetModal = memo(function AssetModal({
 
           {product.description != null && product.description !== "" ? (
             <div className="border-t border-border/60 pt-4">
-              <dt className="font-mono text-xs font-medium uppercase tracking-widest text-muted-foreground mb-2">
+              <dt className="font-mono text-sm font-medium uppercase tracking-widest text-muted-foreground mb-2">
                 Deskripsi
               </dt>
               <p className="font-mono text-sm text-foreground leading-relaxed">
@@ -260,7 +261,7 @@ const ProductTableRow = memo(function ProductTableRow({
         <td className="w-[120px] px-4 py-4 align-middle">
           <span
             className={cn(
-              "inline-block rounded-md px-2 py-1 text-xs font-medium uppercase tracking-wider",
+              "inline-block rounded-md px-2 py-1 text-sm font-medium uppercase tracking-wider",
               product.stock > 0
                 ? "bg-chart-2/20 text-chart-2"
                 : "bg-destructive/20 text-destructive",
@@ -281,7 +282,7 @@ const ProductTableRow = memo(function ProductTableRow({
               />
             </div>
           ) : (
-            <div className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-gray-200 bg-paper text-xs font-medium text-gray-500 avatar-mono dark:border-white/10 dark:bg-black/40 dark:text-gray-400">
+            <div className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-gray-200 bg-paper text-sm font-medium text-gray-500 avatar-mono dark:border-white/10 dark:bg-black/40 dark:text-gray-400">
               {getInitials(product.name)}
             </div>
           )}
@@ -362,8 +363,14 @@ export function ProductsTable({
     const idToDelete = deletingId;
     startTransition(() => {
       deleteProduct(idToDelete)
-        .then(() => setDeletingId(null))
-        .catch(() => setDeletingId(null));
+        .then(() => {
+          setDeletingId(null);
+          toast.success("Produk berhasil dihapus");
+        })
+        .catch(() => {
+          setDeletingId(null);
+          toast.error("Gagal menghapus produk");
+        });
     });
   }
 

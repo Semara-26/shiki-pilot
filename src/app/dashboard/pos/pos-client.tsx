@@ -255,7 +255,7 @@ export function POSClient({ products, storeId }: POSClientProps) {
       <div className="flex-1 flex flex-col p-4 md:p-6 gap-6 overflow-y-auto">
         {/* Katalog Produk */}
         <div className="shrink-0 border-b-2 border-ink dark:border-white/20 bg-white dark:bg-[#0a0a0a] pb-4">
-          <p className="mb-3 font-mono text-xs font-bold uppercase tracking-widest text-ink dark:text-gray-300">
+          <p className="mb-3 font-mono text-sm font-bold uppercase tracking-widest text-ink dark:text-gray-300">
             KATALOG PRODUK
           </p>
           {products.length > 0 && (
@@ -288,7 +288,7 @@ export function POSClient({ products, storeId }: POSClientProps) {
                   disabled={p.stock === 0}
                   className="min-w-[160px] max-w-[200px] flex-shrink-0 snap-center flex flex-col items-stretch gap-1 rounded-lg border-2 border-ink bg-white p-3 text-left transition-colors hover:border-primary hover:bg-primary/5 dark:border-white/20 dark:bg-white/5 dark:hover:border-[#22d3ee] dark:hover:bg-[#22d3ee]/10 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <span className="truncate font-mono text-xs font-medium text-ink dark:text-white">
+                  <span className="truncate font-mono text-sm font-medium text-ink dark:text-white">
                     {p.name}
                   </span>
                   <span className="font-mono text-lg font-bold text-primary dark:text-[#22d3ee]">
@@ -308,7 +308,7 @@ export function POSClient({ products, storeId }: POSClientProps) {
 
         {/* Keranjang */}
         <div className="flex flex-col">
-          <p className="mb-3 font-mono text-xs font-bold uppercase tracking-widest text-ink dark:text-gray-300">
+          <p className="mb-3 font-mono text-sm font-bold uppercase tracking-widest text-ink dark:text-gray-300">
             KERANJANG
           </p>
           {cart.length === 0 ? (
@@ -329,7 +329,7 @@ export function POSClient({ products, storeId }: POSClientProps) {
                     <p className="truncate font-mono text-sm font-medium text-ink dark:text-white">
                       {item.name}
                     </p>
-                    <p className="font-mono text-xs text-gray-500 dark:text-gray-400">
+                    <p className="font-mono text-sm text-gray-500 dark:text-gray-400">
                       {formatRupiah(item.price)} × {item.quantity} ={" "}
                       {formatRupiah(item.price * item.quantity)}
                     </p>
@@ -391,7 +391,7 @@ export function POSClient({ products, storeId }: POSClientProps) {
 
           {/* Input Uang Diterima — aktif untuk semua metode */}
           <div>
-            <label className="mb-1 block font-mono text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">
+            <label className="mb-1 block font-mono text-sm uppercase tracking-wider text-gray-500 dark:text-gray-400">
               {activePayment === "cash" ? "Uang Diterima" : "Nominal Transfer"}
             </label>
             <div className="flex rounded-lg border-2 border-ink dark:border-white/20 bg-white dark:bg-white/5 overflow-hidden focus-within:ring-2 focus-within:ring-primary dark:focus-within:ring-[#22d3ee]">
@@ -433,7 +433,7 @@ export function POSClient({ products, storeId }: POSClientProps) {
                   onClick={() => handleConfirmClick("cash")}
                   disabled={cart.length === 0 || isSubmitting}
                   className={[
-                    "relative overflow-hidden flex items-center justify-center gap-2 rounded-lg border-2 py-4 font-mono text-base font-bold uppercase tracking-wider transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed",
+                    "relative overflow-hidden flex items-center justify-center gap-2 rounded-lg border-2 py-4 font-mono text-sm font-bold uppercase tracking-wider transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed",
                     isArmed
                       ? "border-amber-500 bg-amber-500 text-white scale-[1.02] shadow-lg shadow-amber-500/30 dark:border-amber-400 dark:bg-amber-400 dark:text-[#0a0a0a]"
                       : "border-ink bg-ink text-white hover:bg-ink/80 dark:border-white/30 dark:bg-white/10 dark:text-white dark:hover:bg-white/20",
@@ -477,7 +477,7 @@ export function POSClient({ products, storeId }: POSClientProps) {
                   }}
                   disabled={cart.length === 0 || isSubmitting}
                   className={[
-                    "relative overflow-hidden flex items-center justify-center gap-2 rounded-lg border-2 py-4 font-mono text-base font-bold uppercase tracking-wider transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed",
+                    "relative overflow-hidden flex items-center justify-center gap-2 rounded-lg border-2 py-4 font-mono text-sm font-bold uppercase tracking-wider transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed",
                     isArmed
                       ? "border-amber-500 bg-amber-500 text-white scale-[1.02] shadow-lg shadow-amber-500/30 dark:border-amber-400 dark:bg-amber-400 dark:text-[#0a0a0a]"
                       : "border-primary bg-primary text-white hover:bg-primary/90 dark:border-[#22d3ee] dark:bg-[#22d3ee] dark:text-[#0a0a0a] dark:hover:bg-[#22d3ee]/90",
@@ -505,7 +505,7 @@ export function POSClient({ products, storeId }: POSClientProps) {
 
           {/* Hint saat tombol armed */}
           {confirmState !== null && !isSubmitting && (
-            <p className="text-center font-mono text-xs text-amber-500 dark:text-amber-400">
+            <p className="text-center font-mono text-sm text-amber-500 dark:text-amber-400">
               ⚡ Klik sekali lagi untuk konfirmasi, atau tunggu 3 detik untuk
               batal.
             </p>

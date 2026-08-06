@@ -24,7 +24,7 @@ export function LowStockAlert({ products, className }: LowStockAlertProps) {
         )}
       >
         <CheckCircle2 className="h-4 w-4 text-emerald-500/80 shrink-0" />
-        <p className="font-mono text-xs tracking-wide text-gray-400">
+        <p className="font-mono text-sm tracking-wide text-gray-400">
           STATUS AMAN: Seluruh persediaan aset berada pada jumlah optimal.
         </p>
       </div>
@@ -40,7 +40,7 @@ export function LowStockAlert({ products, className }: LowStockAlertProps) {
     >
       <div className="flex items-center gap-3">
         <AlertCircle className="h-4 w-4 text-amber-500 shrink-0 animate-pulse" />
-        <p className="font-mono text-xs font-semibold tracking-wide text-amber-400">
+        <p className="font-mono text-sm font-semibold tracking-wide text-amber-400">
           PERINGATAN: {products.length} produk hampir habis. Segera lakukan restock.
         </p>
       </div>

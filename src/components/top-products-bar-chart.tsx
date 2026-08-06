@@ -14,58 +14,60 @@ import { useTheme } from "next-themes";
 import { motion } from "framer-motion";
 import { cn } from "@/src/lib/utils";
 
-// --- Custom XAxis tick: teks nama produk dibungkus ke baris baru (multiline) ---
-// Mencegah label saling tumpang-tindih saat nama produk panjang
-const MAX_CHARS_PER_LINE = 10;
-const TICK_LINE_HEIGHT = 12;
+const MAX_CHARS_PER_LINE = 18;
 
-function MultilineXTick({
-  x,
-  y,
-  payload,
-  fill,
-}: {
-  // recharts bisa memberikan x/y sebagai string atau number — terima keduanya
-  x?: string | number;
-  y?: string | number;
-  payload?: { value?: string };
-  fill?: string;
-}) {
-  // Normalkan ke number untuk dipakai di transform SVG
-  const nx = Number(x ?? 0);
-  const ny = Number(y ?? 0);
-  const name = payload?.value ?? "";
-  const words = name.split(" ");
-
-  // Bangun baris berdasarkan batas karakter per baris
+function wrapLabelText(text: string): string[] {
+  if (!text || text.length <= MAX_CHARS_PER_LINE) return [text];
+  const words = text.split(/\s+/);
   const lines: string[] = [];
   let current = "";
-  for (const word of words) {
-    const candidate = current ? `${current} ${word}` : word;
-    if (candidate.length > MAX_CHARS_PER_LINE && current) {
-      lines.push(current);
-      current = word;
+  for (const w of words) {
+    if (current.length + w.length + 1 <= MAX_CHARS_PER_LINE) {
+      current += (current ? " " : "") + w;
     } else {
-      current = candidate;
+      if (current) lines.push(current);
+      current =
+        w.length > MAX_CHARS_PER_LINE ? w.slice(0, MAX_CHARS_PER_LINE) : w;
     }
   }
   if (current) lines.push(current);
+  return lines;
+}
+
+interface WrappedYAxisTickProps {
+  x?: number;
+  y?: number;
+  payload?: { value?: string; name?: string };
+  fill?: string;
+  fontSize?: number;
+}
+
+function WrappedYAxisTick({
+  x = 0,
+  y = 0,
+  payload,
+  fill,
+  fontSize = 13,
+}: WrappedYAxisTickProps) {
+  const text = payload?.value ?? payload?.name ?? "";
+  const lines = wrapLabelText(text);
+  const lineHeight = fontSize + 2;
 
   return (
-    <g transform={`translate(${nx},${ny})`}>
-      {lines.map((line, i) => (
-        <text
-          key={i}
-          x={0}
-          y={i * TICK_LINE_HEIGHT}
-          dy={6}
-          textAnchor="middle"
-          fill={fill ?? "#9ca3af"}
-          fontSize={10}
-        >
-          {line}
-        </text>
-      ))}
+    <g transform={`translate(${x}, ${y})`}>
+      <text
+        textAnchor="end"
+        fill={fill}
+        fontSize={fontSize}
+        fontFamily="monospace"
+        style={{ fontWeight: 500 }}
+      >
+        {lines.map((line, i) => (
+          <tspan key={i} x={0} dy={i === 0 ? 0 : lineHeight}>
+            {line}
+          </tspan>
+        ))}
+      </text>
     </g>
   );
 }
@@ -105,10 +107,10 @@ function ChartTooltip({ active, payload }: TooltipProps) {
       transition={{ duration: 0.2 }}
       className="rounded-md border border-ink/30 bg-white p-3 shadow-lg dark:border-white/20 dark:bg-[#0a0a0a]"
     >
-      <p className="mb-1 font-mono text-xs text-ink dark:text-gray-300">
+      <p className="mb-1 font-mono text-sm text-ink dark:text-gray-300">
         {name}
       </p>
-      <p className="font-mono text-base font-semibold tabular-nums text-ink dark:text-gray-100">
+      <p className="font-mono text-sm font-semibold tabular-nums text-ink dark:text-gray-100">
         {value}{" "}
         <span className="text-sm font-normal text-muted-foreground">unit</span>
       </p>
@@ -118,7 +120,7 @@ function ChartTooltip({ active, payload }: TooltipProps) {
 
 const GRID_LIGHT = "#e5e7eb";
 const GRID_DARK = "rgba(255,255,255,0.1)";
-const TICK_LIGHT = "#374151";
+const TICK_LIGHT = "#6b7280";
 const TICK_DARK = "#9ca3af";
 
 export function TopProductsBarChart({
@@ -142,55 +144,70 @@ export function TopProductsBarChart({
           {title}
         </p>
       )}
-      <div className="mt-4 w-full flex-1 min-h-[400px]">
-        <ResponsiveContainer width="100%" height="100%" minWidth={0}>
-          {/* Layout vertical (horizontal bars) */}
-          <BarChart
-            data={data.slice(0, 15)}
-            layout="vertical"
-            margin={{ top: 10, right: 32, left: 110, bottom: 0 }}
+      <div className="relative mt-4 max-h-[400px] w-full overflow-y-auto overflow-x-hidden custom-scrollbar">
+        <div
+          style={{ height: `${Math.max(data.slice(0, 15).length * 44, 280)}px` }}
+          className="w-full"
+        >
+          <ResponsiveContainer
+            width="100%"
+            height="100%"
+            minWidth={0}
+            minHeight={0}
           >
-            <CartesianGrid
-              strokeDasharray="3 3"
-              stroke={isDark ? GRID_DARK : GRID_LIGHT}
-              strokeOpacity={0.5}
-              horizontal={false}
-              vertical={true}
-            />
-            {/* XAxis = nilai numerik (unit terjual) */}
-            <XAxis type="number" hide />
-            {/* YAxis = nama produk */}
-            <YAxis
-              dataKey="name"
-              type="category"
-              width={110}
-              tickMargin={10}
-              tick={{ fill: isDark ? TICK_DARK : TICK_LIGHT, fontSize: 12 }}
-              tickLine={false}
-              axisLine={false}
-            />
-            <Tooltip
-              content={<ChartTooltip />}
-              cursor={{ fill: "rgba(0,0,0,0.03)" }}
-            />
-            <Bar
-              dataKey="value"
-              fill={barColor}
-              radius={[0, 4, 4, 0]}
-              name="Qty"
-              barSize={24}
-              animationDuration={1000}
+            {/* Layout vertical (horizontal bars) */}
+            <BarChart
+              data={data.slice(0, 15)}
+              layout="vertical"
+              margin={{ top: 10, right: 50, left: 8, bottom: 10 }}
             >
-              {/* Label value di kanan bar */}
-              <LabelList
-                dataKey="value"
-                position="right"
-                fill="#888888"
-                fontSize={11}
+              <CartesianGrid
+                strokeDasharray="3 3"
+                stroke={isDark ? GRID_DARK : GRID_LIGHT}
+                strokeOpacity={0.5}
+                horizontal={false}
               />
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
+              {/* XAxis = nilai numerik (unit terjual) */}
+              <XAxis 
+                type="number" 
+                tick={{ fill: isDark ? TICK_DARK : TICK_LIGHT, fontSize: 13 }}
+                tickLine={false}
+                axisLine={{ stroke: isDark ? GRID_DARK : GRID_LIGHT }}
+                tickFormatter={(v) => String(Math.round(Number(v)))}
+              />
+              {/* YAxis = nama produk */}
+              <YAxis
+                dataKey="name"
+                type="category"
+                interval={0}
+                width={140}
+                tickLine={false}
+                axisLine={false}
+                tick={<WrappedYAxisTick fill={isDark ? TICK_DARK : TICK_LIGHT} fontSize={13} />}
+              />
+              <Tooltip
+                content={<ChartTooltip />}
+                cursor={{ fill: "rgba(0,0,0,0.03)" }}
+              />
+              <Bar
+                dataKey="value"
+                fill={barColor}
+                radius={[0, 4, 4, 0]}
+                name="Qty"
+                barSize={24}
+                animationDuration={1000}
+              >
+                {/* Label value di samping bar */}
+                <LabelList
+                  dataKey="value"
+                  position="right"
+                  fill={isDark ? "#d1d5db" : "#374151"}
+                  fontSize={13}
+                />
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
       </div>
     </div>
   );

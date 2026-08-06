@@ -92,7 +92,7 @@ export function SplashScreen({ isHeroLoaded }: SplashScreenProps) {
         {MICRO_COPY.map((text, i) => (
           <p
             key={i}
-            className="absolute text-xs text-zinc-500 tracking-widest uppercase select-none opacity-0"
+            className="absolute text-sm text-zinc-500 tracking-widest uppercase select-none opacity-0"
             style={{
               animation: `micro-copy-fade 7.5s infinite`,
               animationDelay: `${i * 2.5}s`,

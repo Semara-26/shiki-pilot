@@ -201,10 +201,10 @@ export function Sidebar() {
                 : "hidden opacity-0 group-hover:block group-hover:opacity-100 md:group-hover:block md:group-hover:opacity-100",
             )}
           >
-            <p className="truncate text-xs font-medium text-gray-700 dark:text-sidebar-foreground">
+            <p className="truncate text-sm font-medium text-gray-700 dark:text-sidebar-foreground">
               {displayName}
             </p>
-            <p className="truncate text-xs text-gray-500 dark:text-muted-foreground">
+            <p className="truncate text-sm text-gray-500 dark:text-muted-foreground">
               {user?.primaryEmailAddress?.emailAddress ?? "Operator"}
             </p>
           </div>

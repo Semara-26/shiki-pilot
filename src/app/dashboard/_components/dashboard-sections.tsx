@@ -82,14 +82,14 @@ async function WaAlertSection() {
           <h4 className="font-mono text-sm font-bold uppercase tracking-tight">
             Peringatan: WhatsApp Terputus
           </h4>
-          <p className="font-mono text-xs opacity-80">
+          <p className="font-mono text-sm opacity-80">
             Notifikasi stok habis tidak dapat dikirim. Silakan hubungkan ulang.
           </p>
         </div>
       </div>
       <Link
         href="/dashboard?setup=wa"
-        className="flex items-center gap-2 rounded border border-red-500/50 bg-red-500 px-3 py-1.5 font-mono text-xs font-bold text-white transition-colors hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+        className="flex items-center gap-2 rounded border border-red-500/50 bg-red-500 px-3 py-1.5 font-mono text-sm font-bold text-white transition-colors hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
       >
         <Settings2 className="h-4 w-4" />
         HUBUNGKAN SEKARANG
@@ -107,12 +107,12 @@ async function RecentAssetsSection({ storeId }: { storeId: string }) {
   return (
     <div>
       <div className="mb-3 flex items-center justify-between">
-        <p className="font-mono text-xs uppercase tracking-widest text-gray-500 dark:text-gray-400">
+        <p className="font-mono text-sm uppercase tracking-widest text-gray-500 dark:text-gray-400">
           PRODUK TERBARU
         </p>
         <Link
           href="/dashboard/inventory"
-          className="font-mono text-xs text-primary hover:text-primary-hover dark:hover:text-primary/80 hover:underline"
+          className="font-mono text-sm text-primary hover:text-primary-hover dark:hover:text-primary/80 hover:underline"
         >
           Lihat semua →
         </Link>

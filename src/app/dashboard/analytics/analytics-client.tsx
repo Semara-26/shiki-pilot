@@ -574,7 +574,7 @@ export function AnalyticsClient({
           <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full border-2 border-ink/20 dark:border-white/20 bg-paper dark:bg-white/5">
             <BarChart3 className="h-7 w-7 text-ink dark:text-white" />
           </div>
-          <h2 className="font-mono text-base font-black uppercase tracking-wider text-ink dark:text-white">
+          <h2 className="font-mono text-sm font-black uppercase tracking-wider text-ink dark:text-white">
             Toko Belum Dibuat
           </h2>
           <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
@@ -606,7 +606,7 @@ export function AnalyticsClient({
               <button
                 type="button"
                 onClick={() => setIsExportOpen((prev) => !prev)}
-                className="flex items-center gap-1.5 rounded-md border-2 border-ink bg-transparent px-3 py-1.5 font-mono text-xs font-medium uppercase tracking-wider text-ink transition-colors hover:bg-ink hover:text-white dark:border-white/20 dark:text-gray-300 dark:hover:bg-white/20 dark:hover:text-white"
+                className="flex items-center gap-1.5 rounded-md border-2 border-ink bg-transparent px-3 py-1.5 font-mono text-sm font-medium uppercase tracking-wider text-ink transition-colors hover:bg-ink hover:text-white dark:border-white/20 dark:text-gray-300 dark:hover:bg-white/20 dark:hover:text-white"
               >
                 <Download size={14} />
                 Ekspor Data
@@ -623,7 +623,7 @@ export function AnalyticsClient({
                       handleExportCSV();
                       setIsExportOpen(false);
                     }}
-                    className="flex w-full items-center gap-2 px-3 py-2 text-left font-mono text-xs uppercase tracking-wider text-gray-300 transition-colors hover:bg-primary/20 hover:text-primary"
+                    className="flex w-full items-center gap-2 px-3 py-2 text-left font-mono text-sm uppercase tracking-wider text-gray-300 transition-colors hover:bg-primary/20 hover:text-primary"
                   >
                     <Download size={13} />
                     Unduh CSV
@@ -635,7 +635,7 @@ export function AnalyticsClient({
                       setIsExportOpen(false);
                       handleExportPDF();
                     }}
-                    className="flex w-full items-center gap-2 px-3 py-2 text-left font-mono text-xs uppercase tracking-wider text-gray-300 transition-colors hover:bg-primary/20 hover:text-primary disabled:cursor-not-allowed disabled:opacity-50"
+                    className="flex w-full items-center gap-2 px-3 py-2 text-left font-mono text-sm uppercase tracking-wider text-gray-300 transition-colors hover:bg-primary/20 hover:text-primary disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     {isExporting ? (
                       <Loader2 size={13} className="animate-spin" />
@@ -654,7 +654,7 @@ export function AnalyticsClient({
                   type="button"
                   onClick={() => setTimeFilter(f)}
                   className={`
-                  px-2 py-1 sm:px-3 sm:py-1.5 font-mono text-xs font-medium uppercase transition-colors
+                  px-2 py-1 sm:px-3 sm:py-1.5 font-mono text-sm font-medium uppercase transition-colors
                   ${
                     timeFilter === f
                       ? "bg-primary text-primary-foreground dark:bg-[#22d3ee] dark:text-[#0a0a0a]"

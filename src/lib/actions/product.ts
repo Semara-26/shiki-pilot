@@ -298,12 +298,12 @@ export async function updateProduct(
 
     revalidatePath("/dashboard/inventory");
     revalidatePath("/dashboard");
+    return { success: true };
   } catch (err) {
     // SECURITY F-07: Log detail error di server, kembalikan pesan generik ke client
     console.error("updateProduct error:", err);
     return { error: "Gagal menyimpan perubahan. Coba lagi." };
   }
-  redirect("/dashboard/inventory");
 }
 
 export type ProcessAiImportResult =

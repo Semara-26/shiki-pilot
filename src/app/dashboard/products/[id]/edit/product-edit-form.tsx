@@ -15,6 +15,8 @@ const inputClass =
 
 const labelClass = "block font-mono text-sm text-muted-foreground mb-1.5";
 
+import { useRouter } from "next/navigation";
+
 export interface ProductEditInitialData {
   id: string;
   name: string;
@@ -37,12 +39,20 @@ export function ProductEditForm({ initialData }: ProductEditFormProps) {
   const [imagePreview, setImagePreview] = useState<string | null>(
     initialData.imageUrl,
   );
+  const router = useRouter();
 
   useEffect(() => {
     if (state?.error) {
       toast.error("Gagal menyimpan", { description: state.error });
     }
   }, [state?.error]);
+
+  useEffect(() => {
+    if (state?.success) {
+      toast.success("Produk berhasil diperbarui");
+      router.push("/dashboard/inventory");
+    }
+  }, [state?.success, router]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -230,7 +240,7 @@ export function ProductEditForm({ initialData }: ProductEditFormProps) {
               : undefined
           }
         />
-        <p className="mt-1.5 font-mono text-xs text-muted-foreground/70">
+        <p className="mt-1.5 font-mono text-sm text-muted-foreground/70">
           AI dan WhatsApp akan mengingatkan Anda jika stok menyentuh angka ini.
           Default: 10.
         </p>

@@ -132,7 +132,7 @@ const ToolThinkingBubble = memo(function ToolThinkingBubble({
 
                 <span
                   key={isFinished ? "finished" : textIndex}
-                  className={`font-mono text-xs font-medium ${isFinished ? "text-green-600/90 dark:text-green-400/90" : "text-muted-foreground"} animate-in fade-in slide-in-from-left-1 duration-500`}
+                  className={`font-mono text-sm font-medium ${isFinished ? "text-green-600/90 dark:text-green-400/90" : "text-muted-foreground"} animate-in fade-in slide-in-from-left-1 duration-500`}
                 >
                   {isFinished ? `Selesai: Berhasil` : loadingTexts[textIndex]}
                 </span>
@@ -194,7 +194,7 @@ const markdownComponents = {
     </h1>
   ),
   h2: ({ children }: { children?: React.ReactNode }) => (
-    <h2 className="mb-2 mt-3 text-base font-semibold text-white first:mt-0">
+    <h2 className="mb-2 mt-3 text-sm font-semibold text-white first:mt-0">
       {children}
     </h2>
   ),
@@ -237,7 +237,7 @@ const AssistantBubble = memo(function AssistantBubble({
       {text.length > 0 && (
         <div className="flex justify-start">
           <div className="max-w-[85%] rounded-md border border-border bg-secondary px-4 py-2.5 text-foreground">
-            <div className="font-sans text-base leading-relaxed text-gray-200">
+            <div className="font-sans text-sm leading-relaxed text-gray-200">
               <ReactMarkdown components={markdownComponents}>
                 {text}
               </ReactMarkdown>
@@ -389,7 +389,7 @@ export function ChatClient({ chatId, initialMessages }: ChatClientProps) {
         <button
           onClick={handleClearChat}
           disabled={messages.length === 0}
-          className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-lg border border-zinc-800 bg-zinc-900/50 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 transition-all duration-200 shrink-0"
+          className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-lg border border-zinc-800 bg-zinc-900/50 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 transition-all duration-200 shrink-0"
           title="Bersihkan Chat"
         >
           <TrashIcon className="w-3.5 h-3.5" />
@@ -458,7 +458,7 @@ export function ChatClient({ chatId, initialMessages }: ChatClientProps) {
                           d="M5 13l4 4L19 7"
                         />
                       </svg>
-                      <span className="font-mono text-xs font-medium text-green-600/90 dark:text-green-400/90 animate-in fade-in duration-500">
+                      <span className="font-mono text-sm font-medium text-green-600/90 dark:text-green-400/90 animate-in fade-in duration-500">
                         ✅ Data gudang berhasil diperbarui! Sedang merapikan
                         laporan untukmu...
                       </span>
@@ -468,7 +468,7 @@ export function ChatClient({ chatId, initialMessages }: ChatClientProps) {
                       <Loader2 className="h-4 w-4 text-primary animate-spin shrink-0" />
                       <span
                         key={loadingTextIndex}
-                        className="font-mono text-xs font-medium text-muted-foreground animate-in fade-in duration-500"
+                        className="font-mono text-sm font-medium text-muted-foreground animate-in fade-in duration-500"
                       >
                         {loadingTexts[loadingTextIndex]}
                       </span>

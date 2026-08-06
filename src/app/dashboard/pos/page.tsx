@@ -41,7 +41,7 @@ export default async function POSPage() {
         </div>
         <div className="flex flex-1 items-center justify-center p-6">
           <div className="rounded-lg border-2 border-ink dark:border-white/20 bg-white dark:bg-[#0a0a0a] p-8 text-center">
-            <h2 className="font-mono text-base font-black uppercase tracking-wider text-ink dark:text-white">
+            <h2 className="font-mono text-sm font-black uppercase tracking-wider text-ink dark:text-white">
               Toko Belum Dibuat
             </h2>
             <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">

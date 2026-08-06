@@ -56,12 +56,12 @@ function DonutTooltip({ active, payload }: TooltipProps) {
       transition={{ duration: 0.2 }}
       className="relative z-50 rounded-md border border-white/20 bg-ink p-3 shadow-2xl dark:bg-ink dark:border-white/20"
     >
-      <p className="mb-1 font-mono text-xs text-white">{name}</p>
-      <p className="font-mono text-base font-semibold tabular-nums text-white">
+      <p className="mb-1 font-mono text-sm text-white">{name}</p>
+      <p className="font-mono text-sm font-semibold tabular-nums text-white">
         {formatRupiah(value)}
       </p>
       {pct != null && (
-        <p className="mt-0.5 font-mono text-xs text-white/80">
+        <p className="mt-0.5 font-mono text-sm text-white/80">
           {pct.toFixed(1)}%
         </p>
       )}
@@ -141,10 +141,10 @@ export function ProductDistributionDonut({
               )}
               aria-hidden
             >
-              <p className="truncate font-mono text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">
+              <p className="truncate font-mono text-sm uppercase tracking-wider text-gray-500 dark:text-gray-400">
                 TOTAL
               </p>
-              <p className="mt-1 truncate font-mono text-base font-bold tabular-nums text-ink sm:text-lg dark:text-white">
+              <p className="mt-1 truncate font-mono text-sm font-bold tabular-nums text-ink sm:text-lg dark:text-white">
                 {totalDisplay}
               </p>
             </div>
@@ -159,7 +159,7 @@ export function ProductDistributionDonut({
             {chartData.map((item, i) => (
               <div
                 key={`${item.name}-${i}`}
-                className="flex items-start gap-2 font-mono text-xs"
+                className="flex items-start gap-2 font-mono text-sm"
                 role="listitem"
               >
                 {/* Dot warna produk */}

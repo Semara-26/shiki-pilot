@@ -1,13 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { Search, Calendar } from "lucide-react";
+import { Search, Calendar, Loader2 } from "lucide-react";
 
 export function TransactionFilters() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
+  const [isPending, startTransition] = useTransition();
 
   const urlId = searchParams.get("id") || "";
   const urlStart = searchParams.get("start") || "";
@@ -46,18 +47,22 @@ export function TransactionFilters() {
     if (end) params.set("end", end);
     else params.delete("end");
 
-    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    startTransition(() => {
+      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    });
   };
 
   const clearFilters = () => {
     setId("");
     setStart("");
     setEnd("");
-    router.replace(pathname, { scroll: false });
+    startTransition(() => {
+      router.replace(pathname, { scroll: false });
+    });
   };
 
   return (
-    <div className="flex flex-col gap-4 mb-6 rounded-md border border-ink/20 bg-card p-4 dark:border-white/10 dark:bg-surface-dark w-full shadow-sm">
+    <div className={`flex flex-col gap-4 mb-6 rounded-md border border-ink/20 bg-card p-4 dark:border-white/10 dark:bg-surface-dark w-full shadow-sm transition-opacity duration-200 ${isPending ? "opacity-70 pointer-events-none" : "opacity-100"}`}>
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end w-full">
         {/* Input ID Transaksi */}
         <div className="flex-1 w-full">
@@ -95,7 +100,7 @@ export function TransactionFilters() {
               type="date"
               value={start}
               onChange={(e) => setStart(e.target.value)}
-              className="h-9 w-full rounded-md border border-ink/20 bg-background pl-9 pr-3 py-2 font-mono text-xs text-ink transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary dark:border-white/10 dark:bg-background/50 dark:text-white"
+              className="h-9 w-full rounded-md border border-ink/20 bg-background pl-9 pr-3 py-2 font-mono text-sm text-ink transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary dark:border-white/10 dark:bg-background/50 dark:text-white"
             />
           </div>
         </div>
@@ -116,7 +121,7 @@ export function TransactionFilters() {
               value={end}
               min={start}
               onChange={(e) => setEnd(e.target.value)}
-              className="h-9 w-full rounded-md border border-ink/20 bg-background pl-9 pr-3 py-2 font-mono text-xs text-ink transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary dark:border-white/10 dark:bg-background/50 dark:text-white"
+              className="h-9 w-full rounded-md border border-ink/20 bg-background pl-9 pr-3 py-2 font-mono text-sm text-ink transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary dark:border-white/10 dark:bg-background/50 dark:text-white"
             />
           </div>
         </div>
@@ -127,7 +132,7 @@ export function TransactionFilters() {
             <button
               type="button"
               onClick={clearFilters}
-              className="h-9 px-3 rounded font-mono text-xs font-medium text-muted-foreground hover:bg-secondary/80 hover:text-foreground transition-colors"
+              className="h-9 px-3 rounded font-mono text-sm font-medium text-muted-foreground hover:bg-secondary/80 hover:text-foreground transition-colors"
             >
               RESET
             </button>
@@ -135,9 +140,16 @@ export function TransactionFilters() {
           <button
             type="button"
             onClick={handleApplyFilter}
-            className="h-9 rounded-md shrink-0 bg-primary px-4 font-mono text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+            className="flex items-center justify-center gap-2 h-9 rounded-md shrink-0 bg-primary px-4 font-mono text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
           >
-            TERAPKAN FILTER
+            {isPending ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                MEMPROSES...
+              </>
+            ) : (
+              "TERAPKAN FILTER"
+            )}
           </button>
         </div>
       </div>

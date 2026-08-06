@@ -55,7 +55,7 @@ function HoloTooltip({ active, payload }: HoloTooltipProps) {
       transition={{ duration: 0.4, ease: "easeOut" }}
       className="rounded-md border border-primary/50 bg-background/90 p-3 shadow-[0_0_20px_rgba(14,165,233,0.3)] backdrop-blur-md"
     >
-      <p className="mb-1 font-mono text-xs text-muted-foreground">{fullName}</p>
+      <p className="mb-1 font-mono text-sm text-muted-foreground">{fullName}</p>
       <p className="font-mono text-xl font-semibold tabular-nums text-foreground drop-shadow-[0_0_8px_rgba(14,165,233,0.8)]">
         {stock}{" "}
         <span className="text-sm font-normal text-muted-foreground">stok</span>
@@ -114,7 +114,7 @@ function WrappedYAxisTick({
   y = 0,
   payload,
   fill,
-  fontSize = 11,
+  fontSize = 13,
 }: WrappedYAxisTickProps) {
   const text = payload?.value ?? payload?.name ?? "";
   const lines = wrapLabelText(text);
@@ -181,7 +181,7 @@ export function GrowthChart({ data, title, className }: GrowthChartProps) {
               />
               <XAxis
                 type="number"
-                tick={{ fill: tickFill, fontSize: 11 }}
+                tick={{ fill: tickFill, fontSize: 13 }}
                 tickLine={false}
                 axisLine={{ stroke: gridStroke }}
                 tickFormatter={(v) => String(Math.round(Number(v)))}
@@ -193,7 +193,7 @@ export function GrowthChart({ data, title, className }: GrowthChartProps) {
                 width={140}
                 tickLine={false}
                 axisLine={{ stroke: gridStroke }}
-                tick={<WrappedYAxisTick fill={tickFill} fontSize={11} />}
+                tick={<WrappedYAxisTick fill={tickFill} fontSize={13} />}
               />
               <Tooltip content={<HoloTooltip />} cursor={<CustomCursor />} />
               <Bar
@@ -215,7 +215,7 @@ export function GrowthChart({ data, title, className }: GrowthChartProps) {
                   dataKey="value"
                   position="right"
                   fill={tickFill}
-                  fontSize={11}
+                  fontSize={13}
                 />
               </Bar>
             </BarChart>

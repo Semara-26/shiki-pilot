@@ -112,28 +112,28 @@ const ReceiptModal = memo(function ReceiptModal({
 
         {/* Timestamp */}
         <div className="mb-5 flex items-center justify-between gap-2 flex-shrink-0">
-          <span className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
+          <span className="font-mono text-sm uppercase tracking-wider text-muted-foreground">
             Waktu Transaksi
           </span>
-          <span className="font-mono text-xs tabular-nums text-foreground">
+          <span className="font-mono text-sm tabular-nums text-foreground">
             {formatDateTime(tx.createdAt)}
           </span>
         </div>
 
         {/* Product table */}
         <div className="mb-5 flex-1 min-h-0 flex flex-col">
-          <p className="mb-3 font-mono text-xs font-medium uppercase tracking-widest text-muted-foreground">
+          <p className="mb-3 font-mono text-sm font-medium uppercase tracking-widest text-muted-foreground">
             Detail Pembelian
           </p>
           <div className="rounded border border-white/10 bg-black/20 flex flex-col overflow-hidden">
             <div className="grid grid-cols-[1fr_3rem_auto] gap-x-3 border-b border-white/10 bg-black/20 px-4 py-2 flex-shrink-0">
-              <span className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
+              <span className="font-mono text-sm uppercase tracking-wider text-muted-foreground">
                 Produk
               </span>
-              <span className="font-mono text-xs uppercase tracking-wider text-muted-foreground text-right">
+              <span className="font-mono text-sm uppercase tracking-wider text-muted-foreground text-right">
                 Qty
               </span>
-              <span className="font-mono text-xs uppercase tracking-wider text-muted-foreground text-right">
+              <span className="font-mono text-sm uppercase tracking-wider text-muted-foreground text-right">
                 Harga
               </span>
             </div>
@@ -171,15 +171,15 @@ const ReceiptModal = memo(function ReceiptModal({
 
         {/* Metode Pembayaran */}
         <div className="mb-4 flex items-center justify-between flex-shrink-0">
-          <span className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
+          <span className="font-mono text-sm uppercase tracking-wider text-muted-foreground">
             Metode Pembayaran
           </span>
           {tx.paymentType === "qris_statis" ? (
-            <span className="inline-flex items-center gap-1 rounded-full border border-cyan-500/40 bg-cyan-500/10 px-2.5 py-0.5 font-mono text-xs font-semibold text-cyan-400">
+            <span className="inline-flex items-center gap-1 rounded-full border border-cyan-500/40 bg-cyan-500/10 px-2.5 py-0.5 font-mono text-sm font-semibold text-cyan-400">
               📱 QRIS Statis
             </span>
           ) : (
-            <span className="inline-flex items-center gap-1 rounded-full border border-gray-500/40 bg-gray-500/10 px-2.5 py-0.5 font-mono text-xs font-semibold text-gray-400">
+            <span className="inline-flex items-center gap-1 rounded-full border border-gray-500/40 bg-gray-500/10 px-2.5 py-0.5 font-mono text-sm font-semibold text-gray-400">
               💵 TUNAI
             </span>
           )}
@@ -197,7 +197,7 @@ const ReceiptModal = memo(function ReceiptModal({
 
         {/* Footer stamp */}
         <div className="mt-6 flex justify-center flex-shrink-0">
-          <span className="font-mono text-xs tracking-[0.3em] uppercase text-muted-foreground/40">
+          <span className="font-mono text-sm tracking-[0.3em] uppercase text-muted-foreground/40">
             — ShikiPilot —
           </span>
         </div>
@@ -260,11 +260,11 @@ const TransactionTableRow = memo(function TransactionTableRow({
         </td>
         <td className="px-4 py-4">
           {tx.paymentType === "qris_statis" ? (
-            <span className="inline-flex items-center gap-1 rounded-full border border-cyan-500/40 bg-cyan-500/10 px-2.5 py-0.5 font-mono text-xs font-semibold text-cyan-400">
+            <span className="inline-flex items-center gap-1 rounded-full border border-cyan-500/40 bg-cyan-500/10 px-2.5 py-0.5 font-mono text-sm font-semibold text-cyan-400">
               📱 QRIS
             </span>
           ) : (
-            <span className="inline-flex items-center gap-1 rounded-full border border-gray-500/40 bg-gray-500/10 px-2.5 py-0.5 font-mono text-xs font-semibold text-gray-400">
+            <span className="inline-flex items-center gap-1 rounded-full border border-gray-500/40 bg-gray-500/10 px-2.5 py-0.5 font-mono text-sm font-semibold text-gray-400">
               💵 TUNAI
             </span>
           )}

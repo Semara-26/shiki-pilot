@@ -276,7 +276,7 @@ export function SystemPreferencesModal({
               <h3 className="text-sm font-bold text-ink dark:text-white">
                 Pengaturan Avatar
               </h3>
-              <p className="mt-1 text-xs text-gray-600 dark:text-gray-400">
+              <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
                 Unggah avatar baru atau sinkronisasikan dengan profil Gravatar Anda.
                 Ukuran yang disarankan: 400×400px.
               </p>
@@ -284,14 +284,14 @@ export function SystemPreferencesModal({
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="rounded-sm bg-primary px-3 py-1.5 font-mono text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+                  className="rounded-sm bg-primary px-3 py-1.5 font-mono text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
                 >
                   UNGGAH BARU
                 </button>
                 <button
                   type="button"
                   onClick={handleRemoveAvatar}
-                  className="rounded-md border border-red-200 px-4 py-2 font-mono text-xs font-bold text-red-600 transition-all hover:bg-red-50 dark:border-white/20 dark:text-gray-300 dark:hover:bg-white/10"
+                  className="rounded-md border border-red-200 px-4 py-2 font-mono text-sm font-bold text-red-600 transition-all hover:bg-red-50 dark:border-white/20 dark:text-gray-300 dark:hover:bg-white/10"
                 >
                   HAPUS
                 </button>
@@ -344,10 +344,10 @@ export function SystemPreferencesModal({
       return (
         <div className="space-y-6">
           <div>
-            <h3 className="text-base font-bold uppercase tracking-wide text-ink dark:text-white">
+            <h3 className="text-sm font-bold uppercase tracking-wide text-ink dark:text-white">
               KONFIGURASI TOKO
             </h3>
-            <p className="mt-1 text-xs text-gray-600 dark:text-gray-400">
+            <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
               Memuat data toko...
             </p>
           </div>
@@ -364,10 +364,10 @@ export function SystemPreferencesModal({
     return (
       <div className="space-y-6">
         <div>
-          <h3 className="text-base font-bold uppercase tracking-wide text-ink dark:text-white">
+          <h3 className="text-sm font-bold uppercase tracking-wide text-ink dark:text-white">
             KONFIGURASI TOKO
           </h3>
-          <p className="mt-1 text-xs text-gray-600 dark:text-gray-400">
+          <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
             Kelola detail perusahaan untuk publik.
           </p>
         </div>
@@ -509,7 +509,7 @@ export function SystemPreferencesModal({
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-75" />
                   <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
                 </span>
-                <p className="font-mono text-xs font-bold text-emerald-600 dark:text-emerald-400">
+                <p className="font-mono text-sm font-bold text-emerald-600 dark:text-emerald-400">
                   TERHUBUNG KE GATEWAY
                 </p>
               </div>
@@ -517,7 +517,7 @@ export function SystemPreferencesModal({
               <div className="flex flex-col gap-3">
                 <div className="flex items-center gap-3">
                   <span className="h-2 w-2 rounded-full bg-red-500" />
-                  <p className="font-mono text-xs font-bold text-red-600 dark:text-red-400">
+                  <p className="font-mono text-sm font-bold text-red-600 dark:text-red-400">
                     TERPUTUS
                   </p>
                   {waStatus?.error && (
@@ -529,7 +529,7 @@ export function SystemPreferencesModal({
 
                 {waStatus?.qr && (
                   <div className="mt-2 flex max-w-[200px] flex-col items-center rounded-md border-2 border-red-200 bg-white p-4 dark:border-red-900/50 dark:bg-black/50">
-                    <p className="mb-3 text-center text-xs font-bold text-ink dark:text-white">
+                    <p className="mb-3 text-center text-sm font-bold text-ink dark:text-white">
                       Scan QR WhatsApp
                     </p>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -555,10 +555,10 @@ export function SystemPreferencesModal({
     return (
       <div className="space-y-6">
         <div>
-          <h3 className="text-base font-bold uppercase tracking-wide text-ink dark:text-white">
+          <h3 className="text-sm font-bold uppercase tracking-wide text-ink dark:text-white">
             PROTOKOL KEAMANAN
           </h3>
-          <p className="mt-1 text-xs text-gray-600 dark:text-gray-400">
+          <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
             Kelola autentikasi dan kredensial akses.
           </p>
         </div>
@@ -654,7 +654,7 @@ export function SystemPreferencesModal({
           <div className="flex gap-3">
             <Lock className="h-5 w-5 shrink-0 text-gray-500 dark:text-slate-400" />
             <div>
-              <p className="font-mono text-xs font-bold text-gray-500 dark:text-slate-300">
+              <p className="font-mono text-sm font-bold text-gray-500 dark:text-slate-300">
                 FEATURE_LOCKED // 2FA AUTENTIKASI
               </p>
               <p className="mt-1.5 text-[10px] text-gray-500 dark:text-slate-300">
@@ -754,7 +754,7 @@ export function SystemPreferencesModal({
                   <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <div className="flex items-center gap-3">
                       <div className="h-8 w-0.5 shrink-0 bg-primary" />
-                      <h2 className="text-base font-black uppercase tracking-wide text-ink dark:text-white md:text-lg">
+                      <h2 className="text-sm font-black uppercase tracking-wide text-ink dark:text-white md:text-lg">
                         KONFIGURASI PROFIL PENGGUNA
                       </h2>
                     </div>
@@ -775,7 +775,7 @@ export function SystemPreferencesModal({
                     <button
                       type="button"
                       onClick={onClose}
-                      className="order-2 rounded-sm border-2 border-ink bg-white px-4 py-2 font-mono text-xs font-medium text-ink transition-colors hover:bg-gray-100 dark:border-white/20 dark:bg-background/80 dark:text-foreground dark:hover:bg-white/10 sm:order-1"
+                      className="order-2 rounded-sm border-2 border-ink bg-white px-4 py-2 font-mono text-sm font-medium text-ink transition-colors hover:bg-gray-100 dark:border-white/20 dark:bg-background/80 dark:text-foreground dark:hover:bg-white/10 sm:order-1"
                     >
                       BATALKAN PERUBAHAN
                     </button>
@@ -783,7 +783,7 @@ export function SystemPreferencesModal({
                       type="button"
                       onClick={handleSyncData}
                       disabled={isSyncing}
-                      className="order-1 flex min-w-[120px] items-center justify-center gap-2 rounded-sm bg-primary px-5 py-2 font-mono text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-70 sm:order-2"
+                      className="order-1 flex min-w-[120px] items-center justify-center gap-2 rounded-sm bg-primary px-5 py-2 font-mono text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-70 sm:order-2"
                     >
                       <RefreshCw
                         className={cn(
