@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useDeferredValue } from "react";
 import { Plus, Minus, ShoppingCart, Search } from "lucide-react";
 import { toast } from "sonner";
 import { createBulkTransactions } from "@/src/lib/actions/transaction";
@@ -27,6 +27,7 @@ export function POSClient({ products, storeId }: POSClientProps) {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [cashReceived, setCashReceived] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState("");
+  const deferredSearchQuery = useDeferredValue(searchQuery);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activePayment, setActivePayment] = useState<PaymentType>("cash");
   // Two-step confirmation: null = idle, 'cash'/'qris_statis' = armed/waiting konfirmasi
@@ -44,7 +45,7 @@ export function POSClient({ products, storeId }: POSClientProps) {
   }, []);
 
   const filteredProducts = products.filter((p) =>
-    p.name.toLowerCase().includes(searchQuery.toLowerCase()),
+    p.name.toLowerCase().includes(deferredSearchQuery.toLowerCase()),
   );
 
   const grandTotal = cart.reduce(
