@@ -37,9 +37,8 @@ export { MetricsSkeleton, TableSkeleton, ChartSkeleton };
 
 // ─── 1. MetricsSection — 4 kartu angka paling atas ───────────────────────────
 
-async function MetricsSection({ storeId }: { storeId: string }) {
+async function MetricsSection({ storeId, chartProducts }: { storeId: string; chartProducts: any[] }) {
   const metrics = await getDashboardMetrics(storeId);
-  const chartProducts = await getAllProductsForChart(storeId);
 
   const formatRupiah = (value: number) =>
     new Intl.NumberFormat("id-ID", {
@@ -124,8 +123,7 @@ async function RecentAssetsSection({ storeId }: { storeId: string }) {
 
 // ─── 5. ChartsSection — Growth Chart + Donut + Event Log ─────────────────────
 
-async function ChartsSection({ storeId }: { storeId: string }) {
-  const chartProducts = await getAllProductsForChart(storeId);
+async function ChartsSection({ storeId, chartProducts }: { storeId: string; chartProducts: any[] }) {
 
   const stockChartData = chartProducts.map((p) => ({
     name: p.name,
@@ -157,17 +155,19 @@ async function ChartsSection({ storeId }: { storeId: string }) {
 // dengan Suspense individual agar setiap bagian stream secara independen.
 
 export async function DashboardSections({ storeId }: { storeId: string }) {
+  const chartProducts = await getAllProductsForChart(storeId);
+
   return (
     <div className="flex flex-col gap-4 md:gap-6">
       <Suspense fallback={<MetricsSkeleton />}>
-        <MetricsSection storeId={storeId} />
+        <MetricsSection storeId={storeId} chartProducts={chartProducts} />
       </Suspense>
 
-      <Suspense fallback={null}>
+      <Suspense fallback={<div className="h-16 rounded-lg animate-pulse bg-gray-200/50 dark:bg-gray-800/50" />}>
         <LowStockSection storeId={storeId} />
       </Suspense>
 
-      <Suspense fallback={null}>
+      <Suspense fallback={<div className="h-16 rounded-lg animate-pulse bg-gray-200/50 dark:bg-gray-800/50" />}>
         <WaAlertSection />
       </Suspense>
 
@@ -183,7 +183,7 @@ export async function DashboardSections({ storeId }: { storeId: string }) {
           </div>
         }
       >
-        <ChartsSection storeId={storeId} />
+        <ChartsSection storeId={storeId} chartProducts={chartProducts} />
       </Suspense>
     </div>
   );

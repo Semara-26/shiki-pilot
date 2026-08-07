@@ -184,10 +184,13 @@ export function Sidebar() {
             {!isLoaded ? (
               <span className="h-4 w-4 animate-pulse rounded bg-gray-200 dark:bg-white/20" />
             ) : avatarSrc ? (
-              <img
+              <Image
                 src={avatarSrc}
                 alt=""
+                width={36}
+                height={36}
                 className="h-full w-full object-cover"
+                unoptimized
               />
             ) : (
               <User className="h-4 w-4 text-gray-600 dark:text-sidebar-foreground" />

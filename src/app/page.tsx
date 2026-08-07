@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Instagram, Linkedin, Github } from "lucide-react";
 import { motion } from "framer-motion";
 import { SplashScreen } from "@/src/components/splash-screen";
@@ -30,10 +31,12 @@ export default function Home() {
       <header className="fixed top-0 w-full z-50 bg-background/80 backdrop-blur-xl border-b border-white/10">
         <div className="max-w-[1440px] w-full mx-auto px-6 lg:px-12 flex justify-between items-center h-20">
           <Link href="/" className="flex items-center">
-            <img
+            <Image
               src="/logo-new-png.png"
               alt="ShikiPilot Logo"
-              className="w-10 h-10 object-contain"
+              width={40}
+              height={40}
+              className="object-contain"
             />
             <span className="font-bold text-xl ml-3 tracking-tight text-white">
               ShikiPilot
@@ -119,11 +122,13 @@ export default function Home() {
         </div>
 
         {/* Trigger onLoad untuk splash screen (gambar dirender tapi tidak terlihat) */}
-        <img
+        <Image
           src="/banner hero section.png"
           alt=""
           aria-hidden
-          className="absolute w-0 h-0 opacity-0 pointer-events-none"
+          fill
+          priority
+          className="opacity-0 pointer-events-none"
           onLoad={() => setIsHeroLoaded(true)}
         />
       </section>
@@ -308,10 +313,12 @@ export default function Home() {
         <div className="max-w-[1440px] w-full mx-auto px-6 lg:px-12 flex flex-col md:flex-row justify-between mb-16">
           <div className="flex flex-col gap-4 mb-10 md:mb-0">
             <div className="flex items-center">
-              <img
+              <Image
                 src="/logo-new-png.png"
                 alt="ShikiPilot Logo"
-                className="h-10 w-10 object-contain"
+                width={40}
+                height={40}
+                className="object-contain"
               />
               <span className="font-bold text-2xl ml-3 tracking-tight text-white">
                 ShikiPilot
@@ -330,6 +337,7 @@ export default function Home() {
                 href="https://www.instagram.com/semaradana_kadek/"
                 target="_blank"
                 rel="noopener noreferrer"
+                aria-label="Profil Instagram Kadek Semaradana"
                 className="w-12 h-12 flex items-center justify-center rounded-2xl bg-white/5 border border-white/10 hover:bg-primary/20 text-text-muted hover:text-[#0ea5e9] transition-all duration-300"
               >
                 <Instagram className="w-5 h-5" />
@@ -338,6 +346,7 @@ export default function Home() {
                 href="https://www.linkedin.com/in/kadek-semaradana-322b7128a/"
                 target="_blank"
                 rel="noopener noreferrer"
+                aria-label="Profil LinkedIn Kadek Semaradana"
                 className="w-12 h-12 flex items-center justify-center rounded-2xl bg-white/5 border border-white/10 hover:bg-primary/20 text-text-muted hover:text-[#0ea5e9] transition-all duration-300"
               >
                 <Linkedin className="w-5 h-5" />
@@ -346,6 +355,7 @@ export default function Home() {
                 href="https://github.com/Semara-26"
                 target="_blank"
                 rel="noopener noreferrer"
+                aria-label="Profil GitHub Kadek Semaradana (Semara-26)"
                 className="w-12 h-12 flex items-center justify-center rounded-2xl bg-white/5 border border-white/10 hover:bg-primary/20 text-text-muted hover:text-[#0ea5e9] transition-all duration-300"
               >
                 <Github className="w-5 h-5" />

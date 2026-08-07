@@ -9,9 +9,6 @@ import {
   ChevronDown,
   Loader2,
 } from "lucide-react";
-import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
-import html2canvas from "html2canvas";
 import { LOGO_BASE64 } from "@/src/lib/logo-base64";
 import { LOGO_NEW_BASE64 } from "@/src/lib/logo-new-base64";
 import { SalesChart } from "@/src/components/sales-chart";
@@ -239,6 +236,17 @@ export function AnalyticsClient({
   const handleExportPDF = async () => {
     setIsExporting(true);
     try {
+      // Dynamic imports for heavy PDF libraries
+      const [
+        { default: jsPDF },
+        { default: autoTable },
+        { default: html2canvas }
+      ] = await Promise.all([
+        import("jspdf"),
+        import("jspdf-autotable"),
+        import("html2canvas"),
+      ]);
+
       const doc = new jsPDF("p", "mm", "a4");
       const pageW = doc.internal.pageSize.getWidth();
       const pageH = doc.internal.pageSize.getHeight();
