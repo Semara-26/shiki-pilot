@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 
 const features = [
   {
@@ -87,11 +88,14 @@ export function FeaturesSection() {
 
             {/* Image Container */}
             <div className="relative">
-              <img
+              <Image
                 key={activeTab}
                 src={features[activeTab].image}
                 alt={features[activeTab].title}
+                width={600}
+                height={400}
                 className="w-full object-cover animate-[fadeIn_0.5s_ease-in-out]"
+                unoptimized
               />
             </div>
           </div>

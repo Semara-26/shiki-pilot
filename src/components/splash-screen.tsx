@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 
 const MICRO_COPY = [
   "Menyiapkan ruang kerja...",
@@ -74,11 +75,14 @@ export function SplashScreen({ isHeroLoaded }: SplashScreenProps) {
         </svg>
 
         {/* Logo Image */}
-        <img
+        <Image
           src="/logo-new-png.png"
           alt="ShikiPilot Logo"
+          width={64}
+          height={64}
           className="relative z-10 w-16 h-16 object-contain"
           aria-hidden
+          unoptimized
         />
       </div>
 

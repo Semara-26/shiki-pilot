@@ -8,6 +8,7 @@ import { ProductsTable } from "@/src/components/products-table";
 import { PageContainer } from "@/src/components/page-animation";
 import { AiImportButton } from "./ai-import-button";
 import { SearchInput } from "@/src/components/search-input";
+import { InventoryTour } from "@/src/components/onboarding/inventory-tour";
 
 export const dynamic = "force-dynamic";
 
@@ -73,6 +74,7 @@ export default async function InventoryPage(props: {
 
   return (
     <PageContainer className="w-full">
+      <InventoryTour />
       <div className="flex flex-col">
         <div className="flex-none">
           <DashboardHeaderServer

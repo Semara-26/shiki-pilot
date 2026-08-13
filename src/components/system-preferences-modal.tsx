@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { toast } from "sonner";
+import Image from "next/image";
 import { getStoreByUserId, updateStoreInfo } from "@/src/lib/actions/store";
 import { upsertProfile } from "@/src/lib/actions/profile";
 import { useProfile } from "@/src/components/profile-context";
@@ -249,10 +250,13 @@ export function SystemPreferencesModal({
             <div className="relative shrink-0">
               <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border-2 border-primary bg-muted font-mono text-2xl font-semibold text-foreground">
                 {avatarUrl ? (
-                  <img
+                  <Image
                     src={avatarUrl}
                     alt="Avatar"
+                    width={96}
+                    height={96}
                     className="h-full w-full object-cover"
+                    unoptimized
                   />
                 ) : (
                   formData.username

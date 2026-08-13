@@ -83,6 +83,7 @@ const ReceiptModal = memo(function ReceiptModal({
         style={{ willChange: "transform, opacity" }}
         className="w-full max-w-md max-h-[85vh] flex flex-col overflow-hidden rounded-md border border-white/10 bg-secondary/90 p-6 shadow-xl shadow-black/50 relative"
         onClick={(e) => e.stopPropagation()}
+        data-tour="history-detail-modal"
       >
         {/* Header */}
         <div className="mb-5 flex items-start justify-between gap-4 flex-shrink-0">
@@ -213,10 +214,12 @@ const ReceiptModal = memo(function ReceiptModal({
 
 interface TxRowProps {
   tx: TransactionRow;
+  index: number;
 }
 
 const TransactionTableRow = memo(function TransactionTableRow({
   tx,
+  index,
 }: TxRowProps) {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -243,6 +246,7 @@ const TransactionTableRow = memo(function TransactionTableRow({
           }
         }}
         className="cursor-pointer border-b border-gray-200 transition-colors duration-150 hover:bg-gray-50 dark:border-white/5 dark:hover:bg-primary/10"
+        data-tour={index === 0 ? "history-row-first" : undefined}
       >
         <td className="px-4 py-4 whitespace-nowrap text-gray-500 dark:text-gray-400">
           {formatDateTime(tx.createdAt)}
@@ -330,8 +334,8 @@ export function TransactionsTable({
                 </td>
               </tr>
             ) : (
-              transactions.map((tx) => (
-                <TransactionTableRow key={tx.id} tx={tx} />
+              transactions.map((tx, index) => (
+                <TransactionTableRow key={tx.id} tx={tx} index={index} />
               ))
             )}
           </tbody>

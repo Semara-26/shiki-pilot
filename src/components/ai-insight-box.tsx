@@ -143,6 +143,7 @@ export function AiInsightBox({
 
       {/* Trigger Button */}
       <button
+        data-tour="stat-ai-btn"
         type="button"
         onClick={handleGenerate}
         disabled={isLoading}

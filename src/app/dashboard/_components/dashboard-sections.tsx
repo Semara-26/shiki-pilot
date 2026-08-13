@@ -18,7 +18,7 @@ import {
 } from "@/src/lib/dashboard-data";
 import { getWaStatus } from "@/src/lib/actions/wa";
 
-import { DashboardHeaderServer } from "@/src/components/dashboard-header-server";
+
 import { MetricsRow, type MetricProduct } from "@/src/components/metrics-row";
 import { ProductsTable } from "@/src/components/products-table";
 import { LowStockAlert } from "@/src/components/low-stock-alert";
@@ -37,7 +37,7 @@ export { MetricsSkeleton, TableSkeleton, ChartSkeleton };
 
 // ─── 1. MetricsSection — 4 kartu angka paling atas ───────────────────────────
 
-async function MetricsSection({ storeId, chartProducts }: { storeId: string; chartProducts: any[] }) {
+async function MetricsSection({ storeId, chartProducts }: { storeId: string; chartProducts: unknown[] }) {
   const metrics = await getDashboardMetrics(storeId);
 
   const formatRupiah = (value: number) =>
@@ -123,7 +123,7 @@ async function RecentAssetsSection({ storeId }: { storeId: string }) {
 
 // ─── 5. ChartsSection — Growth Chart + Donut + Event Log ─────────────────────
 
-async function ChartsSection({ storeId, chartProducts }: { storeId: string; chartProducts: any[] }) {
+async function ChartsSection({ chartProducts }: { chartProducts: { name: string; stock: number; price: number; [key: string]: unknown }[] }) {
 
   const stockChartData = chartProducts.map((p) => ({
     name: p.name,
@@ -183,7 +183,7 @@ export async function DashboardSections({ storeId }: { storeId: string }) {
           </div>
         }
       >
-        <ChartsSection storeId={storeId} chartProducts={chartProducts} />
+        <ChartsSection chartProducts={chartProducts} />
       </Suspense>
     </div>
   );

@@ -7,6 +7,7 @@ import { DashboardHeaderServer } from "@/src/components/dashboard-header-server"
 import { PageContainer } from "@/src/components/page-animation";
 import { TransactionsTable, TransactionRow } from "@/src/components/transactions-table";
 import { TransactionFilters } from "@/src/components/transaction-filters";
+import { HistoryTour } from "@/src/components/onboarding/history-tour";
 
 export const dynamic = "force-dynamic";
 
@@ -114,6 +115,7 @@ export default async function TransactionsPage(props: {
           />
         </div>
         <div className="flex-1 overflow-y-auto p-6">
+          <HistoryTour />
           <TransactionFilters />
           <TransactionsTable transactions={transactionsList} />
           {transactionsList.length === 0 &&

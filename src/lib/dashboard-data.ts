@@ -14,7 +14,7 @@
 import { unstable_cache } from "next/cache";
 import { eq, desc } from "drizzle-orm";
 import { db } from "@/src/db";
-import { stores, products, eventLogs } from "@/src/db/schema";
+import { stores, products } from "@/src/db/schema";
 
 // ─── Tipe ────────────────────────────────────────────────────────────────────
 

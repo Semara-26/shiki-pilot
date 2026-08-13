@@ -6,6 +6,7 @@ import { Suspense } from "react";
 import { DashboardHeaderServer } from "@/src/components/dashboard-header-server";
 import { AnalyticsClient } from "./analytics-client";
 import { ChartSkeleton } from "@/src/components/ui/phantom-skeleton";
+import { StatisticsTour } from "@/src/components/onboarding/statistics-tour";
 
 const DAYS_AGO = 365; // 12 months - support monthly filter
 
@@ -102,6 +103,7 @@ export default async function AnalyticsPage() {
         <Suspense fallback={<AnalyticsSkeleton />}>
           <AnalyticsDataWrapper storeId={userStore?.id} storeName={userStore?.name} />
         </Suspense>
+        <StatisticsTour />
       </div>
     </div>
   );

@@ -35,6 +35,16 @@ export default function RootLayout({
             href="https://fonts.gstatic.com"
             crossOrigin=""
           />
+          {/* eslint-disable-next-line @next/next/no-page-custom-font */}
+          <link
+            href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap"
+            rel="stylesheet"
+          />
+          {/* eslint-disable-next-line @next/next/no-page-custom-font */}
+          <link
+            href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap"
+            rel="stylesheet"
+          />
           <link
             rel="preload"
             href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap"

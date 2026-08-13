@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from "recharts";
-import { useTheme } from "next-themes";
 import { motion } from "framer-motion";
 import { cn } from "@/src/lib/utils";
 
@@ -75,9 +74,6 @@ export function ProductDistributionDonut({
   className,
 }: ProductDistributionDonutProps) {
   const [isHovered, setIsHovered] = useState(false);
-  const { resolvedTheme } = useTheme();
-  const isDark = resolvedTheme === "dark";
-  const labelColor = isDark ? "#e5e7eb" : "#374151";
   const total = data.reduce((acc, d) => acc + d.value, 0);
   const totalDisplay =
     total >= 1e6 ? `Rp ${(total / 1e6).toFixed(1)}jt` : formatRupiah(total);

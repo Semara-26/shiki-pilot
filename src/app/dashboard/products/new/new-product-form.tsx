@@ -2,6 +2,7 @@
 
 import { useActionState, useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import {
@@ -120,10 +121,13 @@ export default function NewProductForm() {
                       }
                     />
                     {imagePreview ? (
-                      <img
+                      <Image
                         src={imagePreview}
                         alt="Preview"
+                        width={400}
+                        height={160}
                         className="h-40 w-full rounded-md object-cover"
+                        unoptimized
                       />
                     ) : (
                       <div className="flex flex-col items-center gap-1 py-6 text-muted-foreground">

@@ -11,6 +11,8 @@ import {
   TableSkeleton,
   ChartSkeleton,
 } from "./_components/dashboard-sections";
+import { DashboardTour } from "@/src/components/onboarding/dashboard-tour";
+
 
 // Beri tahu Next.js agar halaman ini selalu di-render fresh di server
 // (tidak di-static-generate), tapi data di dalamnya tetap di-cache via
@@ -66,6 +68,7 @@ export default async function DashboardPage() {
         </div>
 
         <div className="flex-1 overflow-y-auto p-4 md:p-6">
+          <DashboardTour />
           {/*
             DashboardSections membungkus setiap sub-section dengan
             Suspense-nya masing-masing, sehingga konten "streaming"

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Bell } from "lucide-react";
+import { Bell, HelpCircle } from "lucide-react";
 import { SidebarTrigger } from "@/src/components/sidebar";
 import { AnimatePresence, motion } from "framer-motion";
 import { cn } from "@/src/lib/utils";
@@ -70,6 +70,16 @@ export function DashboardHeader({
 
         <div className="flex items-center gap-2">
           {actions}
+
+          <button
+            type="button"
+            onClick={() => document.dispatchEvent(new CustomEvent('start-manual-tour'))}
+            className="relative flex h-9 w-9 items-center justify-center rounded-md border border-ink/20 bg-white text-yellow-500 transition-colors hover:bg-paper hover:text-yellow-400 dark:border-white/10 dark:bg-surface-dark dark:text-yellow-400 dark:hover:bg-white/10 dark:hover:text-yellow-300"
+            aria-label="Panduan Halaman"
+            title="Mulai Panduan"
+          >
+            <HelpCircle className="h-4 w-4" />
+          </button>
 
           {/* Notifications — hidden on pages where bell is not relevant */}
           {!hideBell && (

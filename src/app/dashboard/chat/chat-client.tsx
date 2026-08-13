@@ -8,6 +8,7 @@ import { Loader2, TrashIcon } from "lucide-react";
 import { DashboardHeader } from "@/src/components/dashboard-header";
 import { saveMessage } from "@/src/lib/actions/chat";
 import { PhantomSkeleton } from "@/src/components/ui/phantom-skeleton";
+import { AiTour } from "@/src/components/onboarding/ai-tour";
 
 export type UIMessageLike = {
   id: string;
@@ -384,6 +385,7 @@ export function ChatClient({ chatId, initialMessages }: ChatClientProps) {
 
   return (
     <div className="flex h-full flex-col overflow-hidden bg-white dark:bg-[#0a0a0a] text-foreground">
+      <AiTour />
       <div className="flex-none flex justify-between items-center pr-4">
         <DashboardHeader title="ASISTEN AI" hideBell />
         <button
@@ -391,6 +393,7 @@ export function ChatClient({ chatId, initialMessages }: ChatClientProps) {
           disabled={messages.length === 0}
           className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-lg border border-zinc-800 bg-zinc-900/50 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 transition-all duration-200 shrink-0"
           title="Bersihkan Chat"
+          data-tour="ai-clear-btn"
         >
           <TrashIcon className="w-3.5 h-3.5" />
           Bersihkan Chat
@@ -523,7 +526,7 @@ export function ChatClient({ chatId, initialMessages }: ChatClientProps) {
           onSubmit={handleSubmit}
           className="border-t-2 border-ink dark:border-white/10 bg-white dark:bg-surface-dark p-4"
         >
-          <div className="flex gap-2">
+          <div className="flex gap-2" data-tour="ai-chat-input">
             <input
               type="text"
               value={input}

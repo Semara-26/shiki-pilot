@@ -68,6 +68,7 @@ export function AiImportButton() {
         type="button"
         onClick={() => setIsModalOpen(true)}
         className="inline-flex items-center gap-2 rounded-md border-2 border-primary bg-primary/10 px-4 py-2.5 font-mono text-sm font-bold text-primary transition-colors hover:bg-primary/20 hover:border-primary dark:border-[#22d3ee] dark:bg-[#22d3ee]/10 dark:text-[#22d3ee] dark:hover:bg-[#22d3ee]/20 dark:hover:border-[#22d3ee]"
+        data-tour="import-ai-button"
       >
         ✨ Import Cepat (AI)
       </button>
@@ -122,11 +123,12 @@ export function AiImportButton() {
                 {/* Body */}
                 <div className="space-y-4 p-6">
                   <p className="font-mono text-sm text-gray-400">
-                    Ketik atau paste daftar barang dari WhatsApp di sini. Format
-                    bebas (misal: Kerupuk pedas 15rb stok 50). AI kami akan
+                    Ketik atau paste daftar barang Anda di sini. Format bebas
+                    (misal: Kerupuk pedas 15rb stok 50). AI kami akan
                     merapikannya.
                   </p>
                   <textarea
+                    data-tour="import-textarea"
                     value={importText}
                     onChange={(e) => setImportText(e.target.value)}
                     rows={8}
@@ -146,6 +148,7 @@ export function AiImportButton() {
                     Batal
                   </button>
                   <button
+                    data-tour="import-submit"
                     type="button"
                     onClick={handleExtract}
                     disabled={isLoading || !importText.trim()}

@@ -5,6 +5,7 @@ import { stores, products } from "@/src/db/schema";
 import { DashboardHeader } from "@/src/components/dashboard-header";
 import { POSClient } from "./pos-client";
 import Link from "next/link";
+import { PosTour } from "@/src/components/onboarding/pos-tour";
 
 export type POSProduct = {
   id: string;
@@ -61,6 +62,7 @@ export default async function POSPage() {
 
   return (
     <div className="flex h-[100dvh] flex-col overflow-hidden bg-paper dark:bg-ink lg:h-full">
+      <PosTour />
       <div className="flex-none">
         <DashboardHeader
           title="KASIR"

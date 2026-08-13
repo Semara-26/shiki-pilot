@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { useUser, useClerk } from "@clerk/nextjs";
 import { useTheme } from "next-themes";
 import { AnimatePresence, motion } from "framer-motion";
+import Image from "next/image";
 import {
   Settings,
   Monitor,
@@ -117,10 +118,13 @@ export function OperatorIdPanel({ isOpen }: OperatorIdPanelProps) {
                   {!isLoaded ? (
                     <span className="h-4 w-4 animate-pulse rounded bg-gray-300 dark:bg-white/20" />
                   ) : userProfile.avatar ? (
-                    <img
+                    <Image
                       src={userProfile.avatar}
                       alt=""
+                      width={48}
+                      height={48}
                       className="h-full w-full object-cover"
+                      unoptimized
                     />
                   ) : (
                     initials

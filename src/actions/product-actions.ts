@@ -35,7 +35,7 @@ export async function deleteProduct(id: string): Promise<DeleteProductResult> {
       return { error: "Produk tidak ditemukan atau tidak dapat dihapus." };
     }
 
-    const productName = product.name;
+
 
     await db.transaction(async (tx) => {
       await tx

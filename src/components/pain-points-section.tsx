@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
+import Image from "next/image";
 
 type PainPoint = {
   id: number;
@@ -90,16 +91,22 @@ export function PainPointsSection() {
               </div>
 
               {item.id === 1 ? (
-                <img
+                <Image
                   src={item.image}
                   alt={item.title}
+                  width={400}
+                  height={256}
                   className="w-full md:w-1/2 h-48 md:h-64 object-contain mt-6 md:mt-0 drop-shadow-2xl group-hover:scale-105 group-hover:-translate-y-2 transition-all duration-500"
+                  unoptimized
                 />
               ) : (
-                <img
+                <Image
                   src={item.image}
                   alt={item.title}
+                  width={400}
+                  height={160}
                   className="w-full h-40 object-contain mt-8 drop-shadow-2xl group-hover:scale-105 group-hover:-translate-y-2 transition-all duration-500 self-end"
+                  unoptimized
                 />
               )}
             </div>

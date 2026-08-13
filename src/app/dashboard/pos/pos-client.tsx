@@ -280,7 +280,7 @@ export function POSClient({ products, storeId }: POSClientProps) {
               Tidak ada hasil untuk &quot;{searchQuery}&quot;
             </p>
           ) : (
-            <div className="flex flex-row overflow-x-auto gap-4 pb-4 snap-x [&::-webkit-scrollbar]:hidden">
+            <div className="flex flex-row overflow-x-auto gap-4 pb-4 snap-x [&::-webkit-scrollbar]:hidden" data-tour="pos-product-list">
               {filteredProducts.map((p) => (
                 <button
                   key={p.id}
@@ -335,7 +335,7 @@ export function POSClient({ products, storeId }: POSClientProps) {
                       {formatRupiah(item.price * item.quantity)}
                     </p>
                   </div>
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1" data-tour="pos-quantity">
                     <button
                       type="button"
                       onClick={() => updateQuantity(item.id, -1)}
@@ -395,7 +395,7 @@ export function POSClient({ products, storeId }: POSClientProps) {
             <label className="mb-1 block font-mono text-sm uppercase tracking-wider text-gray-500 dark:text-gray-400">
               {activePayment === "cash" ? "Uang Diterima" : "Nominal Transfer"}
             </label>
-            <div className="flex rounded-lg border-2 border-ink dark:border-white/20 bg-white dark:bg-white/5 overflow-hidden focus-within:ring-2 focus-within:ring-primary dark:focus-within:ring-[#22d3ee]">
+            <div className="flex rounded-lg border-2 border-ink dark:border-white/20 bg-white dark:bg-white/5 overflow-hidden focus-within:ring-2 focus-within:ring-primary dark:focus-within:ring-[#22d3ee]" data-tour="pos-cash-input">
               <span className="flex items-center px-3 font-mono text-lg text-gray-500 dark:text-gray-400">
                 Rp
               </span>
@@ -423,7 +423,7 @@ export function POSClient({ products, storeId }: POSClientProps) {
           </div>
 
           {/* Tombol Pembayaran — 2 tombol berdampingan (Two-Step Confirmation) */}
-          <div className="grid grid-cols-2 gap-3 pt-1">
+          <div className="grid grid-cols-2 gap-3 pt-1" data-tour="pos-checkout">
             {/* CASH */}
             {(() => {
               const isArmed = confirmState === "cash";

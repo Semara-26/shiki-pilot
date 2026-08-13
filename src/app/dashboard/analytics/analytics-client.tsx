@@ -655,7 +655,7 @@ export function AnalyticsClient({
                 </div>
               )}
             </div>
-            <div className="flex rounded-md border-2 border-ink dark:border-white/20 p-0.5">
+            <div data-tour="stat-filter" className="flex rounded-md border-2 border-ink dark:border-white/20 p-0.5">
               {(["daily", "weekly", "monthly"] as const).map((f) => (
                 <button
                   key={f}
@@ -697,7 +697,7 @@ export function AnalyticsClient({
       </div>
 
       {/* Row 2: Top Products + Distribution */}
-      <div className="grid grid-cols-1 gap-4 md:gap-6 md:grid-cols-2">
+      <div data-tour="stat-metrics" className="grid grid-cols-1 gap-4 md:gap-6 md:grid-cols-2">
         <div className="w-full flex">
           <TopProductsBarChart
             data={topProductsData}

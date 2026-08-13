@@ -6,7 +6,19 @@ import {
   timestamp,
   vector,
   index,
+  jsonb,
 } from "drizzle-orm/pg-core";
+
+// Tipe TypeScript untuk kolom JSONB onboarding_status.
+// Setiap key merepresentasikan satu tur yang bisa diselesaikan pengguna.
+export type OnboardingStatus = {
+  dashboardTourDone?: boolean;
+  productsTourDone?: boolean;
+  posTourDone?: boolean;
+  historyTourDone?: boolean;
+  statisticsTourDone?: boolean;
+  aiTourDone?: boolean;
+};
 
 // 1. Tabel Stores (Toko)
 export const stores = pgTable("stores", {
@@ -134,5 +146,11 @@ export const profiles = pgTable("profiles", {
   displayName: text("display_name"),
   avatarUrl: text("avatar_url"),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  // Menyimpan status penyelesaian setiap tur onboarding (JSONB).
+  // Struktur: { dashboardTourDone?: boolean, productsTourDone?: boolean, posTourDone?: boolean, historyTourDone?: boolean, statisticsTourDone?: boolean, aiTourDone?: boolean }
+  onboardingStatus: jsonb("onboarding_status")
+    .$type<OnboardingStatus>()
+    .default({})
+    .notNull(),
 });
 

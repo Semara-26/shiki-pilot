@@ -51,7 +51,7 @@ describe("WA Webhook POST - whatsappJid Separation Logic", () => {
     global.fetch = originalFetch;
   });
 
-  const createMockRequest = (body: any) => {
+  const createMockRequest = (body: unknown) => {
     return new NextRequest("http://localhost/api/wa-webhook", {
       method: "POST",
       headers: {
@@ -71,14 +71,14 @@ describe("WA Webhook POST - whatsappJid Separation Logic", () => {
       whatsappJid: "628123456789",
     };
     
-    vi.mocked(db.query.stores.findFirst).mockResolvedValueOnce(mockStore as any);
+    vi.mocked(db.query.stores.findFirst).mockResolvedValueOnce(mockStore as unknown as Record<string, unknown>);
 
     const req = createMockRequest({
       senderJid: "628123456789@s.whatsapp.net",
       messageText: "Halo",
     });
 
-    const res = await POST(req);
+    await POST(req);
     // Even though AI generation might fail (since we didn't mock it fully), 
     // the store lookup happens first. We just want to check the DB query.
     
@@ -97,17 +97,17 @@ describe("WA Webhook POST - whatsappJid Separation Logic", () => {
     const { db } = await import("../../../../db");
     
     // First findFirst returns null (not registered)
-    vi.mocked(db.query.stores.findFirst).mockResolvedValueOnce(null as any);
+    vi.mocked(db.query.stores.findFirst).mockResolvedValueOnce(null as unknown as Record<string, unknown>);
     
     // Second findFirst for LINK# suffix lookup returns a store
     const targetStore = {
       id: "store-link",
       name: "Target Store",
     };
-    vi.mocked(db.query.stores.findFirst).mockResolvedValueOnce(targetStore as any);
+    vi.mocked(db.query.stores.findFirst).mockResolvedValueOnce(targetStore as unknown as Record<string, unknown>);
 
     const updateSetMock = vi.fn().mockReturnValue({ where: vi.fn() });
-    vi.mocked(db.update).mockReturnValue({ set: updateSetMock } as any);
+    vi.mocked(db.update).mockReturnValue({ set: updateSetMock } as unknown as { set: unknown });
 
     const req = createMockRequest({
       senderJid: "243043676496020@lid",

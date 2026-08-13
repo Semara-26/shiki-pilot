@@ -2,7 +2,6 @@
 
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { eq, and, ilike, sql, gte } from "drizzle-orm";
 import { z } from "zod";
 import { embed, generateObject } from "ai";

@@ -136,6 +136,7 @@ export function Sidebar() {
               <Link
                 href={item.href}
                 onClick={sidebar?.close}
+                data-tour={item.href === "/dashboard/inventory" ? "sidebar-inventory" : item.href === "/dashboard/pos" ? "sidebar-pos" : undefined}
                 className={cn(
                   "relative flex items-center gap-3 border-r-2 border-transparent px-4 py-3 text-sm transition-colors",
                   "text-gray-600 hover:bg-white hover:text-primary dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-white",

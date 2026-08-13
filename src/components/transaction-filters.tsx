@@ -62,7 +62,7 @@ export function TransactionFilters() {
   };
 
   return (
-    <div className={`flex flex-col gap-4 mb-6 rounded-md border border-ink/20 bg-card p-4 dark:border-white/10 dark:bg-surface-dark w-full shadow-sm transition-opacity duration-200 ${isPending ? "opacity-70 pointer-events-none" : "opacity-100"}`}>
+    <div className={`flex flex-col gap-4 mb-6 rounded-md border border-ink/20 bg-card p-4 dark:border-white/10 dark:bg-surface-dark w-full shadow-sm transition-opacity duration-200 ${isPending ? "opacity-70 pointer-events-none" : "opacity-100"}`} data-tour="history-filter">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end w-full">
         {/* Input ID Transaksi */}
         <div className="flex-1 w-full">
