@@ -54,6 +54,7 @@ export function SidebarTrigger() {
       onClick={sidebar.toggle}
       className="md:hidden flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border-2 border-ink dark:border-white/20 text-ink dark:text-white hover:bg-ink hover:text-white dark:hover:bg-white/20 dark:hover:text-white transition-colors"
       aria-label="Buka menu"
+      data-tour="mobile-burger-btn"
     >
       <Menu className="h-5 w-5" />
     </button>

@@ -12,6 +12,7 @@ import {
   ChartSkeleton,
 } from "./_components/dashboard-sections";
 import { DashboardTour } from "@/src/components/onboarding/dashboard-tour";
+import { ZeroStateTour } from "@/src/components/onboarding/zero-state-tour";
 
 
 // Beri tahu Next.js agar halaman ini selalu di-render fresh di server
@@ -45,9 +46,11 @@ export default async function DashboardPage() {
                 <Link
                   href="/dashboard/create-store"
                   className="inline-flex items-center gap-2 rounded-md bg-primary px-6 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+                  data-tour="create-store-btn"
                 >
                   + Buat Toko Pertama
                 </Link>
+                <ZeroStateTour />
               </div>
             </div>
           </div>

@@ -38,7 +38,10 @@ export function DashboardTour() {
         nextBtnText: 'Lanjut ➔',
         prevBtnText: '⬅ Kembali',
         doneBtnText: 'Selesai ✨',
-        steps: [
+      });
+
+      const isMobile = () => typeof window !== 'undefined' && window.innerWidth < 768;
+      const baseSteps = [
           {
             element: 'body',
             popover: {
@@ -75,7 +78,42 @@ export function DashboardTour() {
               }
             }
           }
-        ],
+        ];
+        
+      const steps: any[] = [];
+      baseSteps.forEach((step) => {
+        if (isMobile() && step.element === '[data-tour="sidebar-inventory"]') {
+          steps.push({
+            element: '[data-tour="mobile-burger-btn"]',
+            popover: {
+              title: 'Menu Navigasi 📱',
+              description: 'Ketuk tombol menu ini untuk membuka bilah navigasi.',
+              showButtons: ['close'],
+            },
+            onHighlighted: (el: any) => {
+              if (el) {
+                el._tourClickHandler = () => {
+                  setTimeout(() => {
+                    driverInstance.current?.moveNext();
+                  }, 300);
+                };
+                el.addEventListener('click', el._tourClickHandler, { capture: true });
+              }
+            },
+            onDeselected: (el: any) => {
+              if (el && el._tourClickHandler) {
+                el.removeEventListener('click', el._tourClickHandler, { capture: true });
+              }
+            }
+          });
+        }
+        steps.push(step);
+      });
+
+      driverObj.setSteps(steps);
+      
+      driverObj.setConfig({
+        ...driverObj.getConfig(),
         onDestroyStarted: () => {
           if (!driverObj.hasNextStep()) {
             driverObj.destroy();
