@@ -77,7 +77,7 @@ export function StatisticsTour() {
             description: "Klik tombol ini dan biarkan AI kami merangkumkan kondisi bisnis serta memberikan saran strategi untuk Anda!",
             side: "top",
             align: "start",
-            showButtons: ["close"]
+            showButtons: ["close" as any]
           },
           onHighlighted: (el: any) => {
             if (!el) return;

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { driver } from "driver.js";
+import { driver, DriveStep } from "driver.js";
 import "driver.js/dist/driver.css";
 import { useOnboarding } from "@/src/hooks/use-onboarding";
 import { SkipTourModal } from "./skip-tour-modal";
@@ -54,7 +54,7 @@ export function DashboardTour() {
             popover: {
               title: 'Kelola Stok Barang 📦',
               description: 'Untuk mulai mengelola produk, silakan klik menu "Stok Barang" ini secara manual. Tur ini akan selesai setelah Anda menekan menu tersebut.',
-              showButtons: ['close'], // Sembunyikan tombol next, tunggu klik manual
+              showButtons: ['close' as any], // Sembunyikan tombol next, tunggu klik manual
             },
             onHighlighted: (el: any) => {
               console.log("Element highlighted in DashboardTour:", el);
@@ -80,7 +80,7 @@ export function DashboardTour() {
           }
         ];
         
-      const steps: any[] = [];
+      const steps: DriveStep[] = [];
       baseSteps.forEach((step) => {
         if (isMobile() && step.element === '[data-tour="sidebar-inventory"]') {
           steps.push({
@@ -88,7 +88,7 @@ export function DashboardTour() {
             popover: {
               title: 'Menu Navigasi 📱',
               description: 'Ketuk tombol menu ini untuk membuka bilah navigasi.',
-              showButtons: ['close'],
+              showButtons: ['close' as any],
             },
             onHighlighted: (el: any) => {
               if (el) {

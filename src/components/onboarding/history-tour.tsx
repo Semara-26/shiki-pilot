@@ -68,7 +68,7 @@ export function HistoryTour() {
             title: "Lihat Detail Transaksi",
             description:
               "Klik baris transaksi ini untuk membuka rincian struk belanja pelanggan.",
-            showButtons: ["close"],
+            showButtons: ["close" as any],
           },
           onHighlighted: (el: any) => {
             if (el) {
@@ -90,7 +90,7 @@ export function HistoryTour() {
             title: "Rincian & Cetak Ulang",
             description:
               "Di sini Anda bisa melihat detail item yang terjual. Tutup pop-up ini untuk menyelesaikan panduan.",
-            showButtons: ["close"],
+            showButtons: ["close" as any],
           },
           onHighlighted: (el: any) => {
             if (el) {

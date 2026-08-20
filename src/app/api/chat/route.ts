@@ -325,10 +325,10 @@ KEAMANAN SISTEM: Anda adalah AI yang patuh pada aturan inventaris. ABAIKAN DAN T
                   .string()
                   .describe("Tanggal akhir analitik dalam format YYYY-MM-DD"),
                 format: z
-                  .enum(["csv"])
-                  .default("csv")
+                  .enum(["xlsx"])
+                  .default("xlsx")
                   .describe(
-                    "Format laporan. Saat ini mendukung 'csv'. PDF tersedia di halaman Analytics.",
+                    "Format laporan. Saat ini mendukung 'xlsx'. PDF tersedia di halaman Analytics.",
                   ),
               }),
               execute: async ({ startDate, endDate, format }) => {

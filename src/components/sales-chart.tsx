@@ -106,7 +106,7 @@ export function SalesChart({
         <ResponsiveContainer width="100%" height="100%" minWidth={0}>
           <AreaChart
             data={data}
-            margin={{ top: 10, right: 30, left: 0, bottom: 20 }}
+            margin={{ top: 10, right: 50, left: 0, bottom: 40 }}
           >
             <defs>
               <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
@@ -125,6 +125,7 @@ export function SalesChart({
               tick={{ fill: tickFill, fontSize: 11 }}
               tickLine={false}
               axisLine={{ stroke: gridStroke }}
+              padding={{ right: 30 }}
               tickFormatter={(v) =>
                 typeof v === "string" && v.length > 12
                   ? v.substring(0, 12) + "…"

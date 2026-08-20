@@ -52,7 +52,9 @@ const FALLBACK_RAW: RawTransaction[] = (() => {
     const qty = 2 + (i % 5);
     const price = [28500, 15600, 18900, 22000, 9800][i % 5];
     out.push({
+      receiptId: `TRX-FALLBACK-${i}`,
       productName: product,
+      price: price,
       quantity: qty,
       totalPrice: price * qty,
       createdAt: d,
@@ -400,8 +402,19 @@ export function AnalyticsClient({
       if (chartEl) {
         const canvas = await html2canvas(chartEl, {
           scale: 2,
-          backgroundColor: "#ffffff",
+          backgroundColor: "transparent",
           useCORS: true,
+          onclone: (clonedDoc, clonedEl) => {
+            clonedEl.style.height = `${clonedEl.offsetHeight + 64}px`;
+            clonedEl.style.padding = "24px 24px 40px 24px";
+            clonedEl.style.backgroundColor = "#1E293B";
+            clonedEl.style.borderRadius = "12px";
+            
+            const texts = clonedEl.querySelectorAll("text");
+            texts.forEach((textNode) => {
+              textNode.style.fill = "#94A3B8";
+            });
+          },
         });
         const imgData = canvas.toDataURL("image/png");
         const imgW = CONTENT_W;
@@ -543,36 +556,76 @@ export function AnalyticsClient({
     }
   };
 
-  const handleExportCSV = () => {
-    const headers = [
-      "Tanggal",
-      "Nama Produk",
-      "Kuantitas",
-      "Total Pendapatan (Rp)",
-    ];
-    const escapeCsv = (val: string | number) => {
-      const s = String(val);
-      return s.includes(";") || s.includes('"') || s.includes("\n")
-        ? `"${s.replace(/"/g, '""')}"`
-        : s;
-    };
-    const rows = filteredTransactions.map((tx) => {
-      const date = new Date(tx.createdAt).toLocaleDateString("id-ID");
-      return [
-        escapeCsv(date),
-        escapeCsv(tx.productName),
-        tx.quantity,
-        tx.totalPrice,
-      ].join(";");
-    });
-    const csvContent = "\uFEFF" + [headers.join(";"), ...rows].join("\n");
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `shikipilot_report_${timeFilter}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
+  const handleExportExcel = async () => {
+    setIsExporting(true);
+    try {
+      const ExcelJS = (await import("exceljs")).default;
+      const workbook = new ExcelJS.Workbook();
+      const sheet = workbook.addWorksheet("Laporan Penjualan");
+
+      sheet.columns = [
+        { header: "ID Transaksi", key: "receiptId", width: 20 },
+        { header: "Tanggal", key: "date", width: 15 },
+        { header: "Nama Produk", key: "product", width: 30 },
+        { header: "Harga Satuan", key: "price", width: 15 },
+        { header: "Kuantitas", key: "qty", width: 15 },
+        { header: "Total Pendapatan", key: "total", width: 25 },
+      ];
+
+      const headerRow = sheet.getRow(1);
+      headerRow.eachCell((cell) => {
+        cell.fill = {
+          type: "pattern",
+          pattern: "solid",
+          fgColor: { argb: "FF1E293B" },
+        };
+        cell.font = { color: { argb: "FFFFFFFF" }, bold: true };
+        cell.alignment = { vertical: "middle", horizontal: "center" };
+      });
+
+      const capitalizeFirst = (str: string) => {
+        if (!str) return "";
+        return str.charAt(0).toUpperCase() + str.slice(1);
+      };
+
+      const sanitizeExcel = (str: string) => {
+        if (/^[=+\-@]/.test(str)) {
+          return "'" + str;
+        }
+        return str;
+      };
+
+      filteredTransactions.forEach((tx) => {
+        const createdAt = new Date(tx.createdAt);
+        const row = sheet.addRow({
+          receiptId: sanitizeExcel(tx.receiptId || "-"),
+          date: createdAt,
+          product: sanitizeExcel(capitalizeFirst(tx.productName)),
+          price: Number(tx.price),
+          qty: Number(tx.quantity),
+          total: Number(tx.totalPrice),
+        });
+        row.getCell("date").numFmt = "dd/mm/yyyy";
+        row.getCell("price").numFmt = "#,##0";
+        row.getCell("qty").numFmt = "#,##0";
+        row.getCell("total").numFmt = "#,##0";
+      });
+
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `shikipilot_report_${timeFilter}.xlsx`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Excel export error:", err);
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   if (!hasStore) {
@@ -627,14 +680,19 @@ export function AnalyticsClient({
                 <div className="absolute left-0 top-full z-50 mt-1.5 w-44 origin-top-left rounded-md border border-surface-border bg-surface-dark py-1 shadow-lg sm:left-auto sm:right-0 sm:origin-top-right">
                   <button
                     type="button"
+                    disabled={isExporting}
                     onClick={() => {
-                      handleExportCSV();
+                      handleExportExcel();
                       setIsExportOpen(false);
                     }}
-                    className="flex w-full items-center gap-2 px-3 py-2 text-left font-mono text-sm uppercase tracking-wider text-gray-300 transition-colors hover:bg-primary/20 hover:text-primary"
+                    className="flex w-full items-center gap-2 px-3 py-2 text-left font-mono text-sm uppercase tracking-wider text-gray-300 transition-colors hover:bg-primary/20 hover:text-primary disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    <Download size={13} />
-                    Unduh CSV
+                    {isExporting ? (
+                      <Loader2 size={13} className="animate-spin" />
+                    ) : (
+                      <Download size={13} />
+                    )}
+                    {isExporting ? "Memproses..." : "Unduh Excel"}
                   </button>
                   <button
                     type="button"

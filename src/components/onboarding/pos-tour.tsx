@@ -41,7 +41,7 @@ export function PosTour() {
             popover: {
               title: 'Pilih Produk 📋',
               description: 'Klik produk di daftar ini untuk menambahkannya ke keranjang.',
-              showButtons: ['close'],
+              showButtons: ['close' as any],
             },
             onHighlighted: (el: any) => {
               if (el) {
@@ -76,7 +76,7 @@ export function PosTour() {
             popover: {
               title: 'Selesaikan Pembayaran',
               description: 'Terakhir, klik tombol Tunai atau QRIS untuk menyimpan dan menyelesaikan transaksi.',
-              showButtons: ['close'], 
+              showButtons: ['close' as any], 
             },
             onHighlighted: (el: any) => {
               if (el) {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { driver } from "driver.js";
+import { driver, DriveStep } from "driver.js";
 import "driver.js/dist/driver.css";
 import { useOnboarding } from "@/src/hooks/use-onboarding";
 import { SkipTourModal } from "./skip-tour-modal";
@@ -44,7 +44,7 @@ export function InventoryTour() {
             popover: {
               title: 'Import Cepat via AI ✨',
               description: 'Punya data stok dalam teks/excel? Klik tombol ini untuk memasukkan produk secara otomatis.',
-              showButtons: ['close'],
+              showButtons: ['close' as any],
             },
             onHighlighted: (el: any) => {
               if (el) {
@@ -72,7 +72,7 @@ export function InventoryTour() {
             popover: {
               title: 'Ekstrak & Simpan ✨',
               description: 'Klik tombol ini untuk memproses data menggunakan AI. Tunggu sejenak hingga proses selesai.',
-              showButtons: ['close'],
+              showButtons: ['close' as any],
             },
             onHighlighted: (el: any) => {
               if (el) {
@@ -93,7 +93,7 @@ export function InventoryTour() {
             popover: {
               title: 'Mulai Jualan 🛒',
               description: 'Setelah produk siap, klik menu "Kasir" untuk mulai melayani pelanggan. Tur ini selesai setelah Anda menekan menu tersebut.',
-              showButtons: ['close'], 
+              showButtons: ['close' as any], 
             },
             onHighlighted: (el: any) => {
               if (el) {
@@ -112,7 +112,7 @@ export function InventoryTour() {
           }
         ];
         
-      const steps: any[] = [];
+      const steps: DriveStep[] = [];
       baseSteps.forEach((step) => {
         if (isMobile() && step.element === '[data-tour="sidebar-pos"]') {
           steps.push({
@@ -120,7 +120,7 @@ export function InventoryTour() {
             popover: {
               title: 'Menu Navigasi 📱',
               description: 'Ketuk tombol menu ini untuk membuka bilah navigasi.',
-              showButtons: ['close'],
+              showButtons: ['close' as any],
             },
             onHighlighted: (el: any) => {
               if (el) {

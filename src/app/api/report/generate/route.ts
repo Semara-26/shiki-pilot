@@ -5,10 +5,10 @@ import { stores } from "../../../../db/schema";
 import { generateReportData } from "@/src/lib/actions/product";
 
 /**
- * GET /api/report/generate?period=daily|weekly|monthly&format=csv
+ * GET /api/report/generate?period=daily|weekly|monthly&format=xlsx
  *
  * Endpoint yang dipanggil oleh tool AI generateReport.
- * Me-return file CSV sebagai download langsung — tidak ada data mentah yang dibaca AI.
+ * Me-return file Excel sebagai download langsung — tidak ada data mentah yang dibaca AI.
  */
 export async function GET(req: Request) {
   try {
@@ -20,7 +20,7 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const startDate = searchParams.get("startDate");
     const endDate = searchParams.get("endDate");
-    const format = searchParams.get("format") ?? "csv";
+    const format = searchParams.get("format") ?? "xlsx";
 
     // Validasi parameter
     if (!startDate || !endDate) {
@@ -35,11 +35,11 @@ export async function GET(req: Request) {
       );
     }
 
-    if (format !== "csv") {
+    if (format !== "xlsx") {
       return new Response(
         JSON.stringify({
           error:
-            "Format PDF tidak didukung via API. Gunakan halaman Analytics untuk ekspor PDF.",
+            "Format yang diminta tidak didukung. Gunakan format 'xlsx'. PDF tersedia di halaman Analytics.",
         }),
         { status: 400, headers: { "Content-Type": "application/json" } },
       );
@@ -60,18 +60,20 @@ export async function GET(req: Request) {
 
     const result = await generateReportData(userStore.id, startDate, endDate);
 
-    if (!result.success || !result.csvContent) {
+    if (!result.success || !result.fileContentBase64) {
       return new Response(JSON.stringify({ error: result.message }), {
         status: 404,
         headers: { "Content-Type": "application/json" },
       });
     }
 
+    const buffer = Buffer.from(result.fileContentBase64, "base64");
+
     // Return file sebagai download langsung
-    return new Response(result.csvContent, {
+    return new Response(buffer, {
       status: 200,
       headers: {
-        "Content-Type": "text/csv; charset=utf-8",
+        "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         "Content-Disposition": `attachment; filename="${result.filename}"`,
         "Cache-Control": "no-store",
       },

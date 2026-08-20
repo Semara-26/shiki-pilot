@@ -19,7 +19,7 @@ export function ZeroStateTour() {
             popover: {
               title: '🚀 Mulai Perjalanan Anda',
               description: 'Selamat datang di Cockpit! Mari mulai dengan menyiapkan profil toko Anda. Klik tombol ini untuk membuat toko pertama.',
-              showButtons: ['close'],
+              showButtons: ['close' as any],
             },
             onHighlighted: (el: any) => {
               if (el) {

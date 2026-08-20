@@ -11,7 +11,9 @@ import { StatisticsTour } from "@/src/components/onboarding/statistics-tour";
 const DAYS_AGO = 365; // 12 months - support monthly filter
 
 export type RawTransaction = {
+  receiptId: string | null;
   productName: string;
+  price: number;
   quantity: number;
   totalPrice: number;
   createdAt: Date;
@@ -52,7 +54,9 @@ async function AnalyticsDataWrapper({
 
     const rows = await db
       .select({
+        receiptId: transactions.receiptId,
         productName: products.name,
+        price: products.price,
         quantity: transactionItems.quantity,
         totalPrice: transactionItems.subtotal,
         createdAt: transactions.createdAt,
@@ -69,7 +73,9 @@ async function AnalyticsDataWrapper({
       .orderBy(desc(transactions.createdAt));
 
     rawTransactions = rows.map((r) => ({
+      receiptId: r.receiptId,
       productName: r.productName,
+      price: r.price,
       quantity: r.quantity,
       totalPrice: r.totalPrice,
       createdAt: r.createdAt,

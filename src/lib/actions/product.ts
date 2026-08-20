@@ -1020,7 +1020,7 @@ export async function generateReportData(
   endDate: string,
 ): Promise<{
   success: boolean;
-  csvContent?: string;
+  fileContentBase64?: string;
   filename?: string;
   message: string;
 }> {
@@ -1028,16 +1028,19 @@ export async function generateReportData(
     const rows = await db.execute(
       sql`
         SELECT
+          t.receipt_id,
           t.created_at,
           p.name AS product_name,
-          t.quantity,
-          t.total_price,
+          p.price AS product_price,
+          ti.quantity,
+          ti.subtotal,
           t.payment_type
         FROM transactions t
-        JOIN products p ON t.product_id = p.id
+        JOIN transaction_items ti ON ti.transaction_id = t.id
+        JOIN products p ON ti.product_id = p.id
         WHERE t.store_id = ${storeId}
           AND t.created_at BETWEEN ${startDate}::timestamp AND ${endDate}::timestamp + interval '1 day' - interval '1 microsecond'
-        ORDER BY t.created_at DESC
+        ORDER BY t.created_at DESC, ti.id ASC
       `,
     );
 
@@ -1050,34 +1053,84 @@ export async function generateReportData(
       };
     }
 
-    // Build CSV dengan BOM UTF-8 agar Excel membacanya dengan benar
-    const header =
-      "Tanggal;Nama Produk;Kuantitas;Total Pendapatan (Rp);Metode Bayar";
-    const dataRows = txRows.map((row) => {
-      const date = new Date(row.created_at as string).toLocaleDateString(
-        "id-ID",
-      );
-      const name = String(row.product_name ?? "").replace(/;/g, ",");
+    const ExcelJS = (await import("exceljs")).default;
+    const workbook = new ExcelJS.Workbook();
+    const sheet = workbook.addWorksheet("Laporan Penjualan");
+
+    sheet.columns = [
+      { header: "ID Transaksi", key: "receiptId", width: 20 },
+      { header: "Tanggal", key: "date", width: 15 },
+      { header: "Nama Produk", key: "product", width: 30 },
+      { header: "Harga Satuan", key: "price", width: 15 },
+      { header: "Kuantitas", key: "qty", width: 12 },
+      { header: "Total Pendapatan", key: "total", width: 20 },
+    ];
+
+    const headerRow = sheet.getRow(1);
+    headerRow.eachCell((cell) => {
+      cell.fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "FF1E293B" },
+      };
+      cell.font = { color: { argb: "FFFFFFFF" }, bold: true };
+      cell.alignment = { vertical: "middle", horizontal: "center" };
+    });
+
+    const capitalizeFirst = (str: string) => {
+      if (!str) return "";
+      return str.charAt(0).toUpperCase() + str.slice(1);
+    };
+
+    const sanitizeExcel = (str: string) => {
+      if (/^[=+\-@]/.test(str)) {
+        return "'" + str;
+      }
+      return str;
+    };
+
+    txRows.forEach((row) => {
+      const createdAt = new Date(row.created_at as string);
+      const receiptId = sanitizeExcel(String(row.receipt_id ?? ""));
+      const name = sanitizeExcel(capitalizeFirst(String(row.product_name ?? "")));
+      const price = Number(row.product_price ?? 0);
       const qty = Number(row.quantity ?? 0);
-      const total = Number(row.total_price ?? 0);
-      const payment = String(row.payment_type ?? "");
-      return `${date};${name};${qty};${total};${payment}`;
+      const total = Number(row.subtotal ?? 0);
+
+      const newRow = sheet.addRow({
+        receiptId,
+        date: createdAt,
+        product: name,
+        price,
+        qty,
+        total,
+      });
+
+      newRow.getCell("date").numFmt = "dd/mm/yyyy";
+      newRow.getCell("price").numFmt = "#,##0";
+      newRow.getCell("qty").numFmt = "#,##0";
+      newRow.getCell("total").numFmt = "#,##0";
     });
 
     const totalRevenue = txRows.reduce(
-      (s, r) => s + Number(r.total_price ?? 0),
+      (s, r) => s + Number(r.subtotal ?? 0),
       0,
     );
-    const grandTotalRow = `;GRAND TOTAL;${txRows.reduce((s, r) => s + Number(r.quantity ?? 0), 0)};${totalRevenue};`;
+    const grandTotalRow = sheet.addRow({
+      total: totalRevenue,
+    });
+    grandTotalRow.getCell("total").numFmt = "#,##0";
+    grandTotalRow.getCell("total").font = { bold: true };
 
-    const csvContent =
-      "\uFEFF" + [header, ...dataRows, grandTotalRow].join("\n");
+    const buffer = await workbook.xlsx.writeBuffer();
+    const base64Content = Buffer.from(buffer).toString("base64");
+
     const periodLabel = `${startDate}_sd_${endDate}`;
-    const filename = `Laporan_${periodLabel}_ShikiPilot.csv`;
+    const filename = `Laporan_${periodLabel}_ShikiPilot.xlsx`;
 
     return {
       success: true,
-      csvContent,
+      fileContentBase64: base64Content,
       filename,
       message: "Laporan berhasil dibuat.",
     };

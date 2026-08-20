@@ -68,7 +68,7 @@ export function AiTour() {
             description: "AI ini terhubung langsung dengan data Anda! Coba ketik: 'Produk apa yang stoknya mau habis?' atau 'Urutkan produk dari yang paling lama ditambahkan'. Ketik pesan Anda dan tekan Kirim untuk menyelesaikan panduan ini.",
             side: "top",
             align: "center",
-            showButtons: ["close"],
+            showButtons: ["close" as any],
           },
           onHighlighted: (el: any) => {
             if (!el) return;
